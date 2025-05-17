@@ -20,17 +20,6 @@ export default function Home() {
 
         {/* Signup Form */}
         <SignupForm />
-
-        {/* Login link */}
-        <div className="mt-6 text-center text-sm text-gray-300">
-          Already have an account?{" "}
-          <a 
-            href="#" 
-            className="text-primary hover:text-primary/80 font-medium ml-1 transition-colors"
-          >
-            Sign in
-          </a>
-        </div>
       </div>
 
       <footer className="py-6 mt-auto relative z-10 border-t border-gray-800/30">
