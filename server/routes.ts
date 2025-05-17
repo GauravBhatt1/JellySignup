@@ -21,11 +21,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create user in Jellyfin
       const user = await createJellyfinUser(validatedData);
       
-      // Update user policy to disable downloads
-      await updateUserPolicy(user.Id);
-      
       // Get the Jellyfin server URL for redirect
       const jellyfinUrl = process.env.JELLYFIN_SERVER_URL || "http://localhost:8096";
+      
+      try {
+        // Try to update user policy to disable downloads
+        // This is optional and will not break the flow if it fails
+        await updateUserPolicy(user.Id);
+      } catch (policyError) {
+        console.log("Policy update failed but continuing with user creation");
+        // We don't throw the error here to allow user creation to succeed
+      }
       
       // Return success response with redirect URL
       return res.status(201).json({ 

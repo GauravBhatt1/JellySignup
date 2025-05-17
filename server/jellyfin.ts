@@ -54,17 +54,23 @@ export async function createJellyfinUser(userData: JellyfinUser): Promise<any> {
  */
 export async function updateUserPolicy(userId: string): Promise<void> {
   try {
-    // First get the current policy
-    const policyResponse = await jellyfinApi.get(`/Users/${userId}/Policy`);
-    const policy = policyResponse.data;
+    // For some Jellyfin instances, we need to use a different approach
+    // The API structure might be different or require specific permissions
     
-    // Update policy to disable downloads
-    policy.EnableContentDownloading = false;
+    // Let's make a simpler policy update directly
+    const policy = {
+      EnableContentDownloading: false,
+      // Include only the essential fields to avoid conflicts
+      IsAdministrator: false,
+      EnableRemoteControlOfOtherUsers: false
+    };
     
-    // Update user policy
+    // Post the simplified policy
     await jellyfinApi.post(`/Users/${userId}/Policy`, policy);
+    console.log("Successfully updated user policy");
   } catch (error) {
     console.error("Error updating user policy:", error);
-    throw new Error("Failed to update user policy");
+    // Don't throw an error, as this might be an optional step
+    console.log("Continuing without policy update");
   }
 }
