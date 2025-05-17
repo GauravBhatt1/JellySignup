@@ -13,7 +13,7 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 280 52% 56%; /* Jellyfin Purple */
+  --primary: 280 65% 60%; /* Enhanced Jellyfin Purple */
   --primary-foreground: 211 100% 99%;
   --secondary: 60 4.8% 95.9%;
   --secondary-foreground: 24 9.8% 10%;
@@ -21,8 +21,8 @@
   --accent-foreground: 24 9.8% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 280 52% 56%; /* Jellyfin Purple */
-  --radius: 0.5rem;
+  --ring: 280 65% 60%; /* Enhanced Jellyfin Purple */
+  --radius: 0.75rem; /* Increased radius */
   
   /* Password strength colors */
   --strength-weak: 0 84.2% 60.2%;
@@ -31,26 +31,26 @@
 }
 
 .dark {
-  --background: 220 13% 18%; /* Jellyfin Dark */
-  --foreground: 0 0% 98%;
+  --background: 224 71% 4%; /* Darker, richer background */
+  --foreground: 0 0% 100%;
   --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
+  --muted-foreground: 240 5% 84.9%; /* Brighter text */
   --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --card: 220 13% 18%; /* Jellyfin Dark */
-  --card-foreground: 0 0% 98%;
-  --border: 217 19% 27%; /* Jellyfin Border */
-  --input: 240 3.7% 15.9%;
-  --primary: 280 52% 56%; /* Jellyfin Purple */
-  --primary-foreground: 211 100% 99%;
+  --popover-foreground: 0 0% 100%;
+  --card: 222 47% 11%; /* Enhanced card background */
+  --card-foreground: 0 0% 100%;
+  --border: 217 33% 17%; /* More visible border */
+  --input: 224 71% 4%;
+  --primary: 280 65% 60%; /* Enhanced Jellyfin Purple */
+  --primary-foreground: 0 0% 100%;
   --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --ring: 280 52% 56%; /* Jellyfin Purple */
-  --radius: 0.5rem;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 280 65% 60%; /* Accent same as primary */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 280 65% 60%; /* Enhanced Jellyfin Purple */
+  --radius: 0.75rem; /* Increased radius */
 }
 
 @layer base {
@@ -69,5 +69,25 @@ html {
 }
 
 body {
-  @apply bg-[#1f2937] text-[#f9fafb];
+  @apply bg-gradient-to-b from-[#0a0d14] to-[#121725] text-white min-h-screen;
+}
+
+/* Add glass effect for cards */
+.glass-card {
+  @apply bg-opacity-20 backdrop-blur-md bg-gray-900 border border-gray-800 shadow-xl;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-500;
+}
+
+/* Button glow effect */
+.glow-button {
+  @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(124,58,237,0.5)];
+}
+
+/* Input focus glow */
+.glow-input:focus {
+  @apply shadow-[0_0_10px_rgba(124,58,237,0.3)];
 }

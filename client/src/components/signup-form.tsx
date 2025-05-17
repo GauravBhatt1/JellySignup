@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useJellyfin } from "@/hooks/use-jellyfin";
 import { JellyfinUser, jellyfinUserSchema } from "@shared/schema";
@@ -43,10 +43,17 @@ export function SignupForm() {
   const password = form.watch("password");
 
   return (
-    <Card className="w-full max-w-md rounded-lg border border-jellyfinBorder bg-jellyfinDark p-6 shadow-lg">
+    <Card className="w-full max-w-md rounded-xl glass-card p-8 shadow-2xl">
+      {/* Form Header */}
+      <div className="mb-6 text-center">
+        <h2 className="text-2xl font-bold gradient-text mb-2">Create Your Account</h2>
+        <p className="text-gray-400">Join Jellyfin to access your media library</p>
+      </div>
+
+      {/* Alerts */}
       {error && (
-        <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-800">
-          <AlertCircle className="h-4 w-4 text-red-400" />
+        <Alert variant="destructive" className="mb-6 bg-red-500/10 border border-red-800 rounded-lg">
+          <AlertCircle className="h-5 w-5 text-red-400" />
           <AlertDescription className="text-sm font-medium text-red-400">
             {error}
           </AlertDescription>
@@ -54,8 +61,8 @@ export function SignupForm() {
       )}
 
       {success && (
-        <Alert className="mb-4 bg-green-500/10 border-green-800">
-          <CheckCircle className="h-4 w-4 text-green-400" />
+        <Alert className="mb-6 bg-green-500/10 border border-green-800 rounded-lg">
+          <CheckCircle className="h-5 w-5 text-green-400" />
           <AlertDescription className="text-sm font-medium text-green-400">
             Account created successfully! Redirecting you to Jellyfin...
           </AlertDescription>
@@ -63,26 +70,29 @@ export function SignupForm() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
             control={form.control}
             name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-200">Username</FormLabel>
+                <FormLabel className="text-gray-200 font-medium">Username</FormLabel>
                 <FormControl>
                   <div className="relative">
+                    <div className="absolute left-3 top-3 text-gray-400">
+                      <User className="h-5 w-5" />
+                    </div>
                     <Input
                       {...field}
                       placeholder="Enter username"
-                      className="bg-gray-700 border-jellyfinBorder text-white placeholder-gray-400"
+                      className="bg-gray-900/50 pl-10 border-gray-700 text-white placeholder-gray-500 rounded-lg h-12 glow-input focus:border-purple-500"
                     />
                     {field.value && !form.formState.errors.username && (
-                      <CheckCircle className="absolute right-3 top-2.5 h-4 w-4 text-green-400" />
+                      <CheckCircle className="absolute right-3 top-3.5 h-5 w-5 text-green-400" />
                     )}
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-sm mt-1" />
               </FormItem>
             )}
           />
@@ -92,29 +102,29 @@ export function SignupForm() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-200">Password</FormLabel>
+                <FormLabel className="text-gray-200 font-medium">Password</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="bg-gray-700 border-jellyfinBorder text-white placeholder-gray-400 pr-10"
+                      className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 pr-10 rounded-lg h-12 glow-input focus:border-purple-500"
                     />
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
-                      className="absolute right-3 top-2.5 text-gray-400 hover:text-white focus:outline-none"
+                      className="absolute right-3 top-3 text-gray-400 hover:text-white focus:outline-none transition-colors"
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </button>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-sm mt-1" />
               </FormItem>
             )}
           />
@@ -123,14 +133,14 @@ export function SignupForm() {
 
           <Button
             type="submit"
-            className="w-full bg-jellyfinPurple hover:bg-jellyfinPurple/90"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg h-12 glow-button"
             disabled={isCreating}
           >
             {isCreating ? (
               <>
                 <span className="animate-spin mr-2">
                   <svg 
-                    className="h-4 w-4" 
+                    className="h-5 w-5" 
                     xmlns="http://www.w3.org/2000/svg" 
                     fill="none" 
                     viewBox="0 0 24 24"
