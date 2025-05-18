@@ -15,6 +15,25 @@ const jellyfinApi = axios.create({
 });
 
 /**
+ * Interface for Jellyfin users from API
+ */
+export interface JellyfinApiUser {
+  Id: string;
+  Name: string;
+  HasPassword: boolean;
+  HasConfiguredPassword: boolean;
+  Policy: {
+    IsAdministrator: boolean;
+    IsDisabled: boolean;
+    EnableContentDownloading?: boolean;
+    [key: string]: any;
+  };
+  LastLoginDate?: string;
+  LastActivityDate?: string;
+  [key: string]: any;
+}
+
+/**
  * Check if a username already exists in Jellyfin
  */
 export async function checkUserExists(username: string): Promise<boolean> {
@@ -23,7 +42,7 @@ export async function checkUserExists(username: string): Promise<boolean> {
     const response = await jellyfinApi.get("/Users");
     const users = response.data;
     
-    return users.some((user: any) => 
+    return users.some((user: JellyfinApiUser) => 
       user.Name.toLowerCase() === username.toLowerCase()
     );
   } catch (error) {
@@ -72,5 +91,80 @@ export async function updateUserPolicy(userId: string): Promise<void> {
     console.error("Error updating user policy:", error);
     // Don't throw an error, as this might be an optional step
     console.log("Continuing without policy update");
+  }
+}
+
+/**
+ * Get all Jellyfin users
+ */
+export async function getAllUsers(): Promise<JellyfinApiUser[]> {
+  try {
+    const response = await jellyfinApi.get("/Users");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Jellyfin users:", error);
+    throw new Error("Failed to fetch users from Jellyfin");
+  }
+}
+
+/**
+ * Get a specific user by ID
+ */
+export async function getUserById(userId: string): Promise<JellyfinApiUser> {
+  try {
+    const response = await jellyfinApi.get(`/Users/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching user ${userId}:`, error);
+    throw new Error("Failed to fetch user details");
+  }
+}
+
+/**
+ * Delete a user from Jellyfin
+ */
+export async function deleteUser(userId: string): Promise<void> {
+  try {
+    await jellyfinApi.delete(`/Users/${userId}`);
+  } catch (error) {
+    console.error(`Error deleting user ${userId}:`, error);
+    throw new Error("Failed to delete user");
+  }
+}
+
+/**
+ * Enable or disable a user
+ */
+export async function setUserStatus(userId: string, isDisabled: boolean): Promise<void> {
+  try {
+    // First get the current policy
+    const userResponse = await jellyfinApi.get(`/Users/${userId}`);
+    const user = userResponse.data;
+    
+    // Get user policy if it exists
+    let policy = user.Policy || {};
+    
+    // Update the policy
+    policy.IsDisabled = isDisabled;
+    
+    // Update user policy
+    await jellyfinApi.post(`/Users/${userId}/Policy`, policy);
+  } catch (error) {
+    console.error(`Error ${isDisabled ? 'disabling' : 'enabling'} user ${userId}:`, error);
+    throw new Error(`Failed to ${isDisabled ? 'disable' : 'enable'} user`);
+  }
+}
+
+/**
+ * Reset a user's password
+ */
+export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
+  try {
+    await jellyfinApi.post(`/Users/${userId}/Password`, {
+      NewPw: newPassword
+    });
+  } catch (error) {
+    console.error(`Error resetting password for user ${userId}:`, error);
+    throw new Error("Failed to reset password");
   }
 }
