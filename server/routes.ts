@@ -14,7 +14,8 @@ import {
   deleteUser,
   setUserStatus,
   resetUserPassword,
-  isJellyfinAdmin
+  isJellyfinAdmin,
+  bulkSetUserStatus
 } from "./jellyfin";
 
 // Declare session with adminAuthenticated property
@@ -205,17 +206,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(400).json({ message: "User IDs are required for bulk-disable action" });
           }
           
-          // Process each user ID in the array
-          const results = await Promise.allSettled(
-            userIds.map(id => setUserStatus(id, true))
-          );
-          
-          // Count successes and failures
-          const successes = results.filter(r => r.status === 'fulfilled').length;
-          const failures = results.filter(r => r.status === 'rejected').length;
+          // Use the dedicated bulk operation function
+          const result = await bulkSetUserStatus(userIds, true);
           
           return res.status(200).json({ 
-            message: `Disabled ${successes} users successfully${failures > 0 ? `, ${failures} failed` : ''}` 
+            message: `Disabled ${result.success} users successfully${result.failure > 0 ? `, ${result.failure} failed` : ''}` 
           });
           
         default:

@@ -192,6 +192,27 @@ export async function setUserStatus(userId: string, isDisabled: boolean): Promis
 }
 
 /**
+ * Bulk enable or disable multiple users at once
+ */
+export async function bulkSetUserStatus(userIds: string[], isDisabled: boolean): Promise<{success: number, failure: number}> {
+  let success = 0;
+  let failure = 0;
+  
+  // Process each user ID
+  for (const userId of userIds) {
+    try {
+      await setUserStatus(userId, isDisabled);
+      success++;
+    } catch (error) {
+      console.error(`Error during bulk ${isDisabled ? 'disable' : 'enable'} for user ${userId}:`, error);
+      failure++;
+    }
+  }
+  
+  return { success, failure };
+}
+
+/**
  * Reset a user's password
  */
 export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
