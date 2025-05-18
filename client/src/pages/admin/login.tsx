@@ -177,7 +177,8 @@ export default function AdminLogin() {
         </Form>
         
         <div className="mt-6 text-center text-xs text-gray-500">
-          <p>Admin access is restricted to authorized personnel only.</p>
+          <p>Only Jellyfin administrators can access the admin dashboard.</p>
+          <p className="mt-1">Use the same credentials you use to log in to Jellyfin with administrator rights.</p>
         </div>
       </Card>
     </div>
