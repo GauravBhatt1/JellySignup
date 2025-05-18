@@ -3,6 +3,14 @@
 @tailwind utilities;
 
 :root {
+  /* Custom theme variables */
+  --theme-primary: rgb(82, 47, 178);
+  --theme-secondary: rgb(60, 35, 131);
+  --theme-background: linear-gradient(to bottom, #0a0d14, #121725);
+  --theme-card-bg: rgba(17, 24, 39, 0.4);
+  --theme-text: #ffffff;
+  
+  /* Shadcn UI variables */
   --background: 0 0% 100%;
   --foreground: 20 14.3% 4.1%;
   --muted: 60 4.8% 95.9%;

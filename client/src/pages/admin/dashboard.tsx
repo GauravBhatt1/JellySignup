@@ -13,8 +13,10 @@ import {
   Trash,
   Lock,
   UserX2,
-  UserCheck2
+  UserCheck2,
+  Settings
 } from "lucide-react";
+import { ThemeSelector } from "@/components/ui/theme-selector";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
@@ -224,19 +226,73 @@ export default function AdminDashboard() {
             <Users className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">Jellyfin Admin Dashboard</h1>
           </div>
-          <Button 
-            variant="ghost" 
-            className="text-gray-400 hover:text-white flex items-center gap-2"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+              <Settings className="h-4 w-4 text-gray-400 mr-2" />
+              <ThemeSelector />
+            </div>
+            <Button 
+              variant="ghost" 
+              className="text-gray-400 hover:text-white flex items-center gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main content */}
       <main className="container mx-auto p-6">
+        {/* Stats Cards */}
+        {!isLoading && !error && users && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Total Users Card */}
+            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/20 border border-blue-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+              <div className="flex items-center">
+                <div className="p-3 bg-blue-500/20 rounded-full mr-4">
+                  <Users className="h-6 w-6 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Total Users</p>
+                  <h3 className="text-2xl font-bold text-white">{users.length}</h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Users Card */}
+            <div className="bg-gradient-to-br from-green-900/50 to-green-800/20 border border-green-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+              <div className="flex items-center">
+                <div className="p-3 bg-green-500/20 rounded-full mr-4">
+                  <UserCheck className="h-6 w-6 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Active Users</p>
+                  <h3 className="text-2xl font-bold text-white">
+                    {users.filter((u: JellyfinApiUser) => !u.Policy?.IsDisabled).length}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Inactive Users Card */}
+            <div className="bg-gradient-to-br from-amber-900/50 to-amber-800/20 border border-amber-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
+              <div className="flex items-center">
+                <div className="p-3 bg-amber-500/20 rounded-full mr-4">
+                  <UserX className="h-6 w-6 text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Never Logged In</p>
+                  <h3 className="text-2xl font-bold text-white">
+                    {users.filter((u: JellyfinApiUser) => hasNeverLoggedIn(u)).length}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 rounded-lg p-6 shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold flex items-center">
