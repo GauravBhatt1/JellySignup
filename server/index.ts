@@ -8,6 +8,10 @@ import createMemoryStore from "memorystore";
 const MemoryStore = createMemoryStore(session);
 
 const app = express();
+
+// Enable trust proxy for running behind reverse proxies in Portainer/Docker
+app.set('trust proxy', true);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

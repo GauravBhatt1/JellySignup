@@ -36,7 +36,7 @@ const adminAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Apply rate limiting to signup endpoint
+  // Apply rate limiting to signup endpoint - configured for proxy environments (like Portainer)
   const signupLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // 5 signup attempts per IP per 15 minutes
@@ -45,6 +45,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    // Skip rate limiting in development for testing
+    skip: (req) => process.env.NODE_ENV === 'development',
+    // For Docker/Portainer deployment
+    trustProxy: true
   });
   
   // Jellyfin user creation endpoint with rate limiting
@@ -97,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ADMIN ROUTES
   
-  // Rate limit for admin login attempts
+  // Rate limit for admin login attempts - configured for proxy environments (like Portainer)
   const loginLimiter = rateLimit({
     windowMs: 30 * 60 * 1000, // 30 minutes
     max: 10, // 10 login attempts per IP per 30 minutes
@@ -106,6 +110,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    // Skip rate limiting in development for testing
+    skip: (req) => process.env.NODE_ENV === 'development',
+    // For Docker/Portainer deployment
+    trustProxy: true
   });
   
   // Admin login endpoint using Jellyfin admin credentials
