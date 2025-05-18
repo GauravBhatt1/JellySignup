@@ -77,6 +77,7 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<JellyfinApiUser | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [showNeverLoggedIn, setShowNeverLoggedIn] = useState(false);
   const { toast } = useToast();
   const [_, navigate] = useLocation();
   const queryClient = useQueryClient();
@@ -114,16 +115,19 @@ export default function AdminDashboard() {
     mutationFn: async ({ 
       userId, 
       action, 
-      newPassword 
+      newPassword,
+      userIds
     }: { 
-      userId: string; 
-      action: "delete" | "enable" | "disable" | "reset-password"; 
-      newPassword?: string 
+      userId?: string; 
+      action: "delete" | "enable" | "disable" | "reset-password" | "bulk-disable"; 
+      newPassword?: string;
+      userIds?: string[];
     }) => {
       const res = await apiRequest("POST", "/api/admin/users/action", {
         userId,
         action,
-        newPassword
+        newPassword,
+        userIds
       });
 
       if (!res.ok) {
@@ -180,10 +184,20 @@ export default function AdminDashboard() {
     }
   });
 
-  // Filter users based on search term
-  const filteredUsers = users ? users.filter((user: JellyfinApiUser) => 
-    user.Name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  // Function to check if a user has never logged in
+  const hasNeverLoggedIn = (user: JellyfinApiUser): boolean => {
+    return !user.LastLoginDate && !user.LastActivityDate;
+  };
+  
+  // Filter users based on search term and never logged in status
+  const filteredUsers = users ? users.filter((user: JellyfinApiUser) => {
+    const matchesSearch = user.Name.toLowerCase().includes(searchTerm.toLowerCase());
+    // If showing only users who never logged in, filter those
+    if (showNeverLoggedIn) {
+      return matchesSearch && hasNeverLoggedIn(user);
+    }
+    return matchesSearch;
+  }) : [];
 
   // Format date for display
   const formatDate = (dateString?: string) => {
@@ -230,16 +244,29 @@ export default function AdminDashboard() {
               User Management
             </h2>
 
-            {/* Search */}
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input 
-                type="text"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
-              />
+            <div className="flex items-center gap-4">
+              {/* Toggle to show only users who never logged in */}
+              <Button
+                variant={showNeverLoggedIn ? "default" : "outline"}
+                size="sm"
+                className={`flex items-center gap-2 ${showNeverLoggedIn ? 'bg-amber-600 hover:bg-amber-700' : 'bg-gray-800 hover:bg-gray-700 border-gray-700'}`}
+                onClick={() => setShowNeverLoggedIn(!showNeverLoggedIn)}
+              >
+                <UserX className="h-4 w-4" />
+                {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
+              </Button>
+
+              {/* Search */}
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input 
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
+                />
+              </div>
             </div>
           </div>
 
@@ -267,6 +294,61 @@ export default function AdminDashboard() {
           {/* User table */}
           {!isLoading && !error && users && (
             <>
+              {/* Bulk action for inactive users */}
+              {showNeverLoggedIn && filteredUsers.length > 0 && (
+                <div className="mb-4 p-4 border border-amber-800/30 rounded-lg bg-amber-900/20">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-amber-400 font-medium mb-1">Inactive User Management</h3>
+                      <p className="text-sm text-gray-400">
+                        Found {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''} who {filteredUsers.length !== 1 ? 'have' : 'has'} never logged in
+                      </p>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive"
+                          size="sm"
+                          className="bg-amber-600 hover:bg-amber-700 text-white border-none"
+                        >
+                          <UserX className="h-4 w-4 mr-2" />
+                          Disable All Inactive Users
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-gray-900 border-gray-800 text-white">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Disable Inactive Users</AlertDialogTitle>
+                          <AlertDialogDescription className="text-gray-400">
+                            Are you sure you want to disable all {filteredUsers.length} users who have never logged in? 
+                            This will prevent them from accessing your Jellyfin server until you enable them.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-amber-600 hover:bg-amber-700 text-white"
+                            onClick={() => {
+                              const userIds = filteredUsers.map(user => user.Id);
+                              actionMutation.mutate({
+                                action: "bulk-disable",
+                                userIds
+                              });
+                            }}
+                          >
+                            {actionMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            ) : null}
+                            Disable All
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              )}
+              
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
