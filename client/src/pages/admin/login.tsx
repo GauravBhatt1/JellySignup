@@ -54,7 +54,8 @@ export default function AdminLogin() {
           title: "Login successful",
           description: "Welcome to the admin dashboard",
         });
-        navigate("/admin/dashboard");
+        // Use window.location for hard navigation to reload the page
+        window.location.href = "/admin/dashboard";
       } else {
         const error = await response.json();
         toast({

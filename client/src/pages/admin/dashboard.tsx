@@ -49,7 +49,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { JellyfinApiUser } from "@/types/jellyfin-types";
+// Define the JellyfinApiUser interface here
+interface JellyfinApiUser {
+  Id: string;
+  Name: string;
+  HasPassword: boolean;
+  HasConfiguredPassword: boolean;
+  Policy?: {
+    IsAdministrator: boolean;
+    IsDisabled: boolean;
+    EnableContentDownloading?: boolean;
+    [key: string]: any;
+  };
+  LastLoginDate?: string;
+  LastActivityDate?: string;
+  [key: string]: any;
+}
 
 // Interface for password reset form
 interface ResetPasswordForm {
@@ -72,15 +87,15 @@ export default function AdminDashboard() {
       try {
         const res = await apiRequest("GET", "/api/admin/users");
         if (!res.ok) {
-          navigate("/admin/login");
+          window.location.href = "/admin/login";
         }
       } catch (error) {
-        navigate("/admin/login");
+        window.location.href = "/admin/login";
       }
     };
     
     checkAuth();
-  }, [navigate]);
+  }, []);
 
   // Query to get all users
   const { data: users, isLoading, error } = useQuery({
@@ -154,7 +169,7 @@ export default function AdminDashboard() {
         title: "Logged out",
         description: "You have been logged out successfully",
       });
-      navigate("/admin/login");
+      window.location.href = "/admin/login";
     },
     onError: () => {
       toast({
