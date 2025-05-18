@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  jellyfin-signup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
+      - JELLYFIN_SERVER_URL=${JELLYFIN_SERVER_URL}
+    networks:
+      - jellyfin-network
+
+networks:
+  jellyfin-network:
+    # You can use the 'external' option if you want to connect to an existing network
+    # where your Jellyfin server is running
+    # external: true
+    # name: existing-network-name
