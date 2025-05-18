@@ -13,7 +13,8 @@ import {
   getUserById,
   deleteUser,
   setUserStatus,
-  resetUserPassword
+  resetUserPassword,
+  isJellyfinAdmin
 } from "./jellyfin";
 
 // Declare session with adminAuthenticated property
@@ -83,16 +84,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ADMIN ROUTES
   
-  // Admin login endpoint
+  // Admin login endpoint using Jellyfin admin credentials
   app.post("/api/admin/login", async (req, res) => {
     try {
       const validatedData = adminLoginSchema.parse(req.body);
       
-      // Check admin credentials against environment variables
-      const adminUsername = process.env.ADMIN_USERNAME || "admin";
-      const adminPassword = process.env.ADMIN_PASSWORD || "admin";
+      // Check if the user is a Jellyfin admin
+      const isAdmin = await isJellyfinAdmin(validatedData.username, validatedData.password);
       
-      if (validatedData.username === adminUsername && validatedData.password === adminPassword) {
+      if (isAdmin) {
         // Set admin session
         if (req.session) {
           req.session.adminAuthenticated = true;
@@ -103,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else {
         return res.status(401).json({ 
-          message: "Invalid credentials" 
+          message: "Access denied. Only Jellyfin administrators can access the admin dashboard." 
         });
       }
     } catch (error) {

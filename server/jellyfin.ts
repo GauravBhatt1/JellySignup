@@ -34,6 +34,42 @@ export interface JellyfinApiUser {
 }
 
 /**
+ * Check if a user is admin in Jellyfin
+ */
+export async function isJellyfinAdmin(username: string, password: string): Promise<boolean> {
+  try {
+    // First, check if user exists
+    const exists = await checkUserExists(username);
+    if (!exists) {
+      return false;
+    }
+
+    const JELLYFIN_SERVER_URL = process.env.JELLYFIN_SERVER_URL || "";
+    
+    // Authenticate and check admin status
+    const response = await axios.post(`${JELLYFIN_SERVER_URL}/Users/AuthenticateByName`, {
+      Username: username,
+      Pw: password
+    }, {
+      headers: {
+        'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Web", Device="Admin Login", DeviceId="admin", Version="10.8.0"`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    // Check if user has admin rights
+    if (response.status === 200 && response.data && response.data.User && response.data.User.Policy) {
+      return response.data.User.Policy.IsAdministrator === true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+}
+
+/**
  * Check if a username already exists in Jellyfin
  */
 export async function checkUserExists(username: string): Promise<boolean> {

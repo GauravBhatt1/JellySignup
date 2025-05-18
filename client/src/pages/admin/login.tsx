@@ -85,7 +85,7 @@ export default function AdminLogin() {
             </div>
           </div>
           <h2 className="text-2xl font-bold gradient-text mb-2">Admin Login</h2>
-          <p className="text-gray-400">Access Jellyfin user management</p>
+          <p className="text-gray-400">Enter your Jellyfin administrator credentials</p>
         </div>
 
         <Form {...form}>
@@ -99,7 +99,7 @@ export default function AdminLogin() {
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Enter admin username"
+                      placeholder="Your Jellyfin admin username"
                       className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 rounded-lg h-12 glow-input focus:border-purple-500"
                     />
                   </FormControl>
@@ -119,7 +119,7 @@ export default function AdminLogin() {
                       <Input
                         {...field}
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter admin password"
+                        placeholder="Your Jellyfin admin password"
                         className="bg-gray-900/50 border-gray-700 text-white placeholder-gray-500 pr-10 rounded-lg h-12 glow-input focus:border-purple-500"
                       />
                       <button
