@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                           <AlertDialogAction
                             className="bg-amber-600 hover:bg-amber-700 text-white"
                             onClick={() => {
-                              const userIds = filteredUsers.map(user => user.Id);
+                              const userIds = filteredUsers.map((user: JellyfinApiUser) => user.Id);
                               actionMutation.mutate({
                                 action: "bulk-disable",
                                 userIds

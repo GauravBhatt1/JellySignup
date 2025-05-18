@@ -162,31 +162,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Perform user action (delete, enable, disable, reset password)
+  // Perform user action (delete, enable, disable, reset password, bulk actions)
   app.post("/api/admin/users/action", adminAuth, async (req, res) => {
     try {
       const validatedData = userActionSchema.parse(req.body);
-      const { userId, action, newPassword } = validatedData;
+      const { userId, action, newPassword, userIds } = validatedData;
       
       switch (action) {
         case "delete":
-          await deleteUser(userId);
+          if (!userId) {
+            return res.status(400).json({ message: "User ID is required for delete action" });
+          }
+          await deleteUser(userId as string);
           return res.status(200).json({ message: "User deleted successfully" });
           
         case "disable":
-          await setUserStatus(userId, true);
+          if (!userId) {
+            return res.status(400).json({ message: "User ID is required for disable action" });
+          }
+          await setUserStatus(userId as string, true);
           return res.status(200).json({ message: "User disabled successfully" });
           
         case "enable":
-          await setUserStatus(userId, false);
+          if (!userId) {
+            return res.status(400).json({ message: "User ID is required for enable action" });
+          }
+          await setUserStatus(userId as string, false);
           return res.status(200).json({ message: "User enabled successfully" });
           
         case "reset-password":
+          if (!userId) {
+            return res.status(400).json({ message: "User ID is required for reset-password action" });
+          }
           if (!newPassword) {
             return res.status(400).json({ message: "New password is required" });
           }
-          await resetUserPassword(userId, newPassword);
+          await resetUserPassword(userId as string, newPassword);
           return res.status(200).json({ message: "Password reset successfully" });
+        
+        case "bulk-disable":
+          if (!userIds || userIds.length === 0) {
+            return res.status(400).json({ message: "User IDs are required for bulk-disable action" });
+          }
+          
+          // Process each user ID in the array
+          const results = await Promise.allSettled(
+            userIds.map(id => setUserStatus(id, true))
+          );
+          
+          // Count successes and failures
+          const successes = results.filter(r => r.status === 'fulfilled').length;
+          const failures = results.filter(r => r.status === 'rejected').length;
+          
+          return res.status(200).json({ 
+            message: `Disabled ${successes} users successfully${failures > 0 ? `, ${failures} failed` : ''}` 
+          });
           
         default:
           return res.status(400).json({ message: "Invalid action" });
