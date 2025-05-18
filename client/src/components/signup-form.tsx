@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, CheckCircle, AlertCircle, User } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useJellyfin } from "@/hooks/use-jellyfin";
 import { JellyfinUser, jellyfinUserSchema } from "@shared/schema";
@@ -69,6 +69,22 @@ export function SignupForm() {
         </Alert>
       )}
 
+      {/* Rate limit info display */}
+      {rateLimitInfo && (
+        <div className="mb-6 flex items-start bg-blue-500/10 border border-blue-800/30 rounded-lg p-3">
+          <Info className="h-5 w-5 text-blue-400 mt-0.5 mr-2 flex-shrink-0" />
+          <div className="text-sm text-blue-300">
+            <p>
+              For security reasons, we limit the number of signup attempts.
+              You have <strong>{rateLimitInfo.remaining}</strong> attempt{rateLimitInfo.remaining !== 1 ? 's' : ''} remaining.
+              {rateLimitInfo.remaining < 2 && (
+                <span> Rate limit resets at {rateLimitInfo.reset}.</span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+      
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField

@@ -43,7 +43,13 @@ export function useJellyfin() {
     },
     onError: (err: Error) => {
       setSuccess(false);
-      setError(err.message);
+      
+      // Check if error is rate limit related
+      if (err.message.includes("Too many signup attempts")) {
+        setError("You've reached the maximum number of signup attempts. Please try again later.");
+      } else {
+        setError(err.message);
+      }
     },
   });
 
