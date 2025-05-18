@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
+import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import { z } from "zod";
 import { jellyfinUserSchema } from "@shared/schema";
@@ -35,8 +36,19 @@ const adminAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Jellyfin user creation endpoint
-  app.post("/api/jellyfin/users", async (req, res) => {
+  // Apply rate limiting to signup endpoint
+  const signupLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // 5 signup attempts per IP per 15 minutes
+    message: {
+      message: "Too many signup attempts from this IP, please try again after 15 minutes"
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  });
+  
+  // Jellyfin user creation endpoint with rate limiting
+  app.post("/api/jellyfin/users", signupLimiter, async (req, res) => {
     try {
       // Validate request body
       const validatedData = jellyfinUserSchema.parse(req.body);
@@ -85,8 +97,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ADMIN ROUTES
   
+  // Rate limit for admin login attempts
+  const loginLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // 30 minutes
+    max: 10, // 10 login attempts per IP per 30 minutes
+    message: {
+      message: "Too many login attempts from this IP, please try again after 30 minutes"
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
   // Admin login endpoint using Jellyfin admin credentials
-  app.post("/api/admin/login", async (req, res) => {
+  app.post("/api/admin/login", loginLimiter, async (req, res) => {
     try {
       const validatedData = adminLoginSchema.parse(req.body);
       

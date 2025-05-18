@@ -22,7 +22,7 @@ import { PasswordStrength } from "./password-strength";
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-  const { createUser, isCreating, error, success } = useJellyfin();
+  const { createUser, isCreating, error, success, rateLimitInfo } = useJellyfin();
 
   const form = useForm<JellyfinUser>({
     resolver: zodResolver(jellyfinUserSchema),
