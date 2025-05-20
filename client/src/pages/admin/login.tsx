@@ -54,8 +54,12 @@ export default function AdminLogin() {
           title: "Login successful",
           description: "Welcome to the admin dashboard",
         });
-        // Use window.location for hard navigation to reload the page
-        window.location.href = "/admin/dashboard";
+        
+        // Short delay to ensure session is set before redirect
+        setTimeout(() => {
+          // Use hard navigation to ensure session cookie is properly set and used
+          window.location.href = "/admin/dashboard";
+        }, 500);
       } else {
         const error = await response.json();
         toast({

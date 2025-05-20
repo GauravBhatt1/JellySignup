@@ -15,22 +15,27 @@ app.set('trust proxy', true);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Configure session middleware
+// Configure session middleware with settings for reverse proxy
 app.use(session({
   secret: process.env.SESSION_SECRET || 'jellyfin-admin-secret',
   resave: true,
   saveUninitialized: true,
+  proxy: true, // Trust the reverse proxy
   cookie: { 
-    // In production behind proxy, don't set secure flag as it might cause issues
+    // Don't set secure flag as we're behind a reverse proxy
     secure: false,
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    // Make cookie work with reverse proxies
+    path: '/',
     sameSite: 'lax'
   },
   store: new MemoryStore({
     checkPeriod: 86400000 // prune expired entries every 24h
   })
 }));
+
+// Trust proxy headers for correct handling of client IP/protocol when behind proxy
+app.set('trust proxy', 1);
 
 app.use((req, res, next) => {
   const start = Date.now();
