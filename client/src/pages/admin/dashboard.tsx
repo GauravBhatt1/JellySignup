@@ -88,11 +88,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log("Checking admin authentication...");
         const res = await apiRequest("GET", "/api/admin/users");
         if (!res.ok) {
+          console.log("Admin authentication failed - redirecting to login");
           window.location.href = "/admin/login";
+        } else {
+          console.log("Admin authentication successful");
         }
       } catch (error) {
+        console.error("Admin authentication error:", error);
         window.location.href = "/admin/login";
       }
     };

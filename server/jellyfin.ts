@@ -50,28 +50,85 @@ export interface JellyfinApiUser {
  */
 export async function isJellyfinAdmin(username: string, password: string): Promise<boolean> {
   try {
-    // First, check if user exists
-    const exists = await checkUserExists(username);
-    if (!exists) {
-      return false;
-    }
-
-    const JELLYFIN_SERVER_URL = process.env.JELLYFIN_SERVER_URL || "";
+    console.log(`Checking admin status for user: ${username}`);
     
-    // Authenticate and check admin status
-    const response = await axios.post(`${JELLYFIN_SERVER_URL}/Users/AuthenticateByName`, {
-      Username: username,
-      Pw: password
-    }, {
-      headers: {
-        'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Web", Device="Admin Login", DeviceId="admin", Version="10.8.0"`,
-        'Content-Type': 'application/json'
+    // First try to get the users from Jellyfin to verify API connection
+    try {
+      console.log(`Testing API connection with normalized URL: ${normalizedServerUrl}`);
+      const paths = ['/Users', '/jellyfin/Users', '/emby/Users'];
+      let usersFound = false;
+      
+      for (const path of paths) {
+        try {
+          console.log(`Trying to get users from: ${normalizedServerUrl}${path}`);
+          const userResponse = await axios.get(`${normalizedServerUrl}${path}`, {
+            headers: {
+              'X-Emby-Token': JELLYFIN_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (userResponse.status === 200) {
+            console.log(`Successfully found ${userResponse.data.length} users at path: ${path}`);
+            usersFound = true;
+            
+            // If we can get users, let's try the authentication with the same base path
+            const basePath = path.replace('/Users', '');
+            const authUrl = `${normalizedServerUrl}${basePath}/Users/AuthenticateByName`;
+            
+            console.log(`Attempting authentication at: ${authUrl}`);
+            const authResponse = await axios.post(authUrl, {
+              Username: username,
+              Pw: password
+            }, {
+              headers: {
+                'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Web", Device="Admin Login", DeviceId="admin", Version="10.8.0"`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            // Check if user has admin rights
+            if (authResponse.status === 200 && authResponse.data?.User?.Policy?.IsAdministrator) {
+              console.log('User is confirmed as administrator');
+              return true;
+            } else {
+              console.log('User is not an administrator');
+              return false;
+            }
+          }
+        } catch (pathError) {
+          console.log(`Path ${path} failed: ${pathError.message}`);
+        }
       }
-    });
-
-    // Check if user has admin rights
-    if (response.status === 200 && response.data && response.data.User && response.data.User.Policy) {
-      return response.data.User.Policy.IsAdministrator === true;
+      
+      if (!usersFound) {
+        console.error('Could not access users through any standard API paths');
+        return false;
+      }
+    } catch (apiError) {
+      console.error('API connection test failed:', apiError.message);
+    }
+    
+    // Fallback to standard authentication if path tests didn't succeed
+    try {
+      console.log(`Falling back to standard authentication at: ${normalizedServerUrl}/Users/AuthenticateByName`);
+      const response = await axios.post(`${normalizedServerUrl}/Users/AuthenticateByName`, {
+        Username: username,
+        Pw: password
+      }, {
+        headers: {
+          'X-Emby-Authorization': `MediaBrowser Client="Jellyfin Web", Device="Admin Login", DeviceId="admin", Version="10.8.0"`,
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      // Check if user has admin rights
+      if (response.status === 200 && response.data?.User?.Policy?.IsAdministrator) {
+        console.log('User is confirmed as administrator (fallback)');
+        return true;
+      }
+    } catch (authError) {
+      console.error('Authentication failed:', authError.message);
     }
     
     return false;
@@ -147,19 +204,47 @@ export async function updateUserPolicy(userId: string): Promise<void> {
  */
 export async function getAllUsers(): Promise<JellyfinApiUser[]> {
   try {
-    // Use normalized URL to build API endpoint
-    console.log(`Connecting to Jellyfin at: ${normalizedServerUrl}/Users`);
-    const response = await jellyfinApi.get('/Users');
-    console.log(`Successfully fetched ${response.data.length} users from Jellyfin`);
-    return response.data;
+    // Try different API paths that might be used by Jellyfin
+    const possiblePaths = ['/Users', '/jellyfin/Users', '/emby/Users'];
+    let lastError = null;
+    
+    // Try each path until one works
+    for (const path of possiblePaths) {
+      try {
+        console.log(`Attempting to connect to Jellyfin at: ${normalizedServerUrl}${path}`);
+        const response = await jellyfinApi.get(path);
+        console.log(`Successfully fetched ${response.data.length} users from Jellyfin using path: ${path}`);
+        return response.data;
+      } catch (pathError: any) {
+        console.log(`Path ${path} failed with: ${pathError.message}`);
+        lastError = pathError;
+        // Continue trying next path
+      }
+    }
+    
+    // If we get here, all paths failed
+    throw lastError;
   } catch (error: any) {
-    // Test if we can access the API at all
-    console.log("Testing Jellyfin API connection with system endpoint...");
-    try {
-      await jellyfinApi.get('/System/Info');
-      console.log("Jellyfin API is accessible, but /Users endpoint failed");
-    } catch (systemError: any) {
-      console.error("Could not access Jellyfin API system info either:", systemError.message);
+    // Try alternative system endpoints to determine the correct API base path
+    console.log("Testing Jellyfin API connection with alternative system endpoints...");
+    const systemPaths = ['/System/Info', '/jellyfin/System/Info', '/emby/System/Info', '/api/jellyfin/System/Info'];
+    let systemEndpointFound = false;
+    
+    for (const sysPath of systemPaths) {
+      try {
+        const sysResponse = await jellyfinApi.get(sysPath);
+        console.log(`Successfully connected to system info at: ${sysPath}`);
+        console.log(`Server name: ${sysResponse.data?.ServerName || 'Not available'}`);
+        console.log(`Version: ${sysResponse.data?.Version || 'Not available'}`);
+        systemEndpointFound = true;
+        break;
+      } catch (sysError: any) {
+        console.log(`System path ${sysPath} failed with: ${sysError.message}`);
+      }
+    }
+    
+    if (!systemEndpointFound) {
+      console.error("Could not access Jellyfin API system info through any standard paths.");
     }
     
     // More detailed error logging
