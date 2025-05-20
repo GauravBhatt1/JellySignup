@@ -29,51 +29,74 @@ function initAccessLogFile(): void {
   }
 }
 
-// Get user's real location data - now with precise coordinates
-function getUserLocation(ip: string): {
+// Import the more precise location tracker
+import { getPreciseLocation, getWorldwideDemoLocations } from './precise-location';
+
+// Get user's real location data with precise coordinates (Google Analytics style)
+async function getUserLocation(ip: string): Promise<{
   country: string;
   region: string;
   city: string;
   latitude?: number;
   longitude?: number;
-} {
-  // Clean the IP to handle proxies
-  const cleanIP = ip.includes(',') 
-    ? ip.split(',')[0].trim() 
-    : ip.split(':')[0].trim();
-  
+  org?: string;
+  timezone?: string;
+}> {
+  // Try to get precise location using multiple services
   try {
-    // Only use real IP data from geoip-lite for location tracking
+    const preciseLocation = await getPreciseLocation(ip);
+    
+    if (preciseLocation) {
+      console.log(`Precise location identified for IP ${ip}: ${preciseLocation.city}, ${preciseLocation.region}, ${preciseLocation.country} [${preciseLocation.latitude}, ${preciseLocation.longitude}]`);
+      return {
+        country: preciseLocation.country,
+        region: preciseLocation.region,
+        city: preciseLocation.city,
+        latitude: preciseLocation.latitude,
+        longitude: preciseLocation.longitude,
+        org: preciseLocation.org,
+        timezone: preciseLocation.timezone
+      };
+    }
+  } catch (error) {
+    console.error(`Error getting precise location for ${ip}:`, error);
+  }
+  
+  // Fallback to geoip lookup if precision services fail
+  try {
+    const cleanIP = ip.includes(',') 
+      ? ip.split(',')[0].trim() 
+      : ip.split(':')[0].trim();
+      
     const geo = geoip.lookup(cleanIP);
     if (geo) {
-      console.log(`Real location identified for IP ${cleanIP}: ${geo.city}, ${geo.region}, ${geo.country}`);
-      return { 
+      console.log(`Fallback location identified for IP ${cleanIP}: ${geo.city}, ${geo.region}, ${geo.country}`);
+      return {
         country: geo.country || 'Unknown', 
         region: geo.region || 'Unknown', 
         city: geo.city || 'Unknown',
         latitude: geo.ll ? geo.ll[0] : undefined,
-        longitude: geo.ll ? geo.ll[1] : undefined
+        longitude: geo.ll ? geo.ll[1] : undefined,
+        timezone: geo.timezone
       };
-    } else {
-      console.log(`Could not resolve location for IP: ${cleanIP}`);
     }
-  } catch (error) {
-    console.error(`Error looking up location for IP ${cleanIP}:`, error);
+  } catch (geoipError) {
+    console.error(`Fallback geoip lookup failed for ${ip}:`, geoipError);
   }
   
-  // If we can't get the location, just return unknown instead of generating fake data
+  // If we can't get any location, return unknown
   return { country: 'Unknown', region: 'Unknown', city: 'Unknown' };
 }
 
-// Log real user access with precise geographic coordinates
-export function logUserAccess(req: Request, username: string, path: string): void {
+// Log real user access with precise geographic coordinates (Google Analytics style)
+export async function logUserAccess(req: Request, username: string, path: string): Promise<void> {
   try {
     // Get the real IP address from the request 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
     
     // Get real location data based on the IP address, including coordinates
-    const location = getUserLocation(ip as string);
+    const location = await getUserLocation(ip as string);
     
     // Create log entry with real data only
     const logEntry: AccessLogEntry = {
@@ -116,10 +139,10 @@ export function logUserAccess(req: Request, username: string, path: string): voi
     // Save to file
     fs.writeFileSync(ACCESS_LOG_FILE, JSON.stringify(logs, null, 2), 'utf8');
     
-    // Log the real location information
+    // Log the real location information with precise coordinates
     if (location.country !== 'Unknown') {
       const coordsStr = location.latitude 
-        ? `(${location.latitude.toFixed(4)}, ${location.longitude?.toFixed(4)})` 
+        ? `(${location.latitude}, ${location.longitude})` 
         : '';
       console.log(`Real user location tracked: ${username} from ${location.city}, ${location.country} ${coordsStr} (IP: ${ip})`);
     } else {
