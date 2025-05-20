@@ -133,9 +133,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           req.session.adminAuthenticated = true;
         }
         
-        // Track admin login location
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        trackUserLocation(ip as string, validatedData.username);
+        // Track admin login location with real IP data
+        const { logUserAccess } = require('./access-tracker');
+        logUserAccess(req, validatedData.username, '/api/admin/login');
         
         return res.status(200).json({ 
           message: "Login successful" 
@@ -181,19 +181,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const users = await getAllUsers();
       console.log(`Successfully returned ${users.length} users from Jellyfin`);
       
-      // Track location for sample of existing users (only in admin view)
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      if (users.length > 0) {
-        // Track 5 random users to generate location data
-        const sampleSize = Math.min(5, users.length);
-        for (let i = 0; i < sampleSize; i++) {
-          const randomIndex = Math.floor(Math.random() * users.length);
-          const user = users[randomIndex];
-          if (user && user.Name) {
-            trackUserLocation(ip as string, user.Name);
-          }
-        }
-      }
+      // Log admin viewing user list for access tracking
+      const { logUserAccess } = require('./access-tracker');
+      logUserAccess(req, 'admin-view', '/api/admin/users');
       
       return res.status(200).json(users);
     } catch (error) {
@@ -220,27 +210,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get location statistics
+  // Get location statistics from real user access data
   app.get("/api/admin/location-stats", adminAuth, async (req, res) => {
     try {
-      // Get all users from Jellyfin to ensure we have location data for all
-      try {
-        const users = await getAllUsers();
-        console.log(`Populating location data for ${users.length} Jellyfin users`);
-        
-        // Generate location data for each user
-        for (const user of users) {
-          if (user && user.Name) {
-            // Use client IP but with a variation to simulate different locations
-            const ip = `${(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '1.1.1.1')}.${Math.floor(Math.random() * 255)}`;
-            trackUserLocation(ip as string, user.Name);
-          }
-        }
-      } catch (error) {
-        console.error("Error populating user location data:", error);
-      }
+      // Log this admin viewing analytics
+      const { logUserAccess, getAccessStats } = require('./access-tracker');
+      logUserAccess(req, 'admin', '/api/admin/location-stats');
       
-      const stats = getLocationStats();
+      // Get real access stats from our tracking system
+      const stats = getAccessStats();
       return res.status(200).json(stats);
     } catch (error) {
       console.error("Error fetching location stats:", error);

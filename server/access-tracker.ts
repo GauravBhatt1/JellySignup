@@ -35,24 +35,23 @@ function getUserLocation(ip: string): { country: string; region: string; city: s
     : ip.split(':')[0].trim();
   
   try {
-    // Skip localhost in production
-    if (cleanIP === '127.0.0.1' || cleanIP === 'localhost') {
-      return { country: 'Local', region: 'Development', city: 'Local Environment' };
-    }
-    
-    // Lookup IP using geoip-lite
+    // Only use real IP data from geoip-lite for location tracking
     const geo = geoip.lookup(cleanIP);
     if (geo) {
+      console.log(`Real location identified for IP ${cleanIP}: ${geo.city}, ${geo.region}, ${geo.country}`);
       return { 
         country: geo.country || 'Unknown', 
         region: geo.region || 'Unknown', 
         city: geo.city || 'Unknown'
       };
+    } else {
+      console.log(`Could not resolve location for IP: ${cleanIP}`);
     }
   } catch (error) {
     console.error(`Error looking up location for IP ${cleanIP}:`, error);
   }
   
+  // If we can't get the location, just return unknown instead of generating fake data
   return { country: 'Unknown', region: 'Unknown', city: 'Unknown' };
 }
 
@@ -173,7 +172,7 @@ export function setupUserAccessTracking(app: Express): void {
     const path = req.path;
     if (path.includes('/api/jellyfin') || path.includes('/api/admin')) {
       // Try to get user from session
-      const username = req.session?.user?.name || 'anonymous';
+      const username = req.session?.adminAuthenticated ? 'admin' : 'anonymous';
       logUserAccess(req, username, path);
     }
     next();
