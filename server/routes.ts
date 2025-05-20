@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Track user location at signup
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       // Using our new access tracking system for real location data
-      const { logUserAccess } = require('./access-tracker');
+      const { logUserAccess } = await import('./access-tracker');
       logUserAccess(req, validatedData.username, '/api/jellyfin/users/signup');
       console.log(`User signup location tracked for ${validatedData.username} from IP: ${ip}`);
       
@@ -134,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         // Track admin login location with real IP data
-        const { logUserAccess } = require('./access-tracker');
+        const { logUserAccess } = await import('./access-tracker');
         logUserAccess(req, validatedData.username, '/api/admin/login');
         
         return res.status(200).json({ 
@@ -182,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Successfully returned ${users.length} users from Jellyfin`);
       
       // Log admin viewing user list for access tracking
-      const { logUserAccess } = require('./access-tracker');
+      const { logUserAccess } = await import('./access-tracker');
       logUserAccess(req, 'admin-view', '/api/admin/users');
       
       return res.status(200).json(users);
@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/location-stats", adminAuth, async (req, res) => {
     try {
       // Log this admin viewing analytics
-      const { logUserAccess, getAccessStats } = require('./access-tracker');
+      const { logUserAccess, getAccessStats } = await import('./access-tracker');
       logUserAccess(req, 'admin', '/api/admin/location-stats');
       
       // Get real access stats from our tracking system
