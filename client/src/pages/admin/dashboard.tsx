@@ -448,10 +448,10 @@ export default function AdminDashboard() {
                           <TableCell className="font-medium text-white">
                             {user.Name}
                           </TableCell>
-                          <TableCell className="text-gray-400">
+                          <TableCell className="text-gray-400 hidden md:table-cell">
                             {formatDate(user.LastActivityDate)}
                           </TableCell>
-                          <TableCell className="text-gray-400">
+                          <TableCell className="text-gray-400 hidden md:table-cell">
                             {formatDate(user.LastLoginDate)}
                           </TableCell>
                           <TableCell>
@@ -469,8 +469,19 @@ export default function AdminDashboard() {
                               </span>
                             )}
                           </TableCell>
+                          <TableCell>
+                            {user.Policy?.EnableContentDownloading ? (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                Enabled
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30">
+                                Disabled
+                              </span>
+                            )}
+                          </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end space-x-2">
+                            <div className="flex flex-wrap justify-end gap-2">
                               {/* Reset Password */}
                               <Dialog>
                                 <DialogTrigger asChild>
@@ -479,11 +490,12 @@ export default function AdminDashboard() {
                                     size="icon"
                                     className="h-8 w-8 bg-gray-800 border-gray-700 hover:bg-gray-700"
                                     onClick={() => setSelectedUser(user)}
+                                    title="Reset Password"
                                   >
                                     <Lock className="h-4 w-4 text-amber-400" />
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="bg-gray-900 border-gray-800 text-white">
+                                <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-md mx-auto">
                                   <DialogHeader>
                                     <DialogTitle>Reset Password</DialogTitle>
                                     <DialogDescription className="text-gray-400">
@@ -523,6 +535,45 @@ export default function AdminDashboard() {
                               </Dialog>
 
                               {/* Enable/Disable User */}
+                              {/* Toggle Download Permissions */}
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className={`h-8 w-8 ${
+                                  user.Policy?.EnableContentDownloading 
+                                    ? "bg-blue-900/30 border-blue-700/70 hover:bg-blue-800/50" 
+                                    : "bg-gray-800 border-gray-700 hover:bg-gray-700"
+                                }`}
+                                onClick={() => {
+                                  actionMutation.mutate({
+                                    userId: user.Id,
+                                    action: "toggle-downloads",
+                                    enableDownloads: !user.Policy?.EnableContentDownloading
+                                  });
+                                }}
+                                title={user.Policy?.EnableContentDownloading ? "Disable Downloads" : "Enable Downloads"}
+                                disabled={user.Policy?.IsAdministrator || actionMutation.isPending}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  strokeWidth="2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round" 
+                                  className={`h-4 w-4 ${
+                                    user.Policy?.EnableContentDownloading 
+                                      ? "text-blue-400" 
+                                      : "text-gray-400"
+                                  }`}
+                                >
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="7 10 12 15 17 10" />
+                                  <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                              </Button>
+                              
+                              {/* Enable/Disable User */}
                               <Button 
                                 variant="outline" 
                                 size="icon"
@@ -540,6 +591,7 @@ export default function AdminDashboard() {
                                     });
                                   }
                                 }}
+                                title={user?.Policy?.IsDisabled ? "Enable User" : "Disable User"}
                                 disabled={user.Policy?.IsAdministrator || actionMutation.isPending}
                               >
                                 {user?.Policy?.IsDisabled ? (
@@ -561,7 +613,7 @@ export default function AdminDashboard() {
                                     <Trash className="h-4 w-4 text-red-400" />
                                   </Button>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="bg-gray-900 border-gray-800 text-white">
+                                <AlertDialogContent className="bg-gray-900 border-gray-800 text-white max-w-md mx-auto">
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Delete User</AlertDialogTitle>
                                     <AlertDialogDescription className="text-gray-400">
