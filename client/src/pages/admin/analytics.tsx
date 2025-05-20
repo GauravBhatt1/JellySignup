@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import AnalyticsMap from '@/components/admin/analytics-map';
+import LocationMap from '@/components/admin/location-map';
 import { MapPin, Users, Clock, Activity, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -22,7 +22,6 @@ export default function Analytics() {
     if (!data || !data.geoData) return [];
     
     return data.geoData.map((item: any) => ({
-      ip: item.ip || 'unknown',
       username: item.username,
       coordinates: item.coordinates,
       city: item.city || 'Unknown',
@@ -127,10 +126,9 @@ export default function Analytics() {
                     </div>
                   </div>
                 ) : (
-                  <AnalyticsMap 
-                    visitorData={mapData}
+                  <LocationMap 
+                    locationData={mapData}
                     title="Real-time User Location Tracking"
-                    showZoom
                   />
                 )}
               </CardContent>
