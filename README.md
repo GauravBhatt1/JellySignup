@@ -9,6 +9,15 @@ A web application that allows users to create accounts for your Jellyfin server.
 - Modern UI with responsive design
 - Connects directly to your Jellyfin server API
 - Disables downloads for new users automatically
+- Admin dashboard for user management
+
+## Screenshots
+
+### Signup Page
+![Signup Page](./docs/signup-page.png)
+
+### Admin Dashboard
+![Admin Dashboard](./docs/admin-dashboard.png)
 
 ## Deployment Instructions for VPS with Portainer
 
