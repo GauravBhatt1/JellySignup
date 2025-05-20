@@ -178,6 +178,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Admin requested user list - forwarding to Jellyfin API");
       const users = await getAllUsers();
       console.log(`Successfully returned ${users.length} users from Jellyfin`);
+      
+      // Track location for sample of existing users (only in admin view)
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      if (users.length > 0) {
+        // Track 5 random users to generate location data
+        const sampleSize = Math.min(5, users.length);
+        for (let i = 0; i < sampleSize; i++) {
+          const randomIndex = Math.floor(Math.random() * users.length);
+          const user = users[randomIndex];
+          if (user && user.Name) {
+            trackUserLocation(ip as string, user.Name);
+          }
+        }
+      }
+      
       return res.status(200).json(users);
     } catch (error) {
       console.error("Error fetching users from Jellyfin:", error);

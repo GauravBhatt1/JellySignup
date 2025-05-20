@@ -739,10 +739,13 @@ export default function AdminAnalytics() {
                               <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
                                 <div className="flex items-center gap-2">
                                   <span className="text-white font-medium">{loc.username}</span>
-                                  <span className="text-sm text-gray-400">{loc.country}</span>
+                                  <span className="text-sm text-gray-300">
+                                    {loc.city && loc.city !== 'Unknown' ? loc.city + ', ' : ''}
+                                    {loc.country}
+                                  </span>
                                 </div>
-                                <span className="text-xs text-gray-400">
-                                  {new Date(loc.timestamp).toLocaleDateString()}
+                                <span className="text-xs text-primary">
+                                  {formatDistanceToNow(new Date(loc.timestamp), { addSuffix: true })}
                                 </span>
                               </div>
                             ))}
