@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import NotFound from "@/pages/not-found";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
+import AdminAnalytics from "@/pages/admin/analytics";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/admin/login" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/analytics" component={AdminAnalytics} />
       <Route component={NotFound} />
     </Switch>
   );
