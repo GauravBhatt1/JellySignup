@@ -1,7 +1,10 @@
 import { JellyfinLogo } from "@/components/logo";
 import { SignupForm } from "@/components/signup-form";
+import { LocationTracker, useLocationTracking } from "@/components/location-tracker";
 
 export default function Home() {
+  // Initialize location tracking 
+  useLocationTracking();
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#0a0d14] to-[#121725]">
       {/* Decorative elements */}
@@ -20,6 +23,15 @@ export default function Home() {
 
         {/* Signup Form */}
         <SignupForm />
+        
+        {/* Add option for precise location tracking */}
+        <div className="mt-6 bg-black/30 backdrop-blur-sm border border-gray-800 rounded-lg p-4 max-w-md w-full">
+          <h3 className="text-sm font-medium text-white mb-2">Exact Location Tracking</h3>
+          <p className="text-xs text-gray-400 mb-3">
+            Allow us to use your exact location for precise analytics, like Google Maps.
+          </p>
+          <LocationTracker />
+        </div>
       </div>
 
       <footer className="py-6 mt-auto relative z-10 border-t border-gray-800/30">

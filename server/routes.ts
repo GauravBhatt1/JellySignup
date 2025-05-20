@@ -244,6 +244,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // API endpoint for browser-based geolocation (much more accurate than IP-based)
+  app.post("/api/update-client-location", async (req, res) => {
+    try {
+      const { latitude, longitude, accuracy, username } = req.body;
+      
+      // Validate the data
+      if (!latitude || !longitude) {
+        return res.status(400).json({ message: "Missing required location coordinates" });
+      }
+      
+      // Store this precise GPS location in our system
+      console.log(`Received precise GPS location from browser: [${latitude}, ${longitude}] with accuracy: ${accuracy}m`);
+      
+      // Update the user's session with their precise location
+      if (req.session) {
+        req.session.preciseLocation = {
+          latitude,
+          longitude,
+          accuracy,
+          source: 'browser-gps',
+          timestamp: Date.now()
+        };
+      }
+      
+      // Log this precise location in our access tracking system
+      try {
+        const { logExactLocation } = await import('./access-tracker');
+        const user = username || (req.session?.adminAuthenticated ? 'admin' : 'anonymous');
+        await logExactLocation(req, user, latitude, longitude);
+      } catch (locationError) {
+        console.error("Failed to log exact location:", locationError);
+      }
+      
+      return res.status(200).json({ message: "Location updated successfully" });
+    } catch (error) {
+      console.error("Error updating client location:", error);
+      return res.status(500).json({
+        message: error instanceof Error ? error.message : "Internal server error"
+      });
+    }
+  });
+  
   // Perform user action (delete, enable, disable, reset password, bulk actions)
   app.post("/api/admin/users/action", adminAuth, async (req, res) => {
     try {

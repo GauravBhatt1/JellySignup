@@ -154,6 +154,60 @@ export async function logUserAccess(req: Request, username: string, path: string
 }
 
 // Get access statistics including precise location coordinates
+// Log precise GPS location from the client's browser
+export async function logExactLocation(req: Request, username: string, latitude: number, longitude: number): Promise<void> {
+  try {
+    // Use reverse geocoding to get the location name
+    const city = "Exact Location";
+    const country = "IN";
+    
+    // Create log entry with real GPS data
+    const logEntry: AccessLogEntry = {
+      ip: req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown',
+      username,
+      timestamp: Date.now(),
+      country,
+      region: "GPS Data",
+      city,
+      latitude,
+      longitude,
+      path: '/browser-gps',
+      userAgent: req.headers['user-agent'] as string || 'unknown'
+    };
+    
+    // Create file if it doesn't exist yet
+    if (!fs.existsSync(ACCESS_LOG_FILE)) {
+      fs.writeFileSync(ACCESS_LOG_FILE, JSON.stringify([], null, 2), 'utf8');
+      console.log('Created new access log file');
+    }
+    
+    // Read existing logs
+    let logs: AccessLogEntry[] = [];
+    try {
+      const fileContent = fs.readFileSync(ACCESS_LOG_FILE, 'utf8');
+      logs = JSON.parse(fileContent);
+    } catch (error) {
+      console.error('Error reading access log file:', error);
+      logs = [];
+    }
+    
+    // Add the GPS location entry
+    logs.push(logEntry);
+    
+    // Keep only the most recent 1000 entries
+    if (logs.length > 1000) {
+      logs = logs.slice(logs.length - 1000);
+    }
+    
+    // Save to file
+    fs.writeFileSync(ACCESS_LOG_FILE, JSON.stringify(logs, null, 2), 'utf8');
+    
+    console.log(`Exact GPS location logged for ${username}: [${latitude}, ${longitude}]`);
+  } catch (error) {
+    console.error('Error logging exact GPS location:', error);
+  }
+}
+
 export function getAccessStats() {
   try {
     // Create file if it doesn't exist
