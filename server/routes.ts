@@ -46,9 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     // Skip rate limiting in development for testing
-    skip: (req) => process.env.NODE_ENV === 'development',
-    // For Docker/Portainer deployment
-    trustProxy: true
+    skip: (req) => process.env.NODE_ENV === 'development'
   });
   
   // Jellyfin user creation endpoint with rate limiting
@@ -111,9 +109,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     standardHeaders: true,
     legacyHeaders: false,
     // Skip rate limiting in development for testing
-    skip: (req) => process.env.NODE_ENV === 'development',
-    // For Docker/Portainer deployment
-    trustProxy: true
+    skip: (req) => process.env.NODE_ENV === 'development'
   });
   
   // Admin login endpoint using Jellyfin admin credentials

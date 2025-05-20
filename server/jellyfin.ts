@@ -5,15 +5,20 @@ import { JellyfinUser } from "@shared/schema";
 const JELLYFIN_SERVER_URL = process.env.JELLYFIN_SERVER_URL || "http://localhost:8096";
 const JELLYFIN_API_KEY = process.env.JELLYFIN_API_KEY || "";
 
+// Ensure the server URL doesn't end with a trailing slash
+const normalizedServerUrl = JELLYFIN_SERVER_URL.endsWith('/') 
+  ? JELLYFIN_SERVER_URL.slice(0, -1)
+  : JELLYFIN_SERVER_URL;
+
 // Log Jellyfin configuration (without exposing full API key)
 console.log(`Jellyfin API Configuration: 
-  Server URL: ${JELLYFIN_SERVER_URL}
+  Server URL: ${normalizedServerUrl}
   API Key Set: ${JELLYFIN_API_KEY ? "Yes" : "No"}`
 );
 
 // Create axios instance for Jellyfin API with timeout and better error handling
 const jellyfinApi = axios.create({
-  baseURL: JELLYFIN_SERVER_URL,
+  baseURL: normalizedServerUrl,
   headers: {
     "X-Emby-Token": JELLYFIN_API_KEY,
     "Content-Type": "application/json",
@@ -142,27 +147,37 @@ export async function updateUserPolicy(userId: string): Promise<void> {
  */
 export async function getAllUsers(): Promise<JellyfinApiUser[]> {
   try {
-    console.log(`Connecting to Jellyfin at: ${JELLYFIN_SERVER_URL}/Users`);
-    const response = await jellyfinApi.get("/Users");
+    // Use normalized URL to build API endpoint
+    console.log(`Connecting to Jellyfin at: ${normalizedServerUrl}/Users`);
+    const response = await jellyfinApi.get('/Users');
     console.log(`Successfully fetched ${response.data.length} users from Jellyfin`);
     return response.data;
   } catch (error: any) {
+    // Test if we can access the API at all
+    console.log("Testing Jellyfin API connection with system endpoint...");
+    try {
+      await jellyfinApi.get('/System/Info');
+      console.log("Jellyfin API is accessible, but /Users endpoint failed");
+    } catch (systemError: any) {
+      console.error("Could not access Jellyfin API system info either:", systemError.message);
+    }
+    
     // More detailed error logging
     console.error("Error fetching Jellyfin users:", {
       message: error.message,
       status: error.response?.status,
       statusText: error.response?.statusText,
-      url: `${JELLYFIN_SERVER_URL}/Users`,
-      headers: error.response?.headers
+      url: `${normalizedServerUrl}/Users`,
+      details: error.response?.data
     });
     
-    // Provide more context in the error message
+    // Provide more context in the error message for debugging
     if (error.response?.status === 401) {
       throw new Error("Authentication failed. Check your JELLYFIN_API_KEY.");
     } else if (error.response?.status === 404) {
-      throw new Error("Jellyfin API endpoint not found. Check your JELLYFIN_SERVER_URL.");
+      throw new Error(`Jellyfin API endpoint not found at ${normalizedServerUrl}/Users. Check your JELLYFIN_SERVER_URL - it should be the base URL of your Jellyfin server (e.g., http://your-server:8096).`);
     } else if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      throw new Error(`Cannot connect to Jellyfin server at ${JELLYFIN_SERVER_URL}. Please check the server is running and accessible.`);
+      throw new Error(`Cannot connect to Jellyfin server at ${normalizedServerUrl}. Please check the server is running and accessible.`);
     }
     
     throw new Error(`Failed to fetch users from Jellyfin: ${error.message}`);
