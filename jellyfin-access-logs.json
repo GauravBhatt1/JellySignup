@@ -3684,5 +3684,17 @@
     "longitude": 77.7064,
     "path": "/jellyfin-app",
     "userAgent": "Jellyfin App"
+  },
+  {
+    "ip": "152.58.97.201",
+    "username": "jhonybhai",
+    "timestamp": 1747771622349,
+    "country": "IN",
+    "region": "National Capital Territory of Delhi",
+    "city": "Delhi",
+    "latitude": 28.6542,
+    "longitude": 77.2373,
+    "path": "/jellyfin-app",
+    "userAgent": "Jellyfin App"
   }
 ]
