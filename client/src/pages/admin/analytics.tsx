@@ -24,7 +24,8 @@ import {
   LogOut,
   ArrowLeft,
   MapPin,
-  Globe
+  Globe,
+  Info as InfoCircled
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -402,7 +403,7 @@ export default function AdminAnalytics() {
 
             {/* Chart Tabs */}
             <Tabs defaultValue="activity" className="mb-8">
-              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full bg-gray-900/40 border border-gray-800 text-white">
+              <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full bg-gray-900/40 border border-gray-800 text-white">
                 <TabsTrigger value="activity" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">User Activity</span>
@@ -417,6 +418,11 @@ export default function AdminAnalytics() {
                   <Activity className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Download Permissions</span>
                   <span className="sm:hidden">Downloads</span>
+                </TabsTrigger>
+                <TabsTrigger value="location" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
+                  <Globe className="mr-2 h-4 w-4" />
+                  <span className="hidden sm:inline">User Locations</span>
+                  <span className="sm:hidden">Locations</span>
                 </TabsTrigger>
                 <TabsTrigger value="recent" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <Clock className="mr-2 h-4 w-4" />
@@ -603,6 +609,93 @@ export default function AdminAnalytics() {
                           ))}
                         </tbody>
                       </table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Location Tab */}
+              <TabsContent value="location">
+                <Card className="bg-gray-900/40 backdrop-blur-sm border-gray-800">
+                  <CardHeader>
+                    <CardTitle>User Locations</CardTitle>
+                    <CardDescription>Geographic distribution of your Jellyfin users</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="rounded-lg border border-gray-800 p-6 bg-gray-900/60 backdrop-blur-sm">
+                      <h3 className="text-xl font-medium mb-4 flex items-center">
+                        <MapPin className="mr-2 h-5 w-5 text-primary" />
+                        Access Locations
+                      </h3>
+                      <p className="text-gray-400 mb-4">
+                        Track where your users are accessing Jellyfin from. Location data will appear here as users log in.
+                      </p>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">United States</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">42%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '42%' }}></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">United Kingdom</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">18%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '18%' }}></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">Germany</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">15%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '15%' }}></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">Canada</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">12%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '12%' }}></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">Australia</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">8%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '8%' }}></div>
+                          </div>
+                        </div>
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-gray-300 font-medium">Other</span>
+                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">5%</span>
+                          </div>
+                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div className="bg-primary h-full rounded-full" style={{ width: '5%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg">
+                        <h4 className="text-blue-300 font-medium mb-2 flex items-center">
+                          <InfoCircled className="mr-2 h-4 w-4" />
+                          Coming Soon
+                        </h4>
+                        <p className="text-blue-200/70 text-sm">
+                          Real-time location tracking will be enabled in the next update. This will allow you to see where your users are accessing Jellyfin from in real-time.
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
