@@ -1,6 +1,29 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+
+// Location tracking interfaces
+interface LocationData {
+  ip: string;
+  country: string;
+  region: string;
+  city: string;
+  timestamp: number;
+  username: string;
+}
+
+interface LocationStats {
+  totalTracked: number;
+  countries: Record<string, {
+    count: number;
+    percentage: number;
+  }>;
+  cities: Record<string, {
+    count: number;
+    country: string;
+  }>;
+  recentLocations: LocationData[];
+}
 import {
   BarChart,
   Bar,
@@ -89,6 +112,25 @@ export default function AdminAnalytics() {
       } catch (err: any) {
         console.error("Error in admin dashboard:", err.message);
         throw new Error(err.message || "Failed to fetch users from server");
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false
+  });
+  
+  // Query to get location statistics
+  const { data: locationStats, isLoading: isLoadingLocations } = useQuery({
+    queryKey: ['admin', 'locations'],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest("GET", "/api/admin/location-stats");
+        if (!res.ok) {
+          throw new Error("Failed to fetch location data");
+        }
+        return res.json() as Promise<LocationStats>;
+      } catch (err: any) {
+        console.error("Error fetching location stats:", err.message);
+        throw new Error(err.message || "Failed to fetch location data");
       }
     },
     retry: 1,
@@ -631,60 +673,46 @@ export default function AdminAnalytics() {
                         Track where your users are accessing Jellyfin from. Location data will appear here as users log in.
                       </p>
                       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">United States</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">42%</span>
+                        {isLoadingLocations ? (
+                          // Loading skeleton for location data
+                          Array(6).fill(0).map((_, i) => (
+                            <div key={i} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 animate-pulse">
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="h-4 bg-gray-700 rounded w-20"></div>
+                                <div className="h-4 bg-gray-700 rounded w-8"></div>
+                              </div>
+                              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div className="bg-gray-600 h-full rounded-full w-1/3"></div>
+                              </div>
+                            </div>
+                          ))
+                        ) : locationStats && locationStats.totalTracked > 0 ? (
+                          // Real location data
+                          Object.entries(locationStats.countries)
+                            .sort((a, b) => b[1].count - a[1].count)
+                            .slice(0, 6)
+                            .map(([country, data]) => (
+                              <div key={country} className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-gray-300 font-medium">{country}</span>
+                                  <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">{data.percentage}%</span>
+                                </div>
+                                <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                                  <div 
+                                    className="bg-primary h-full rounded-full" 
+                                    style={{ width: `${data.percentage}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            ))
+                        ) : (
+                          // No location data yet
+                          <div className="col-span-3 bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                            <p className="text-gray-400 text-center">
+                              No location data available yet. Data will appear here as users log in.
+                            </p>
                           </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '42%' }}></div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">United Kingdom</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">18%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '18%' }}></div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">Germany</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">15%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '15%' }}></div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">Canada</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">12%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '12%' }}></div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">Australia</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">8%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '8%' }}></div>
-                          </div>
-                        </div>
-                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-gray-300 font-medium">Other</span>
-                            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">5%</span>
-                          </div>
-                          <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                            <div className="bg-primary h-full rounded-full" style={{ width: '5%' }}></div>
-                          </div>
-                        </div>
+                        )}
                       </div>
 
                       <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg">

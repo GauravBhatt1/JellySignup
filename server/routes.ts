@@ -18,6 +18,7 @@ import {
   isJellyfinAdmin,
   bulkSetUserStatus
 } from "./jellyfin";
+import { trackUserLocation, getLocationStats } from "./location-tracker";
 
 // Declare session with adminAuthenticated property
 declare module "express-session" {
@@ -75,6 +76,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // We don't throw the error here to allow user creation to succeed
       }
       
+      // Track user location at signup
+      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      trackUserLocation(ip as string, validatedData.username);
+      console.log(`User signup location tracked for ${validatedData.username} from IP: ${ip}`);
+      
       // Return success response with redirect URL
       return res.status(201).json({ 
         message: "User created successfully", 
@@ -124,6 +130,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (req.session) {
           req.session.adminAuthenticated = true;
         }
+        
+        // Track admin login location
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        trackUserLocation(ip as string, validatedData.username);
         
         return res.status(200).json({ 
           message: "Login successful" 
@@ -189,6 +199,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error(`Error fetching user ${req.params.userId}:`, error);
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
+      });
+    }
+  });
+
+  // Get location statistics
+  app.get("/api/admin/location-stats", adminAuth, (req, res) => {
+    try {
+      const stats = getLocationStats();
+      return res.status(200).json(stats);
+    } catch (error) {
+      console.error("Error fetching location stats:", error);
+      return res.status(500).json({
+        message: error instanceof Error ? error.message : "Internal server error"
       });
     }
   });
