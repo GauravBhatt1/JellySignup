@@ -131,11 +131,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Set admin session
         if (req.session) {
           req.session.adminAuthenticated = true;
+          // Save the session before returning
+          req.session.save(err => {
+            if (err) {
+              console.error("Error saving session:", err);
+            } else {
+              console.log("Admin session saved successfully");
+            }
+          });
         }
         
-        // Track admin login location with real IP data
-        const { logUserAccess } = await import('./access-tracker');
-        logUserAccess(req, validatedData.username, '/api/admin/login');
+        // Add IP tracking without async/await
+        try {
+          const { logUserAccess } = require('./access-tracker');
+          logUserAccess(req, validatedData.username, '/api/admin/login');
+        } catch (trackingError) {
+          console.error("Location tracking error (non-critical):", trackingError);
+        }
         
         return res.status(200).json({ 
           message: "Login successful" 
