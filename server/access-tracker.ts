@@ -55,13 +55,17 @@ function getUserLocation(ip: string): { country: string; region: string; city: s
   return { country: 'Unknown', region: 'Unknown', city: 'Unknown' };
 }
 
-// Log user access
+// Log real user access without generating any fake data
 export function logUserAccess(req: Request, username: string, path: string): void {
   try {
+    // Get the real IP address from the request 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
+    
+    // Get real location data based on the IP address
     const location = getUserLocation(ip as string);
     
+    // Create log entry with real data only
     const logEntry: AccessLogEntry = {
       ip: ip as string,
       username,
@@ -73,6 +77,12 @@ export function logUserAccess(req: Request, username: string, path: string): voi
       userAgent
     };
     
+    // Create file if it doesn't exist yet
+    if (!fs.existsSync(ACCESS_LOG_FILE)) {
+      fs.writeFileSync(ACCESS_LOG_FILE, JSON.stringify([], null, 2), 'utf8');
+      console.log('Created new access log file');
+    }
+    
     // Read existing logs
     let logs: AccessLogEntry[] = [];
     try {
@@ -83,7 +93,7 @@ export function logUserAccess(req: Request, username: string, path: string): voi
       logs = [];
     }
     
-    // Add new log entry
+    // Add new log entry with real user data
     logs.push(logEntry);
     
     // Keep only the most recent 1000 entries
@@ -93,7 +103,13 @@ export function logUserAccess(req: Request, username: string, path: string): voi
     
     // Save to file
     fs.writeFileSync(ACCESS_LOG_FILE, JSON.stringify(logs, null, 2), 'utf8');
-    console.log(`Logged access for user ${username} from ${location.city}, ${location.country}`);
+    
+    // Log the real location information
+    if (location.country !== 'Unknown') {
+      console.log(`Real user location tracked: ${username} from ${location.city}, ${location.country} (IP: ${ip})`);
+    } else {
+      console.log(`User access logged: ${username} with IP ${ip} (Could not resolve location)`);
+    }
   } catch (error) {
     console.error('Error logging user access:', error);
   }
