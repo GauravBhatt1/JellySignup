@@ -133,18 +133,21 @@ export default function AdminDashboard() {
       userId, 
       action, 
       newPassword,
-      userIds
+      userIds,
+      enableDownloads
     }: { 
       userId?: string; 
-      action: "delete" | "enable" | "disable" | "reset-password" | "bulk-disable"; 
+      action: "delete" | "enable" | "disable" | "reset-password" | "bulk-disable" | "toggle-downloads"; 
       newPassword?: string;
       userIds?: string[];
+      enableDownloads?: boolean;
     }) => {
       const res = await apiRequest("POST", "/api/admin/users/action", {
         userId,
         action,
         newPassword,
-        userIds
+        userIds,
+        enableDownloads
       });
 
       if (!res.ok) {
@@ -235,8 +238,8 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a0d14] to-[#121725] text-white">
       {/* Header */}
-      <header className="bg-gray-900/60 border-b border-gray-800 px-6 py-4">
-        <div className="container mx-auto flex justify-between items-center">
+      <header className="bg-gray-900/60 border-b border-gray-800 px-4 sm:px-6 py-4">
+        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
             <Users className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold">Jellyfin Admin Dashboard</h1>
@@ -252,14 +255,14 @@ export default function AdminDashboard() {
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="container mx-auto p-6">
+      <main className="container mx-auto p-4 sm:p-6">
         {/* Stats Cards */}
         {!isLoading && !error && users && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -425,9 +428,10 @@ export default function AdminDashboard() {
                   <TableHeader>
                     <TableRow className="border-gray-800 hover:bg-gray-900/50">
                       <TableHead className="text-gray-400">Username</TableHead>
-                      <TableHead className="text-gray-400">Last Activity</TableHead>
-                      <TableHead className="text-gray-400">Last Login</TableHead>
+                      <TableHead className="text-gray-400 hidden md:table-cell">Last Activity</TableHead>
+                      <TableHead className="text-gray-400 hidden md:table-cell">Last Login</TableHead>
                       <TableHead className="text-gray-400">Status</TableHead>
+                      <TableHead className="text-gray-400">Downloads</TableHead>
                       <TableHead className="text-gray-400 text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>

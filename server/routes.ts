@@ -242,6 +242,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(200).json({ 
             message: `Disabled ${result.success} users successfully${result.failure > 0 ? `, ${result.failure} failed` : ''}` 
           });
+
+        case "toggle-downloads":
+          if (!userId) {
+            return res.status(400).json({ message: "User ID is required for toggle-downloads action" });
+          }
+          // Extract the enableDownloads value from request, default to false if not provided
+          const enableDownloads = validatedData.enableDownloads === true;
+          
+          await updateUserPolicy(userId as string, enableDownloads);
+          return res.status(200).json({ 
+            message: `Downloads ${enableDownloads ? 'enabled' : 'disabled'} successfully` 
+          });
           
         default:
           return res.status(400).json({ message: "Invalid action" });
