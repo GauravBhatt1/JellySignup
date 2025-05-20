@@ -16,7 +16,7 @@ import {
   UserCheck2,
   Settings
 } from "lucide-react";
-import { ThemeSelector } from "@/components/ui/theme-selector";
+// Theme selector import removed
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
@@ -247,10 +247,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
 {/* Analytics button removed */}
             
-            <div className="flex items-center">
-              <Settings className="h-4 w-4 text-gray-400 mr-2" />
-              <ThemeSelector />
-            </div>
+{/* Theme selector button removed */}
             <Button 
               variant="ghost" 
               className="text-gray-400 hover:text-white flex items-center gap-2"
