@@ -14,10 +14,13 @@ A web application that allows users to create accounts for your Jellyfin server.
 ## Screenshots
 
 ### Signup Page
-![Signup Page](./docs/signup-page.png)
+![Signup Page](./docs/images/signup-page.jpg)
+
+### Admin Login
+![Admin Login](./docs/images/admin-login.jpg)
 
 ### Admin Dashboard
-![Admin Dashboard](./docs/admin-dashboard.png)
+![Admin Dashboard](./docs/images/admin-dashboard.jpg)
 
 ## Deployment Instructions for VPS with Portainer
 
