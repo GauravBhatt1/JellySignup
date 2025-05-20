@@ -14,8 +14,7 @@ import {
   Lock,
   UserX2,
   UserCheck2,
-  Settings,
-  BarChart3
+  Settings
 } from "lucide-react";
 import { ThemeSelector } from "@/components/ui/theme-selector";
 import { useToast } from "@/hooks/use-toast";
@@ -246,15 +245,7 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-bold">Jellyfin Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
-              onClick={() => navigate("/admin/analytics")}
-            >
-              <BarChart3 className="mr-2 h-4 w-4" />
-              User Analytics
-            </Button>
+{/* Analytics button removed */}
             
             <div className="flex items-center">
               <Settings className="h-4 w-4 text-gray-400 mr-2" />
