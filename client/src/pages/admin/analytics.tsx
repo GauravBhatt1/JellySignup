@@ -22,7 +22,9 @@ import {
   Activity,
   Calendar,
   LogOut,
-  ArrowLeft
+  ArrowLeft,
+  MapPin,
+  Globe
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -61,7 +63,7 @@ interface JellyfinApiUser {
 }
 
 // Custom colors for the charts
-const COLORS = ['#6366f1', '#8b5cf6', '#d946ef', '#ec4899', '#f43f5e', '#f59e0b', '#10b981'];
+const COLORS = ['#8b5cf6', '#3b82f6', '#ec4899', '#f59e0b', '#10b981', '#6366f1', '#f43f5e'];
 
 export default function AdminAnalytics() {
   const [_, navigate] = useLocation();
@@ -400,23 +402,23 @@ export default function AdminAnalytics() {
 
             {/* Chart Tabs */}
             <Tabs defaultValue="activity" className="mb-8">
-              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full bg-gray-900/40 border border-gray-800">
-                <TabsTrigger value="activity" className="data-[state=active]:bg-gray-800">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full bg-gray-900/40 border border-gray-800 text-white">
+                <TabsTrigger value="activity" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <BarChart3 className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">User Activity</span>
                   <span className="sm:hidden">Activity</span>
                 </TabsTrigger>
-                <TabsTrigger value="status" className="data-[state=active]:bg-gray-800">
+                <TabsTrigger value="status" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <PieChartIcon className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">User Status</span>
                   <span className="sm:hidden">Status</span>
                 </TabsTrigger>
-                <TabsTrigger value="downloads" className="data-[state=active]:bg-gray-800">
+                <TabsTrigger value="downloads" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <Activity className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Download Permissions</span>
                   <span className="sm:hidden">Downloads</span>
                 </TabsTrigger>
-                <TabsTrigger value="recent" className="data-[state=active]:bg-gray-800">
+                <TabsTrigger value="recent" className="data-[state=active]:bg-gray-800/80 data-[state=active]:text-primary text-gray-300">
                   <Clock className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">Recent Activity</span>
                   <span className="sm:hidden">Recent</span>
@@ -465,11 +467,11 @@ export default function AdminAnalytics() {
                           <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                           <XAxis 
                             dataKey="name" 
-                            tick={{ fill: '#a0aec0' }} 
+                            tick={{ fill: '#d1d5db' }} 
                             axisLine={{ stroke: '#4a5568' }}
                           />
                           <YAxis 
-                            tick={{ fill: '#a0aec0' }} 
+                            tick={{ fill: '#d1d5db' }} 
                             axisLine={{ stroke: '#4a5568' }}
                           />
                           <Tooltip content={<CustomTooltip />} />
