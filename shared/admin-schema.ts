@@ -16,9 +16,10 @@ export const adminCredentialsSchema = z.object({
 // Admin actions for user management
 export const userActionSchema = z.object({
   userId: z.string().min(1, "User ID is required").optional(),
-  action: z.enum(["delete", "enable", "disable", "reset-password", "bulk-disable"]),
+  action: z.enum(["delete", "enable", "disable", "reset-password", "bulk-disable", "toggle-downloads"]),
   newPassword: z.string().optional(),
   userIds: z.array(z.string()).optional(),
+  enableDownloads: z.boolean().optional(),
 });
 
 export type AdminLogin = z.infer<typeof adminLoginSchema>;

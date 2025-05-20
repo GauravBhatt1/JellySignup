@@ -174,16 +174,18 @@ export async function createJellyfinUser(userData: JellyfinUser): Promise<any> {
 }
 
 /**
- * Update user policy to disable downloads
+ * Update user policy to enable or disable downloads
  */
-export async function updateUserPolicy(userId: string): Promise<void> {
+export async function updateUserPolicy(userId: string, enableDownloads: boolean = false): Promise<void> {
   try {
+    console.log(`Setting download permission for user ${userId} to ${enableDownloads ? 'enabled' : 'disabled'}`);
+    
     // For some Jellyfin instances, we need to use a different approach
     // The API structure might be different or require specific permissions
     
     // Let's make a simpler policy update directly
     const policy = {
-      EnableContentDownloading: false,
+      EnableContentDownloading: enableDownloads,
       // Include only the essential fields to avoid conflicts
       IsAdministrator: false,
       EnableRemoteControlOfOtherUsers: false
@@ -191,11 +193,13 @@ export async function updateUserPolicy(userId: string): Promise<void> {
     
     // Post the simplified policy
     await jellyfinApi.post(`/Users/${userId}/Policy`, policy);
-    console.log("Successfully updated user policy");
+    console.log(`Successfully updated user policy: downloads ${enableDownloads ? 'enabled' : 'disabled'}`);
+    return;
   } catch (error) {
     console.error("Error updating user policy:", error);
     // Don't throw an error, as this might be an optional step
     console.log("Continuing without policy update");
+    throw new Error("Failed to update download permissions");
   }
 }
 

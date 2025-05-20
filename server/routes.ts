@@ -68,9 +68,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const jellyfinUrl = process.env.JELLYFIN_SERVER_URL || "http://localhost:8096";
       
       try {
-        // Try to update user policy to disable downloads
-        // This is optional and will not break the flow if it fails
-        await updateUserPolicy(user.Id);
+        // By default, disable downloads for new users (false = disabled)
+        await updateUserPolicy(user.Id, false);
       } catch (policyError) {
         console.log("Policy update failed but continuing with user creation");
         // We don't throw the error here to allow user creation to succeed
