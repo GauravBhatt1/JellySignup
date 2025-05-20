@@ -138,5 +138,245 @@
     "city": "Delhi",
     "path": "/api/admin/logout",
     "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.2.4",
+    "username": "anonymous",
+    "timestamp": 1747768768662,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/jellyfin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.1.4",
+    "username": "anonymous",
+    "timestamp": 1747768790086,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/login",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768797850,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768797970,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768798904,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768798948,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768800591,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768800635,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768800935,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768800982,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768801522,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768801524,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.0.178",
+    "username": "admin",
+    "timestamp": 1747768807112,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768807114,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.0.178",
+    "username": "admin",
+    "timestamp": 1747768807118,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768807229,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.2.4",
+    "username": "admin",
+    "timestamp": 1747768825223,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.4.116",
+    "username": "admin",
+    "timestamp": 1747768825233,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.4.116",
+    "username": "admin",
+    "timestamp": 1747768825240,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.2.4",
+    "username": "admin-view",
+    "timestamp": 1747768825413,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin",
+    "timestamp": 1747768828102,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.2.4",
+    "username": "admin",
+    "timestamp": 1747768828116,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.2.4",
+    "username": "admin",
+    "timestamp": 1747768828117,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/location-stats",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "152.58.97.201, 10.83.8.62",
+    "username": "admin-view",
+    "timestamp": 1747768828148,
+    "country": "IN",
+    "region": "DL",
+    "city": "Delhi",
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
   }
 ]

@@ -147,32 +147,48 @@ export function getAccessStats() {
     
     // Calculate percentages
     const countries: Record<string, { count: number; percentage: number }> = {};
-    const totalAccesses = logs.length;
+    const totalTracked = logs.length;
     
     Object.keys(countryCount).forEach(country => {
       const count = countryCount[country];
       countries[country] = {
         count,
-        percentage: Math.round((count / totalAccesses) * 100)
+        percentage: Math.round((count / totalTracked) * 100)
       };
     });
     
-    // Get most recent accesses
-    const recentAccesses = logs
+    // Count cities
+    const cityCount: Record<string, { count: number; country: string }> = {};
+    logs.forEach(log => {
+      const cityKey = `${log.city}, ${log.country}`;
+      if (cityCount[cityKey]) {
+        cityCount[cityKey].count++;
+      } else {
+        cityCount[cityKey] = { count: 1, country: log.country };
+      }
+    });
+    
+    // Get most recent locations
+    const recentLocations = logs
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 20);
     
+    // Log data being returned for debugging
+    console.log(`Returning location stats: ${totalTracked} total, ${Object.keys(countries).length} countries, ${recentLocations.length} recent locations`);
+    
     return {
-      totalAccesses,
+      totalTracked,
       countries,
-      recentAccesses
+      cities: cityCount,
+      recentLocations
     };
   } catch (error) {
     console.error('Error getting access stats:', error);
     return {
-      totalAccesses: 0,
+      totalTracked: 0,
       countries: {},
-      recentAccesses: []
+      cities: {},
+      recentLocations: []
     };
   }
 }
