@@ -74,6 +74,29 @@ app.use((req, res, next) => {
   await setupJellyfinProxy(app);
   console.log('Real user location tracking system initialized');
   
+  // Initialize Jellyfin activity tracking to monitor all users on the server
+  try {
+    const { trackActiveSessions } = await import('./jellyfin-activity-tracker');
+    
+    // Run once immediately on server start
+    await trackActiveSessions();
+    console.log('Initial Jellyfin user session tracking completed');
+    
+    // Set up periodic tracking of all active Jellyfin sessions (every 5 minutes)
+    setInterval(async () => {
+      try {
+        await trackActiveSessions();
+        console.log('Periodic Jellyfin user activity tracking completed');
+      } catch (err) {
+        console.error('Error during periodic Jellyfin user tracking:', err);
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+    
+    console.log('Automated tracking of ALL Jellyfin users initialized (not just signup users)');
+  } catch (error) {
+    console.error('Failed to initialize Jellyfin activity tracking:', error);
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

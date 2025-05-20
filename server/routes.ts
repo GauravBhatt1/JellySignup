@@ -19,6 +19,7 @@ import {
   bulkSetUserStatus
 } from "./jellyfin";
 import { setupUserAccessTracking, setupJellyfinProxy, getAccessStats } from "./access-tracker";
+import { trackActiveSessions, getActivityStats } from "./jellyfin-activity-tracker";
 
 // Declare session with adminAuthenticated property
 declare module "express-session" {
@@ -229,13 +230,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { logUserAccess, getAccessStats } = await import('./access-tracker');
       await logUserAccess(req, 'admin', '/api/admin/location-stats');
       
-      // Get precise user location stats from our tracking system including exact coordinates
-      const stats = getAccessStats();
+      // First, update our activity tracking to get fresh data from Jellyfin active sessions
+      try {
+        await trackActiveSessions();
+      } catch (trackingError) {
+        console.log("Could not track active sessions (non-critical):", trackingError);
+      }
+      
+      // Get combined stats from both activity tracker (all Jellyfin users) and signup tracker
+      const accessStats = getAccessStats();
+      const activityStats = getActivityStats();
+      
+      // Combine both datasets for a complete picture
+      const combinedStats = {
+        totalTracked: accessStats.totalTracked + activityStats.totalActivities,
+        countries: { ...accessStats.countries, ...activityStats.countries },
+        recentLocations: [
+          ...(accessStats.recentLocations || []), 
+          ...(activityStats.recentActivities || []).map((a: any) => ({
+            username: a.username,
+            timestamp: a.timestamp,
+            country: a.country || 'Unknown',
+            city: a.city || 'Unknown',
+            latitude: a.latitude,
+            longitude: a.longitude
+          }))
+        ].sort((a: any, b: any) => b.timestamp - a.timestamp).slice(0, 50),
+        geoData: [
+          ...(accessStats.geoData || []),
+          ...(activityStats.geoData || [])
+        ],
+        uniqueUsers: activityStats.uniqueUsers
+      };
       
       // Log the amount of data being returned for debugging
-      console.log(`Returning location stats: ${stats.totalTracked} total, ${Object.keys(stats.countries || {}).length} countries, ${stats.recentLocations?.length} recent locations, ${stats.geoData?.length} geo points`);
+      console.log(`Returning combined location stats: ${combinedStats.totalTracked} total, ${Object.keys(combinedStats.countries || {}).length} countries, ${combinedStats.recentLocations?.length} recent locations, ${combinedStats.geoData?.length} geo points`);
       
-      return res.status(200).json(stats);
+      return res.status(200).json(combinedStats);
     } catch (error) {
       console.error("Error fetching location stats:", error);
       return res.status(500).json({
@@ -256,6 +287,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Store this precise GPS location in our system
       console.log(`Received precise GPS location from browser: [${latitude}, ${longitude}] with accuracy: ${accuracy}m`);
+      
+      // Log this exact location in our tracking system
+      try {
+        const { logExactLocation } = await import('./access-tracker');
+        await logExactLocation(req, username || "guest", latitude, longitude);
+      } catch (error) {
+        console.error("Error logging exact location:", error);
+      }
+      
+      // Also add this to the global Jellyfin activity tracking
+      try {
+        const { logUserActivity } = await import('./jellyfin-activity-tracker');
+        const ip = req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown';
+        await logUserActivity(
+          username || "guest", 
+          ip, 
+          "Provided GPS location", 
+          req.headers['user-agent'] as string || 'unknown'
+        );
+      } catch (error) {
+        console.error("Error logging to activity tracker:", error);
+      }
+      
+      // Refresh active sessions to get the most up-to-date data from Jellyfin server
+      try {
+        await trackActiveSessions();
+      } catch (trackingError) {
+        console.log("Could not track active sessions (non-critical):", trackingError);
+      }
       
       // Update the user's session with their precise location
       if (req.session) {
