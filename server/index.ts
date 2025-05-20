@@ -68,6 +68,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize user access tracking to monitor real user locations
+  const { setupUserAccessTracking, setupJellyfinProxy } = await import('./access-tracker');
+  setupUserAccessTracking(app);
+  await setupJellyfinProxy(app);
+  console.log('Real user location tracking system initialized');
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

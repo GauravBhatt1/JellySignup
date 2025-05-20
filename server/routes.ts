@@ -18,7 +18,7 @@ import {
   isJellyfinAdmin,
   bulkSetUserStatus
 } from "./jellyfin";
-import { trackUserLocation, getLocationStats } from "./location-tracker";
+import { setupUserAccessTracking, setupJellyfinProxy, getAccessStats } from "./access-tracker";
 
 // Declare session with adminAuthenticated property
 declare module "express-session" {
@@ -78,7 +78,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Track user location at signup
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      trackUserLocation(ip as string, validatedData.username);
+      // Using our new access tracking system for real location data
+      const { logUserAccess } = require('./access-tracker');
+      logUserAccess(req, validatedData.username, '/api/jellyfin/users/signup');
       console.log(`User signup location tracked for ${validatedData.username} from IP: ${ip}`);
       
       // Return success response with redirect URL
