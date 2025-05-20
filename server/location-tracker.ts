@@ -2,6 +2,9 @@ import geoip from 'geoip-lite';
 import fs from 'fs';
 import path from 'path';
 
+// Force immediate debug location data for quick display
+const FORCE_DEMO_DATA = true;
+
 // Interface for location data
 export interface LocationData {
   ip: string;
