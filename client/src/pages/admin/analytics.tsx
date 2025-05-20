@@ -311,9 +311,9 @@ export default function AdminAnalytics() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0d14] to-[#121725] text-white">
+    <div className="min-h-screen bg-[#0a0d14] text-white">
       {/* Header */}
-      <header className="bg-gray-900/60 border-b border-gray-800 px-4 sm:px-6 py-4">
+      <header className="bg-gray-900 border-b border-gray-800 px-4 sm:px-6 py-4 shadow-md">
         <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center space-x-2">
             <BarChart3 className="h-6 w-6 text-primary" />
@@ -323,7 +323,7 @@ export default function AdminAnalytics() {
             <Button 
               variant="outline"
               size="sm"
-              className="bg-gray-800/70 border-gray-700 text-white hover:bg-gray-700"
+              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
               onClick={handleBackToDashboard}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -331,7 +331,7 @@ export default function AdminAnalytics() {
             </Button>
             <Button 
               variant="ghost" 
-              className="text-gray-400 hover:text-white flex items-center gap-2"
+              className="text-gray-300 hover:text-white hover:bg-gray-800 flex items-center gap-2"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
@@ -381,61 +381,61 @@ export default function AdminAnalytics() {
             {/* Stats Cards */}
             {stats && (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                <Card className="bg-gradient-to-br from-blue-900/30 to-blue-800/10 border border-blue-800/30 backdrop-blur-sm">
+                <Card className="bg-gray-900 border border-blue-800/40 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardDescription className="text-blue-300 flex items-center">
+                    <CardDescription className="text-blue-400 flex items-center font-medium">
                       <Users className="mr-2 h-4 w-4" />
                       Total Users
                     </CardDescription>
-                    <CardTitle className="text-3xl">{stats.totalUsers}</CardTitle>
+                    <CardTitle className="text-3xl text-white">{stats.totalUsers}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-blue-300/70">
+                    <p className="text-sm text-blue-300">
                       {stats.activeUsers} active, {stats.inactiveUsers} disabled
                     </p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/10 border border-purple-800/30 backdrop-blur-sm">
+                <Card className="bg-gray-900 border border-purple-800/40 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardDescription className="text-purple-300 flex items-center">
+                    <CardDescription className="text-purple-400 flex items-center font-medium">
                       <Activity className="mr-2 h-4 w-4" />
                       Active Last Week
                     </CardDescription>
-                    <CardTitle className="text-3xl">{stats.activeInLastWeek}</CardTitle>
+                    <CardTitle className="text-3xl text-white">{stats.activeInLastWeek}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-purple-300/70">
+                    <p className="text-sm text-purple-300">
                       {Math.round((stats.activeInLastWeek / stats.totalUsers) * 100)}% of total users
                     </p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-amber-900/30 to-amber-800/10 border border-amber-800/30 backdrop-blur-sm">
+                <Card className="bg-gray-900 border border-amber-800/40 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardDescription className="text-amber-300 flex items-center">
+                    <CardDescription className="text-amber-400 flex items-center font-medium">
                       <Clock className="mr-2 h-4 w-4" />
                       Never Logged In
                     </CardDescription>
-                    <CardTitle className="text-3xl">{stats.neverLoggedIn}</CardTitle>
+                    <CardTitle className="text-3xl text-white">{stats.neverLoggedIn}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-amber-300/70">
+                    <p className="text-sm text-amber-300">
                       {Math.round((stats.neverLoggedIn / stats.totalUsers) * 100)}% of total users
                     </p>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-gradient-to-br from-green-900/30 to-green-800/10 border border-green-800/30 backdrop-blur-sm">
+                <Card className="bg-gray-900 border border-emerald-800/40 shadow-lg">
                   <CardHeader className="pb-2">
-                    <CardDescription className="text-green-300 flex items-center">
+                    <CardDescription className="text-emerald-400 flex items-center font-medium">
                       <Calendar className="mr-2 h-4 w-4" />
                       Downloads Enabled
                     </CardDescription>
-                    <CardTitle className="text-3xl">{stats.downloadEnabled}</CardTitle>
+                    <CardTitle className="text-3xl text-white">{stats.downloadEnabled}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-green-300/70">
+                    <p className="text-sm text-emerald-300">
                       {Math.round((stats.downloadEnabled / stats.totalUsers) * 100)}% of total users
                     </p>
                   </CardContent>
@@ -475,17 +475,17 @@ export default function AdminAnalytics() {
               
               {/* Activity Chart */}
               <TabsContent value="activity">
-                <Card className="bg-gray-900/40 backdrop-blur-sm border-gray-800">
+                <Card className="bg-gray-900 border-gray-800 shadow-lg">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle>User Activity</CardTitle>
-                      <CardDescription>When users last interacted with Jellyfin</CardDescription>
+                      <CardTitle className="text-white">User Activity</CardTitle>
+                      <CardDescription className="text-gray-300">When users last interacted with Jellyfin</CardDescription>
                     </div>
                     <div>
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`mr-2 ${showLoginActivity ? 'bg-primary text-white' : 'bg-gray-800 text-gray-300'}`}
+                        className={`mr-2 ${showLoginActivity ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-gray-800 text-gray-300'}`}
                         onClick={() => setShowLoginActivity(true)}
                       >
                         Login Activity
@@ -493,7 +493,7 @@ export default function AdminAnalytics() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`${!showLoginActivity ? 'bg-primary text-white' : 'bg-gray-800 text-gray-300'}`}
+                        className={`${!showLoginActivity ? 'bg-primary/20 border-primary/40 text-primary' : 'bg-gray-800 text-gray-300'}`}
                         onClick={() => setShowLoginActivity(false)}
                       >
                         Any Activity
@@ -715,14 +715,43 @@ export default function AdminAnalytics() {
                         )}
                       </div>
 
-                      <div className="mt-6 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg">
-                        <h4 className="text-blue-300 font-medium mb-2 flex items-center">
-                          <InfoCircled className="mr-2 h-4 w-4" />
-                          Coming Soon
+                      <div className="mt-6 p-4 bg-gray-800 border border-gray-700 rounded-lg">
+                        <h4 className="text-white font-medium mb-2 flex items-center">
+                          <MapPin className="mr-2 h-4 w-4 text-primary" />
+                          Recent User Locations
                         </h4>
-                        <p className="text-blue-200/70 text-sm">
-                          Real-time location tracking will be enabled in the next update. This will allow you to see where your users are accessing Jellyfin from in real-time.
-                        </p>
+                        
+                        {isLoadingLocations ? (
+                          <div className="animate-pulse flex flex-col gap-2">
+                            {[1, 2, 3].map(i => (
+                              <div key={i} className="flex items-center justify-between py-2 border-b border-gray-700">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-4 w-20 bg-gray-700 rounded"></div>
+                                  <div className="h-4 w-16 bg-gray-700 rounded"></div>
+                                </div>
+                                <div className="h-4 w-24 bg-gray-700 rounded"></div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : locationStats && locationStats.recentLocations && locationStats.recentLocations.length > 0 ? (
+                          <div className="space-y-1">
+                            {locationStats.recentLocations.slice(0, 5).map((loc, index) => (
+                              <div key={index} className="flex items-center justify-between py-2 border-b border-gray-700">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-white font-medium">{loc.username}</span>
+                                  <span className="text-sm text-gray-400">{loc.country}</span>
+                                </div>
+                                <span className="text-xs text-gray-400">
+                                  {new Date(loc.timestamp).toLocaleDateString()}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-gray-400 text-sm">
+                            No location data recorded yet. This will update as users log in to Jellyfin.
+                          </p>
+                        )}
                       </div>
                     </div>
                   </CardContent>
