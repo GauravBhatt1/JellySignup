@@ -18,11 +18,14 @@ app.use(express.urlencoded({ extended: false }));
 // Configure session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'jellyfin-admin-secret',
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    // In production behind proxy, don't set secure flag as it might cause issues
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    // Make cookie work with reverse proxies
+    sameSite: 'lax'
   },
   store: new MemoryStore({
     checkPeriod: 86400000 // prune expired entries every 24h
