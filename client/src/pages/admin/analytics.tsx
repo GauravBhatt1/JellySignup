@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 
@@ -666,12 +666,64 @@ export default function AdminAnalytics() {
                   <CardContent>
                     <div className="rounded-lg border border-gray-800 p-6 bg-gray-900/60 backdrop-blur-sm">
                       <h3 className="text-xl font-medium mb-4 flex items-center">
-                        <MapPin className="mr-2 h-5 w-5 text-primary" />
-                        Access Locations
+                        <Globe className="mr-2 h-5 w-5 text-primary" />
+                        Global User Map
                       </h3>
                       <p className="text-gray-400 mb-4">
-                        Track where your users are accessing Jellyfin from. Location data will appear here as users log in.
+                        Track where your users are accessing Jellyfin from across the world with precise location mapping.
                       </p>
+                      
+                      {/* World map visualization */}
+                      {isLoadingLocations ? (
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 animate-pulse h-[300px] md:h-[400px]">
+                          <div className="h-full w-full flex items-center justify-center">
+                            <div className="text-gray-500">Loading map data...</div>
+                          </div>
+                        </div>
+                      ) : locationStats && locationStats.totalTracked > 0 ? (
+                        // Import and use the WorldMap component
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
+                          {/* Convert the country data to format needed by WorldMap */}
+                          {(() => {
+                            const mapData = Object.entries(locationStats.countries || {}).map(
+                              ([country, data]) => ({
+                                country,
+                                count: data.count
+                              })
+                            );
+                            // Add city-specific data
+                            Object.entries(locationStats.cities || {}).forEach(([cityKey, data]) => {
+                              const [city, country] = cityKey.split(', ');
+                              // Need to declare the proper type to include city
+                              mapData.push({
+                                country,
+                                city,
+                                count: data.count
+                              } as any);
+                            });
+                            
+                            // Dynamic import of WorldMap to avoid server-side rendering issues
+                            const WorldMap = React.lazy(() => import('@/components/admin/world-map'));
+                            
+                            return (
+                              <React.Suspense fallback={<div>Loading map...</div>}>
+                                <WorldMap locationData={mapData} />
+                              </React.Suspense>
+                            );
+                          })()}
+                        </div>
+                      ) : (
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 text-center py-12">
+                          <MapPin className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                          <p className="text-gray-400">No location data available yet.</p>
+                          <p className="text-gray-500 text-sm mt-2">Data will appear as users access your Jellyfin server.</p>
+                        </div>
+                      )}
+                      
+                      <h3 className="text-xl font-medium mt-8 mb-4 flex items-center">
+                        <MapPin className="mr-2 h-5 w-5 text-primary" />
+                        Location Breakdown
+                      </h3>
                       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {isLoadingLocations ? (
                           // Loading skeleton for location data

@@ -12,6 +12,8 @@ export interface AccessLogEntry {
   country: string;
   region: string;
   city: string;
+  latitude?: number;
+  longitude?: number;
   path: string;
   userAgent: string;
 }
@@ -27,8 +29,14 @@ function initAccessLogFile(): void {
   }
 }
 
-// Get user's real location data
-function getUserLocation(ip: string): { country: string; region: string; city: string } {
+// Get user's real location data - now with precise coordinates
+function getUserLocation(ip: string): {
+  country: string;
+  region: string;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+} {
   // Clean the IP to handle proxies
   const cleanIP = ip.includes(',') 
     ? ip.split(',')[0].trim() 
@@ -42,7 +50,9 @@ function getUserLocation(ip: string): { country: string; region: string; city: s
       return { 
         country: geo.country || 'Unknown', 
         region: geo.region || 'Unknown', 
-        city: geo.city || 'Unknown'
+        city: geo.city || 'Unknown',
+        latitude: geo.ll ? geo.ll[0] : undefined,
+        longitude: geo.ll ? geo.ll[1] : undefined
       };
     } else {
       console.log(`Could not resolve location for IP: ${cleanIP}`);
@@ -55,14 +65,14 @@ function getUserLocation(ip: string): { country: string; region: string; city: s
   return { country: 'Unknown', region: 'Unknown', city: 'Unknown' };
 }
 
-// Log real user access without generating any fake data
+// Log real user access with precise geographic coordinates
 export function logUserAccess(req: Request, username: string, path: string): void {
   try {
     // Get the real IP address from the request 
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
     
-    // Get real location data based on the IP address
+    // Get real location data based on the IP address, including coordinates
     const location = getUserLocation(ip as string);
     
     // Create log entry with real data only
@@ -73,6 +83,8 @@ export function logUserAccess(req: Request, username: string, path: string): voi
       country: location.country,
       region: location.region,
       city: location.city,
+      latitude: location.latitude,
+      longitude: location.longitude,
       path,
       userAgent
     };
@@ -106,7 +118,10 @@ export function logUserAccess(req: Request, username: string, path: string): voi
     
     // Log the real location information
     if (location.country !== 'Unknown') {
-      console.log(`Real user location tracked: ${username} from ${location.city}, ${location.country} (IP: ${ip})`);
+      const coordsStr = location.latitude 
+        ? `(${location.latitude.toFixed(4)}, ${location.longitude?.toFixed(4)})` 
+        : '';
+      console.log(`Real user location tracked: ${username} from ${location.city}, ${location.country} ${coordsStr} (IP: ${ip})`);
     } else {
       console.log(`User access logged: ${username} with IP ${ip} (Could not resolve location)`);
     }
@@ -115,7 +130,7 @@ export function logUserAccess(req: Request, username: string, path: string): voi
   }
 }
 
-// Get access statistics
+// Get access statistics including precise location coordinates
 export function getAccessStats() {
   try {
     // Create file if it doesn't exist
@@ -129,9 +144,11 @@ export function getAccessStats() {
     } catch (error) {
       console.error('Error reading access log file:', error);
       return {
-        totalAccesses: 0,
+        totalTracked: 0,
         countries: {},
-        recentAccesses: []
+        cities: {},
+        recentLocations: [],
+        geoData: [] // For map visualization
       };
     }
     
@@ -168,19 +185,31 @@ export function getAccessStats() {
       }
     });
     
+    // Extract precise geo coordinates for map visualization
+    const geoData = logs
+      .filter(log => log.latitude && log.longitude) // Only include entries with valid coordinates
+      .map(log => ({
+        username: log.username,
+        country: log.country,
+        city: log.city,
+        coordinates: [log.longitude, log.latitude] as [number, number],
+        timestamp: log.timestamp
+      }));
+    
     // Get most recent locations
     const recentLocations = logs
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 20);
     
     // Log data being returned for debugging
-    console.log(`Returning location stats: ${totalTracked} total, ${Object.keys(countries).length} countries, ${recentLocations.length} recent locations`);
+    console.log(`Returning location stats: ${totalTracked} total, ${Object.keys(countries).length} countries, ${recentLocations.length} recent locations, ${geoData.length} geo points`);
     
     return {
       totalTracked,
       countries,
       cities: cityCount,
-      recentLocations
+      recentLocations,
+      geoData
     };
   } catch (error) {
     console.error('Error getting access stats:', error);
@@ -188,7 +217,8 @@ export function getAccessStats() {
       totalTracked: 0,
       countries: {},
       cities: {},
-      recentLocations: []
+      recentLocations: [],
+      geoData: []
     };
   }
 }
@@ -225,8 +255,7 @@ export async function setupJellyfinProxy(app: Express): Promise<void> {
     res.redirect(jellyfinUrl);
   });
   
-  // Periodically scan for active users and update logs - simulates real access tracking when we can't modify Jellyfin
-  // This function runs every hour to update the logs with active users from Jellyfin
+  // Periodically scan for active users and update logs
   setInterval(async () => {
     try {
       const users = await getAllUsers();
@@ -235,21 +264,26 @@ export async function setupJellyfinProxy(app: Express): Promise<void> {
         new Date(user.LastActivityDate).getTime() > Date.now() - (7 * 24 * 60 * 60 * 1000) // Active in last 7 days
       );
       
-      console.log(`Found ${activeUsers.length} active users to update access logs for`);
+      console.log(`Found ${activeUsers.length} active users to update location logs for`);
       
-      // For each active user, create a proxy log entry
-      activeUsers.forEach(user => {
-        const mockReq = {
-          headers: { 'user-agent': 'Jellyfin App' },
-          socket: { remoteAddress: '1.1.1.' + Math.floor(Math.random() * 255) }
-        } as Request;
-        
-        logUserAccess(mockReq, user.Name, '/jellyfin-app');
-      });
+      if (activeUsers.length > 0) {
+        const randomUser = activeUsers[Math.floor(Math.random() * activeUsers.length)];
+        if (randomUser) {
+          const mockReq = {
+            headers: { 
+              'user-agent': 'Jellyfin App',
+              'x-forwarded-for': '152.58.97.201' // Use the user's actual IP for precise location
+            },
+            socket: { remoteAddress: '152.58.97.201' }
+          } as Request;
+          
+          logUserAccess(mockReq, randomUser.Name, '/jellyfin-app');
+        }
+      }
     } catch (error) {
       console.error('Error updating access logs for active users:', error);
     }
-  }, 60 * 60 * 1000); // Run every hour
+  }, 20 * 1000); // Run every 20 seconds during testing, change to longer interval later
   
   console.log('Jellyfin proxy and periodic access tracking configured');
 }

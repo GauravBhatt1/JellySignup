@@ -155,7 +155,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ locationData }) => {
       coordinates,
       count: location.count
     };
-  }).filter(Boolean); // Remove any nulls from locations we couldn't map
+  }).filter((marker): marker is {name: string; coordinates: [number, number]; count: number} => marker !== null);
 
   return (
     <div className="world-map-container">

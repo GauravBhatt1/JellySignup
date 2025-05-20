@@ -1,0 +1,473 @@
+{
+  "type": "Topology",
+  "arcs": [],
+  "objects": {
+    "countries": {
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "AFG",
+          "properties": { "name": "Afghanistan" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "AGO",
+          "properties": { "name": "Angola" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ALB",
+          "properties": { "name": "Albania" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ARE",
+          "properties": { "name": "United Arab Emirates" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ARG",
+          "properties": { "name": "Argentina" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ARM",
+          "properties": { "name": "Armenia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ATA",
+          "properties": { "name": "Antarctica" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ATF",
+          "properties": { "name": "French Southern and Antarctic Lands" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "AUS",
+          "properties": { "name": "Australia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "AUT",
+          "properties": { "name": "Austria" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "AZE",
+          "properties": { "name": "Azerbaijan" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BDI",
+          "properties": { "name": "Burundi" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BEL",
+          "properties": { "name": "Belgium" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BEN",
+          "properties": { "name": "Benin" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BFA",
+          "properties": { "name": "Burkina Faso" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BGD",
+          "properties": { "name": "Bangladesh" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BGR",
+          "properties": { "name": "Bulgaria" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BHS",
+          "properties": { "name": "The Bahamas" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BIH",
+          "properties": { "name": "Bosnia and Herzegovina" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BLR",
+          "properties": { "name": "Belarus" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BLZ",
+          "properties": { "name": "Belize" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BOL",
+          "properties": { "name": "Bolivia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BRA",
+          "properties": { "name": "Brazil" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BRN",
+          "properties": { "name": "Brunei" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BTN",
+          "properties": { "name": "Bhutan" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "BWA",
+          "properties": { "name": "Botswana" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CAF",
+          "properties": { "name": "Central African Republic" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CAN",
+          "properties": { "name": "Canada" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CHE",
+          "properties": { "name": "Switzerland" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CHL",
+          "properties": { "name": "Chile" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CHN",
+          "properties": { "name": "China" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CIV",
+          "properties": { "name": "Ivory Coast" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CMR",
+          "properties": { "name": "Cameroon" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "COD",
+          "properties": { "name": "Democratic Republic of the Congo" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "COG",
+          "properties": { "name": "Republic of the Congo" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "COL",
+          "properties": { "name": "Colombia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CRI",
+          "properties": { "name": "Costa Rica" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CUB",
+          "properties": { "name": "Cuba" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CYP",
+          "properties": { "name": "Cyprus" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "CZE",
+          "properties": { "name": "Czech Republic" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "DEU",
+          "properties": { "name": "Germany" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "DJI",
+          "properties": { "name": "Djibouti" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "DNK",
+          "properties": { "name": "Denmark" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "DOM",
+          "properties": { "name": "Dominican Republic" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "DZA",
+          "properties": { "name": "Algeria" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ECU",
+          "properties": { "name": "Ecuador" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "EGY",
+          "properties": { "name": "Egypt" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ERI",
+          "properties": { "name": "Eritrea" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ESP",
+          "properties": { "name": "Spain" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "EST",
+          "properties": { "name": "Estonia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ETH",
+          "properties": { "name": "Ethiopia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "FIN",
+          "properties": { "name": "Finland" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "FJI",
+          "properties": { "name": "Fiji" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "FLK",
+          "properties": { "name": "Falkland Islands" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "FRA",
+          "properties": { "name": "France" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GAB",
+          "properties": { "name": "Gabon" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GBR",
+          "properties": { "name": "United Kingdom" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GEO",
+          "properties": { "name": "Georgia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GHA",
+          "properties": { "name": "Ghana" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GIN",
+          "properties": { "name": "Guinea" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GMB",
+          "properties": { "name": "Gambia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GNB",
+          "properties": { "name": "Guinea Bissau" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GNQ",
+          "properties": { "name": "Equatorial Guinea" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GRC",
+          "properties": { "name": "Greece" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GRL",
+          "properties": { "name": "Greenland" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GTM",
+          "properties": { "name": "Guatemala" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "GUY",
+          "properties": { "name": "Guyana" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "HND",
+          "properties": { "name": "Honduras" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "HRV",
+          "properties": { "name": "Croatia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "HTI",
+          "properties": { "name": "Haiti" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "HUN",
+          "properties": { "name": "Hungary" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "IDN",
+          "properties": { "name": "Indonesia" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "IND",
+          "properties": { "name": "India" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "IRL",
+          "properties": { "name": "Ireland" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "IRN",
+          "properties": { "name": "Iran" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "IRQ",
+          "properties": { "name": "Iraq" }
+        },
+        {
+          "type": "Polygon",
+          "arcs": [],
+          "id": "ISL",
+          "properties": { "name": "Iceland" }
+        }
+      ]
+    }
+  }
+}
