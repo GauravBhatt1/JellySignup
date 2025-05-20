@@ -170,12 +170,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users
   app.get("/api/admin/users", adminAuth, async (req, res) => {
     try {
+      console.log("Admin requested user list - forwarding to Jellyfin API");
       const users = await getAllUsers();
+      console.log(`Successfully returned ${users.length} users from Jellyfin`);
       return res.status(200).json(users);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching users from Jellyfin:", error);
+      // Return a more detailed error message for debugging
       return res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Internal server error" 
+        message: error instanceof Error ? error.message : "Internal server error",
+        details: "Check that your JELLYFIN_SERVER_URL and JELLYFIN_API_KEY environment variables are correct"
       });
     }
   });

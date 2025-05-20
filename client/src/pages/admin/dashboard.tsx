@@ -100,16 +100,26 @@ export default function AdminDashboard() {
     checkAuth();
   }, []);
 
-  // Query to get all users
+  // Query to get all users with improved error handling
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['admin', 'users'],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/admin/users");
-      if (!res.ok) {
-        throw new Error("Failed to fetch users");
+      try {
+        const res = await apiRequest("GET", "/api/admin/users");
+        if (!res.ok) {
+          console.error("Admin API returned error:", res.status, res.statusText);
+          throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        console.log("Successfully loaded users:", data.length);
+        return data;
+      } catch (err: any) {
+        console.error("Error in admin dashboard:", err.message);
+        throw new Error(err.message || "Failed to fetch users from server");
       }
-      return res.json();
-    }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   // Mutation for user actions (delete, enable, disable)
