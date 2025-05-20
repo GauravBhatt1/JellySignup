@@ -1188,5 +1188,53 @@
     "timestamp": 1747770020619,
     "path": "/jellyfin-app",
     "userAgent": "Jellyfin App"
+  },
+  {
+    "ip": "152.58.97.201",
+    "username": "Nitin_58292",
+    "timestamp": 1747770060491,
+    "country": "IN",
+    "region": "National Capital Territory of Delhi",
+    "city": "Delhi",
+    "latitude": 28.6542,
+    "longitude": 77.2373,
+    "path": "/jellyfin-app",
+    "userAgent": "Jellyfin App"
+  },
+  {
+    "ip": "152.58.97.201",
+    "username": "yogeshvanv",
+    "timestamp": 1747770080535,
+    "country": "IN",
+    "region": "National Capital Territory of Delhi",
+    "city": "Delhi",
+    "latitude": 28.6542,
+    "longitude": 77.2373,
+    "path": "/jellyfin-app",
+    "userAgent": "Jellyfin App"
+  },
+  {
+    "ip": "152.58.97.201",
+    "username": "Himanshu_4683",
+    "timestamp": 1747770100485,
+    "country": "IN",
+    "region": "National Capital Territory of Delhi",
+    "city": "Delhi",
+    "latitude": 28.6542,
+    "longitude": 77.2373,
+    "path": "/jellyfin-app",
+    "userAgent": "Jellyfin App"
+  },
+  {
+    "ip": "152.58.97.201",
+    "username": "yogeshvanv",
+    "timestamp": 1747770120470,
+    "country": "IN",
+    "region": "National Capital Territory of Delhi",
+    "city": "Delhi",
+    "latitude": 28.6542,
+    "longitude": 77.2373,
+    "path": "/jellyfin-app",
+    "userAgent": "Jellyfin App"
   }
 ]

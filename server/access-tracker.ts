@@ -298,7 +298,7 @@ export async function setupJellyfinProxy(app: Express): Promise<void> {
               'x-forwarded-for': '152.58.97.201' // Use the user's actual IP for precise location
             },
             socket: { remoteAddress: '152.58.97.201' }
-          } as Request;
+          } as unknown as Request;
           
           logUserAccess(mockReq, randomUser.Name, '/jellyfin-app');
         }

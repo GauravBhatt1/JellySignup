@@ -222,15 +222,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get location statistics from real user access data
+  // Get location statistics from real user access data with precise coordinates (Google Analytics style)
   app.get("/api/admin/location-stats", adminAuth, async (req, res) => {
     try {
       // Log this admin viewing analytics
       const { logUserAccess, getAccessStats } = await import('./access-tracker');
-      logUserAccess(req, 'admin', '/api/admin/location-stats');
+      await logUserAccess(req, 'admin', '/api/admin/location-stats');
       
-      // Get real access stats from our tracking system
+      // Get precise user location stats from our tracking system including exact coordinates
       const stats = getAccessStats();
+      
+      // Log the amount of data being returned for debugging
+      console.log(`Returning location stats: ${stats.totalTracked} total, ${Object.keys(stats.countries || {}).length} countries, ${stats.recentLocations?.length} recent locations, ${stats.geoData?.length} geo points`);
+      
       return res.status(200).json(stats);
     } catch (error) {
       console.error("Error fetching location stats:", error);
