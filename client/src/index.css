@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix white flicker during scroll or page transitions */
+html, body {
+  background-color: #0f1129;
+  overflow-x: hidden;
+}
+
 :root {
   /* Jellyfin official colors */
   --jellyfin-primary: #00a4dc; /* Official Jellyfin blue */

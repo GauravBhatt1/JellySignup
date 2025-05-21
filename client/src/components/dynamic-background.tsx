@@ -86,20 +86,23 @@ export function DynamicBackground() {
   }
   
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
+    <div className="fixed inset-0 -z-20 overflow-hidden">
+      <div className="absolute inset-0 bg-[#0f1129] z-[-25]" /> {/* Solid background base layer */}
+      
       {backgroundImages.map((imageUrl, index) => (
         <div 
           key={imageUrl}
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
           style={{ 
             backgroundImage: `url(${imageUrl})`,
-            opacity: index === currentImageIndex ? 0.75 : 0, // Increased opacity to 0.75 for much better visibility
-            zIndex: index === currentImageIndex ? -1 : -2
+            opacity: index === currentImageIndex ? 0.75 : 0,
+            zIndex: index === currentImageIndex ? -22 : -23
           }}
         />
       ))}
+      
       {/* Dark overlay with reduced opacity for better image visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/30 to-[#0f1129]/65 backdrop-blur-[1px] z-[-1]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/30 to-[#0f1129]/65 backdrop-blur-[1px] z-[-21]" />
     </div>
   );
 }
