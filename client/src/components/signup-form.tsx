@@ -5,6 +5,7 @@ import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { useJellyfin } from "@/hooks/use-jellyfin";
 import { JellyfinUser, jellyfinUserSchema } from "@shared/schema";
+import { JELLYFIN_API_BASE_URL } from "@/lib/jellyfin";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -180,6 +181,18 @@ export function SignupForm() {
               "Create Account"
             )}
           </Button>
+          
+          <div className="text-center mt-4 pt-4 border-t border-gray-800">
+            <p className="text-gray-400 mb-2">Already have an account?</p>
+            <Button 
+              type="button" 
+              variant="outline"
+              className="w-full bg-transparent border-gray-700 hover:bg-gray-800 text-gray-300"
+              onClick={() => window.location.href = JELLYFIN_API_BASE_URL}
+            >
+              Login to Jellyfin
+            </Button>
+          </div>
         </form>
       </Form>
     </Card>
