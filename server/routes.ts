@@ -37,6 +37,27 @@ const adminAuth = (req: Request, res: Response, next: NextFunction) => {
   return res.status(401).json({ message: "Unauthorized" });
 };
 
+// TMDB API route to fetch trending movies for background
+async function fetchTrendingMovies() {
+  try {
+    const tmdbApiKey = process.env.TMDB_API_KEY;
+    if (!tmdbApiKey) {
+      console.error('TMDB API key is not available');
+      return { results: [] };
+    }
+
+    const response = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${tmdbApiKey}`);
+    if (!response.ok) {
+      throw new Error(`TMDB API responded with status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching trending movies from TMDB:', error);
+    return { results: [] };
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Apply rate limiting to signup endpoint - configured for proxy environments (like Portainer)
   const signupLimiter = rateLimit({
@@ -338,6 +359,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         message: error instanceof Error ? error.message : "Internal server error" 
       });
+    }
+  });
+
+  // API endpoint to fetch trending movies from TMDB
+  app.get('/api/trending-movies', async (req: Request, res: Response) => {
+    try {
+      console.log('Fetching trending movies from TMDB API');
+      const trendingMovies = await fetchTrendingMovies();
+      console.log(`Found ${trendingMovies.results?.length || 0} trending movies`);
+      res.json(trendingMovies);
+    } catch (error) {
+      console.error('Error in trending-movies endpoint:', error);
+      res.status(500).json({ error: 'Failed to fetch trending movies' });
     }
   });
 
