@@ -27,12 +27,14 @@ export default function Home() {
       <footer className="py-6 mt-auto relative z-10 border-t border-gray-800/30">
         <div className="text-center text-sm text-gray-500">
           <p className="mb-2">© {new Date().getFullYear()} Jellyfin. The Free Software Media System.</p>
-          <a 
-            href="/admin/login" 
-            className="text-gray-400 hover:text-primary transition-colors text-xs"
-          >
-            Admin Dashboard
-          </a>
+          <div className="inline-block">
+            <a 
+              href="/admin/login" 
+              className="text-gray-400 hover:text-primary transition-colors text-xs no-underline"
+            >
+              Admin Dashboard
+            </a>
+          </div>
         </div>
       </footer>
     </div>
