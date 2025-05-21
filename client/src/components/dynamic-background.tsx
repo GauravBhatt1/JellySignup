@@ -8,16 +8,24 @@ interface Movie {
 }
 
 export function DynamicBackground() {
-  const [backgroundImages, setBackgroundImages] = useState<string[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentBackground, setCurrentBackground] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Pre-loaded static background that will definitely work on VPS
+  const staticBackground = "https://image.tmdb.org/t/p/original/rMvPXy8PUjj1o8o1pzgQbdNCsvj.jpg"; // Deadpool
+
+  // Load backgrounds only once on component mount
   useEffect(() => {
-    // Set fallback images first
-    setBackgroundImages(getFallbackImages());
-    
-    // Then try to fetch trending movies
-    async function fetchTrendingMovies() {
+    const loadBackgrounds = async () => {
+      // First set static background - guaranteed to work on VPS
+      setCurrentBackground(staticBackground);
+      setIsLoading(false);
+      
+      // Get fallback images ready as a backup
+      const fallbackImages = getFallbackImages();
+      
       try {
+        // Try to get trending data from API
         console.log("Fetching trending movies for background...");
         const response = await axios.get('/api/trending-movies');
         
@@ -31,29 +39,44 @@ export function DynamicBackground() {
           
           if (images.length > 0) {
             console.log(`✅ Loaded ${images.length} trending movie backdrops`);
-            setBackgroundImages(images);
+            
+            // Set a random background from the fetched images
+            const randomIndex = Math.floor(Math.random() * images.length);
+            setCurrentBackground(images[randomIndex]);
+            
+            // Set up an interval to change the background periodically
+            let imageIndex = randomIndex;
+            
+            const interval = setInterval(() => {
+              imageIndex = (imageIndex + 1) % images.length;
+              
+              // Create a new image element to preload
+              const img = new Image();
+              img.onload = () => {
+                // Only change background after image is loaded
+                setCurrentBackground(images[imageIndex]);
+              };
+              img.onerror = () => {
+                // On error, use a fallback image
+                const fallbackIndex = Math.floor(Math.random() * fallbackImages.length);
+                setCurrentBackground(fallbackImages[fallbackIndex]);
+              };
+              img.src = images[imageIndex];
+            }, 15000); // Every 15 seconds
+            
+            return () => clearInterval(interval);
           }
         }
       } catch (error) {
         console.error('Error fetching trending movies:', error);
+        // Use a random fallback image on error
+        const randomIndex = Math.floor(Math.random() * fallbackImages.length);
+        setCurrentBackground(fallbackImages[randomIndex]);
       }
-    }
+    };
 
-    fetchTrendingMovies();
+    loadBackgrounds();
   }, []);
-
-  // Rotate images every 8 seconds
-  useEffect(() => {
-    if (backgroundImages.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setCurrentImageIndex(prevIndex => 
-        prevIndex === backgroundImages.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 10000); // Longer duration (10s) for smoother experience
-    
-    return () => clearInterval(interval);
-  }, [backgroundImages]);
   
   // Mix of Hollywood, Bollywood and TV Series backdrops
   const getFallbackImages = () => [
@@ -76,25 +99,14 @@ export function DynamicBackground() {
       {/* Base background to prevent white flashes during scroll */}
       <div className="fixed inset-0 bg-[#0f1129] -z-30"></div>
       
-      {/* Current visible background image */}
-      {backgroundImages.length > 0 && (
+      {/* VPS-FRIENDLY VERSION: Simple single background image with no transitions */}
+      {!isLoading && currentBackground && (
         <div 
           className="fixed inset-0 bg-cover bg-center -z-20"
           style={{ 
-            backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+            backgroundImage: `url(${currentBackground})`,
             opacity: 0.55,
-            backgroundPosition: 'center 20%'
-          }}
-        />
-      )}
-      
-      {/* Preload next image for smoother transition on VPS */}
-      {backgroundImages.length > 1 && (
-        <div 
-          className="fixed inset-0 bg-cover bg-center -z-29 hidden"
-          style={{ 
-            backgroundImage: `url(${backgroundImages[(currentImageIndex + 1) % backgroundImages.length]})`,
-            backgroundPosition: 'center 20%'
+            backgroundPosition: 'center 20%',
           }}
         />
       )}
