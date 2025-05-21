@@ -1,17 +1,11 @@
-# Direct Deployment Instructions
+# Vercel Deployment Instructions
 
-## Quick Deployment Links
+## Quick Deployment Link
 
-Click these links to deploy your application directly from GitHub:
+Click this link to deploy your application directly from GitHub:
 
 ### Vercel (Recommended)
 [Deploy to Vercel](https://vercel.com/new/import?repository-url=https://github.com/GauravBhatt1/JellySignup)
-
-### Netlify
-[Deploy to Netlify](https://app.netlify.com/start/deploy?repository=https://github.com/GauravBhatt1/JellySignup)
-
-### Railway
-[Deploy to Railway](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FGauravBhatt1%2FJellySignup)
 
 ## Step-by-Step Instructions
 
@@ -29,7 +23,7 @@ Click these links to deploy your application directly from GitHub:
 
 ### Environment Variables
 
-All deployment platforms require these environment variables:
+This application requires these environment variables:
 
 - `JELLYFIN_API_KEY`: Your Jellyfin API key
 - `JELLYFIN_SERVER_URL`: Your Jellyfin server URL (e.g., https://jellyfin.yourdomain.com)
