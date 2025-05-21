@@ -14,7 +14,7 @@ A modern web application that allows users to create accounts for your Jellyfin 
 [seo-shield]: https://img.shields.io/badge/SEO-Optimized-brightgreen?style=for-the-badge
 [seo-url]: #
 [vercel-shield]: https://img.shields.io/badge/deploy%20with-vercel-black?style=for-the-badge&logo=vercel&logoColor=white
-[vercel-deploy-url]: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fjellyfin-signup-app&env=JELLYFIN_API_KEY,JELLYFIN_SERVER_URL,TMDB_API_KEY&project-name=jellyfin-signup&repository-name=jellyfin-signup
+[vercel-deploy-url]: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGauravBhatt1%2FJellySignup&env=JELLYFIN_API_KEY,JELLYFIN_SERVER_URL,TMDB_API_KEY&project-name=jellyfin-signup&repository-name=jellyfin-signup
 
 ## Features
 
