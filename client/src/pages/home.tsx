@@ -29,7 +29,7 @@ export default function Home() {
           <p className="mb-2">© {new Date().getFullYear()} Jellyfin. The Free Software Media System.</p>
           <a 
             href="/admin/login" 
-            className="text-primary/70 hover:text-primary transition-colors text-xs"
+            className="text-gray-400 hover:text-primary transition-colors text-xs"
           >
             Admin Dashboard
           </a>
