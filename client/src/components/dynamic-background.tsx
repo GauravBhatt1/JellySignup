@@ -13,9 +13,13 @@ export function DynamicBackground() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Show fallback images immediately while real images load
+    setBackgroundImages(getFallbackImages());
+    
     // Fetch trending movies from TMDB API
     const fetchTrendingMovies = async () => {
       try {
+        console.log("Fetching trending movies for background...");
         // Fetch trending movies from server proxy to avoid exposing API key
         const response = await axios.get('/api/trending-movies');
         
@@ -27,15 +31,17 @@ export function DynamicBackground() {
               `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
             );
           
-          console.log(`Loaded ${images.length} trending movie backdrops`);
-          setBackgroundImages(images);
+          if (images.length > 0) {
+            console.log(`✅ Loaded ${images.length} trending movie backdrops`);
+            setBackgroundImages(images);
+          } else {
+            console.log("No valid backdrop images found, using fallbacks");
+          }
         } else {
           console.error('Invalid response format from trending movies API');
-          setBackgroundImages(getFallbackImages());
         }
       } catch (error) {
         console.error('Error fetching trending movies:', error);
-        setBackgroundImages(getFallbackImages());
       } finally {
         setIsLoading(false);
       }
@@ -43,16 +49,7 @@ export function DynamicBackground() {
 
     fetchTrendingMovies();
     
-    // Fallback in case API doesn't respond in 3 seconds
-    const fallbackTimer = setTimeout(() => {
-      if (isLoading && backgroundImages.length === 0) {
-        console.log('Falling back to default images due to timeout');
-        setBackgroundImages(getFallbackImages());
-        setIsLoading(false);
-      }
-    }, 3000);
-
-    return () => clearTimeout(fallbackTimer);
+    // No need for fallback timer as we already set fallback images at the start
   }, []);
 
   // Rotate images periodically
@@ -90,13 +87,13 @@ export function DynamicBackground() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
           style={{ 
             backgroundImage: `url(${imageUrl})`,
-            opacity: index === currentImageIndex ? 0.35 : 0, // Increased opacity to 0.35
+            opacity: index === currentImageIndex ? 0.6 : 0, // Increased opacity to 0.6 for better visibility
             zIndex: index === currentImageIndex ? -1 : -2
           }}
         />
       ))}
       {/* Dark overlay for better text readability - reduced opacity for better visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/50 to-[#0f1129]/80 backdrop-blur-sm z-[-1]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/40 to-[#0f1129]/75 backdrop-blur-[2px] z-[-1]" />
     </div>
   );
 }
