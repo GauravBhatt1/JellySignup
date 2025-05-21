@@ -1,17 +1,20 @@
-#!/usr/bin/env node
+// This script runs during the Vercel build process
+// It helps configure the application for deployment
 
-// This script helps with Vercel deployment
-console.log('Setting up Vercel deployment...');
+console.log('Starting Vercel build process');
 
-// Run the build process
-import { execSync } from 'child_process';
+// Environment variable check
+const requiredEnvVars = ['JELLYFIN_API_KEY', 'JELLYFIN_SERVER_URL', 'TMDB_API_KEY'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
-try {
-  console.log('Building client application...');
-  execSync('npm run build', { stdio: 'inherit' });
-  
-  console.log('Vercel build completed successfully!');
-} catch (error) {
-  console.error('Build failed:', error);
-  process.exit(1);
+if (missingEnvVars.length > 0) {
+  console.warn('⚠️ Missing environment variables:', missingEnvVars.join(', '));
+  console.warn('The application may not function correctly without these variables.');
+} else {
+  console.log('✅ All required environment variables found');
 }
+
+// Build process continues
+console.log('Running build script...');
+
+// The actual build command will be executed by Vercel after this script runs
