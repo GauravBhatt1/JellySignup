@@ -4,7 +4,7 @@
 console.log('Setting up Vercel deployment...');
 
 // Run the build process
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 try {
   console.log('Building client application...');
