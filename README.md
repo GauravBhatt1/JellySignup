@@ -6,6 +6,7 @@ A modern web application that allows users to create accounts for your Jellyfin 
 [![Docker][docker-shield]][docker-url]
 [![SEO Optimized][seo-shield]][seo-url]
 [![Deploy with Vercel][vercel-shield]][vercel-deploy-url]
+[![Deploy to Netlify][netlify-shield]][netlify-deploy-url]
 
 [jellyfin-shield]: https://img.shields.io/badge/media%20server-jellyfin-00a4dc?style=for-the-badge&logo=jellyfin&logoColor=white
 [jellyfin-url]: https://jellyfin.org/
@@ -15,6 +16,8 @@ A modern web application that allows users to create accounts for your Jellyfin 
 [seo-url]: #
 [vercel-shield]: https://img.shields.io/badge/deploy%20with-vercel-black?style=for-the-badge&logo=vercel&logoColor=white
 [vercel-deploy-url]: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGauravBhatt1%2FJellySignup&env=JELLYFIN_API_KEY,JELLYFIN_SERVER_URL,TMDB_API_KEY&project-name=jellyfin-signup&repository-name=jellyfin-signup
+[netlify-shield]: https://img.shields.io/badge/deploy%20to-netlify-00C7B7?style=for-the-badge&logo=netlify&logoColor=white
+[netlify-deploy-url]: https://app.netlify.com/start/deploy?repository=https://github.com/GauravBhatt1/JellySignup
 
 ## Features
 
