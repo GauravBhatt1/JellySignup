@@ -76,12 +76,12 @@ html {
 }
 
 body {
-  @apply bg-gradient-to-b from-gray-900 to-black text-white min-h-screen;
+  @apply bg-gradient-to-b from-[#1a1b4b] to-[#0f1129] text-white min-h-screen;
 }
 
 /* Modern glass card style */
 .glass-card {
-  @apply bg-black/60 backdrop-blur-md border border-gray-800/50 shadow-xl;
+  @apply bg-[#181838]/80 backdrop-blur-md border border-indigo-900/40 shadow-xl;
 }
 
 /* Modern text style */

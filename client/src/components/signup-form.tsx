@@ -102,7 +102,7 @@ export function SignupForm() {
                     <Input
                       {...field}
                       placeholder="Enter username"
-                      className="bg-black/40 pl-10 border-gray-800 text-white placeholder-gray-500 rounded-lg h-12 jellyfin-input"
+                      className="bg-[#12122c]/80 pl-10 border-indigo-900/30 text-white placeholder-gray-400 rounded-lg h-12 jellyfin-input"
                     />
                     {field.value && !form.formState.errors.username && (
                       <CheckCircle className="absolute right-3 top-3.5 h-5 w-5 text-green-400" />
@@ -126,7 +126,7 @@ export function SignupForm() {
                       {...field}
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="bg-black/40 border-gray-800 text-white placeholder-gray-500 pr-10 rounded-lg h-12 jellyfin-input"
+                      className="bg-[#12122c]/80 border-indigo-900/30 text-white placeholder-gray-400 pr-10 rounded-lg h-12 jellyfin-input"
                     />
                     <button
                       type="button"
@@ -187,7 +187,7 @@ export function SignupForm() {
             <Button 
               type="button" 
               variant="outline"
-              className="w-full bg-black/30 backdrop-blur-sm border border-gray-700/50 hover:bg-black/50 text-gray-300"
+              className="w-full bg-[#12122c]/60 backdrop-blur-sm border border-indigo-900/40 hover:bg-[#12122c]/80 text-gray-300"
               onClick={() => window.open("https://freemiuminfo.eu.org", "_blank")}
             >
               Login to Jellyfin
