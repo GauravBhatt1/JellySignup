@@ -3,12 +3,11 @@
 @tailwind utilities;
 
 :root {
-  /* Custom theme variables */
-  --theme-primary: rgb(82, 47, 178);
-  --theme-secondary: rgb(60, 35, 131);
-  --theme-background: linear-gradient(to bottom, #0a0d14, #121725);
-  --theme-card-bg: rgba(17, 24, 39, 0.4);
-  --theme-text: #ffffff;
+  /* Jellyfin official colors */
+  --jellyfin-primary: #00a4dc; /* Official Jellyfin blue */
+  --jellyfin-secondary: #101010; /* Official Jellyfin dark */
+  --jellyfin-accent: #aa5cc3; /* Purple accent */
+  --jellyfin-background: #000b25; /* Dark blue background */
   
   /* Shadcn UI variables */
   --background: 0 0% 100%;
@@ -21,16 +20,16 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 280 65% 60%; /* Enhanced Jellyfin Purple */
-  --primary-foreground: 211 100% 99%;
-  --secondary: 60 4.8% 95.9%;
-  --secondary-foreground: 24 9.8% 10%;
-  --accent: 60 4.8% 95.9%;
-  --accent-foreground: 24 9.8% 10%;
+  --primary: 196 100% 43%; /* Jellyfin blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 287 50% 56%; /* Jellyfin purple */
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 280 65% 60%; /* Enhanced Jellyfin Purple */
-  --radius: 0.75rem; /* Increased radius */
+  --ring: 196 100% 43%; 
+  --radius: 0.5rem;
   
   /* Password strength colors */
   --strength-weak: 0 84.2% 60.2%;
@@ -39,26 +38,26 @@
 }
 
 .dark {
-  --background: 224 71% 4%; /* Darker, richer background */
+  --background: 225 60% 7%; /* Jellyfin dark blue */
   --foreground: 0 0% 100%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 84.9%; /* Brighter text */
-  --popover: 240 10% 3.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 225 60% 7%;
   --popover-foreground: 0 0% 100%;
-  --card: 222 47% 11%; /* Enhanced card background */
+  --card: 228 57% 10%; /* Jellyfin card background */
   --card-foreground: 0 0% 100%;
-  --border: 217 33% 17%; /* More visible border */
-  --input: 224 71% 4%;
-  --primary: 280 65% 60%; /* Enhanced Jellyfin Purple */
+  --border: 215 28% 17%;
+  --input: 215 28% 17%;
+  --primary: 196 100% 43%; /* Jellyfin blue */
   --primary-foreground: 0 0% 100%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 100%;
-  --accent: 280 65% 60%; /* Accent same as primary */
+  --accent: 287 50% 56%; /* Jellyfin purple */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 280 65% 60%; /* Enhanced Jellyfin Purple */
-  --radius: 0.75rem; /* Increased radius */
+  --ring: 196 100% 43%;
+  --radius: 0.5rem;
 }
 
 @layer base {
@@ -77,25 +76,25 @@ html {
 }
 
 body {
-  @apply bg-gradient-to-b from-[#0a0d14] to-[#121725] text-white min-h-screen;
+  @apply bg-[#101010] text-white min-h-screen;
 }
 
-/* Add glass effect for cards */
+/* Clean card style matching Jellyfin */
 .glass-card {
-  @apply bg-opacity-20 backdrop-blur-md bg-gray-900 border border-gray-800 shadow-xl;
+  @apply bg-opacity-90 bg-[#101820] border-[1px] border-[#1e2530] shadow-lg;
 }
 
-/* Gradient text */
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-500;
+/* Clean text style */
+.jellyfin-text {
+  @apply text-[#00a4dc] font-semibold;
 }
 
-/* Button glow effect */
-.glow-button {
-  @apply transition-all duration-300 hover:shadow-[0_0_15px_rgba(124,58,237,0.5)];
+/* Button effect */
+.jellyfin-button {
+  @apply transition-all duration-200 bg-[#00a4dc] hover:bg-[#0082b0] text-white;
 }
 
-/* Input focus glow */
-.glow-input:focus {
-  @apply shadow-[0_0_10px_rgba(124,58,237,0.3)];
+/* Input focus style */
+.jellyfin-input:focus {
+  @apply border-[#00a4dc] outline-none ring-1 ring-[#00a4dc];
 }

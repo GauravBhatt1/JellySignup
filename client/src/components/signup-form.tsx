@@ -44,10 +44,10 @@ export function SignupForm() {
   const password = form.watch("password");
 
   return (
-    <Card className="w-full max-w-md rounded-xl glass-card p-8 shadow-2xl">
+    <Card className="w-full max-w-md rounded-lg glass-card p-6 shadow-xl">
       {/* Form Header */}
       <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold gradient-text mb-2">Create Your Account</h2>
+        <h2 className="text-2xl font-bold jellyfin-text mb-2">Create Your Account</h2>
         <p className="text-gray-400">Join Jellyfin to access your media library</p>
       </div>
 
@@ -150,7 +150,7 @@ export function SignupForm() {
 
           <Button
             type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg h-12 glow-button"
+            className="w-full jellyfin-button font-medium py-3 rounded-lg h-12"
             disabled={isCreating}
           >
             {isCreating ? (
