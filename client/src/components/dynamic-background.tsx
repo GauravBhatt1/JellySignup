@@ -81,11 +81,17 @@ export function DynamicBackground() {
         {backgroundImages.map((imageUrl, index) => (
           <div 
             key={`bg-${index}-${imageUrl.slice(-20)}`}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-3000 ease-in-out bg-fade-in"
+            className="absolute inset-0 bg-cover bg-center transition-opacity duration-3000 ease-in-out bg-fade-in"
             style={{ 
               backgroundImage: `url(${imageUrl})`,
               opacity: index === currentImageIndex ? 0.55 : 0,
-              zIndex: -25
+              zIndex: -25,
+              // Responsive background positioning using CSS variable
+              backgroundPosition: 'center 20%',
+              // Mobile optimization focuses on the center of characters/action in the poster
+              '@media (max-width: 640px)': {
+                backgroundPosition: 'center 30%'
+              }
             }}
           />
         ))}
