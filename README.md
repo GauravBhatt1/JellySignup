@@ -5,7 +5,6 @@ A modern web application that allows users to create accounts for your Jellyfin 
 [![Jellyfin][jellyfin-shield]][jellyfin-url]
 [![Docker][docker-shield]][docker-url]
 [![SEO Optimized][seo-shield]][seo-url]
-[![Deploy with Vercel][vercel-shield]][vercel-deploy-url]
 
 [jellyfin-shield]: https://img.shields.io/badge/media%20server-jellyfin-00a4dc?style=for-the-badge&logo=jellyfin&logoColor=white
 [jellyfin-url]: https://jellyfin.org/
@@ -13,8 +12,6 @@ A modern web application that allows users to create accounts for your Jellyfin 
 [docker-url]: https://www.docker.com/
 [seo-shield]: https://img.shields.io/badge/SEO-Optimized-brightgreen?style=for-the-badge
 [seo-url]: #
-[vercel-shield]: https://img.shields.io/badge/deploy%20with-vercel-black?style=for-the-badge&logo=vercel&logoColor=white
-[vercel-deploy-url]: https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FGauravBhatt1%2FJellySignup&env=JELLYFIN_API_KEY,JELLYFIN_SERVER_URL,TMDB_API_KEY&project-name=jellyfin-signup&repository-name=jellyfin-signup
 
 ## Features
 
@@ -39,20 +36,7 @@ A modern web application that allows users to create accounts for your Jellyfin 
 ### Admin Dashboard
 ![Admin Dashboard](./docs/images/admin-dashboard.jpg)
 
-## One-Click Deployment with Vercel
 
-Click the "Deploy with Vercel" button at the top of this README to instantly deploy your Jellyfin Signup application to Vercel's global CDN.
-
-### Vercel Deployment Steps
-
-1. Click the "Deploy with Vercel" button
-2. Connect your GitHub account and select where to import the repository
-3. Configure the required environment variables:
-   - `JELLYFIN_API_KEY`: Your Jellyfin API key
-   - `JELLYFIN_SERVER_URL`: Your Jellyfin server URL (e.g., https://jellyfin.yourdomain.com)
-   - `TMDB_API_KEY`: Your TMDB API key for movie backgrounds
-4. Click "Deploy" and wait for the build to complete
-5. Your application will be instantly available at a Vercel-provided URL
 
 ## Deployment Instructions for VPS with Portainer
 
