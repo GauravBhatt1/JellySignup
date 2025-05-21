@@ -12,6 +12,8 @@ services:
       - NODE_ENV=production
       - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
       - JELLYFIN_SERVER_URL=${JELLYFIN_SERVER_URL}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET:-$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")}
     networks:
       - jellyfin-network
 
