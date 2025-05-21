@@ -66,12 +66,16 @@ export function DynamicBackground() {
     return () => clearInterval(interval);
   }, [backgroundImages]);
   
-  // Fallback images if API fails
+  // Fallback images if API fails - high-quality popular movie backdrops
   const getFallbackImages = () => [
-    "https://image.tmdb.org/t/p/original/rMvPXy8PUjj1o8o1pzgQbdNCsvj.jpg", // Deadpool
-    "https://image.tmdb.org/t/p/original/t5zCBSB5xMDKcDqe91qahCOUYVV.jpg", // Dune
-    "https://image.tmdb.org/t/p/original/xgDj56UWyeWQcxAa0n5QJDhdeCs.jpg", // Godzilla
-    "https://image.tmdb.org/t/p/original/4m1Au3YkjqsxF8iwQy0mfFr2KB7.jpg"  // Inside Out
+    "https://image.tmdb.org/t/p/original/rMvPXy8PUjj1o8o1pzgQbdNCsvj.jpg", // Deadpool & Wolverine
+    "https://image.tmdb.org/t/p/original/t5zCBSB5xMDKcDqe91qahCOUYVV.jpg", // Dune 2
+    "https://image.tmdb.org/t/p/original/xgDj56UWyeWQcxAa0n5QJDhdeCs.jpg", // Godzilla x Kong
+    "https://image.tmdb.org/t/p/original/4m1Au3YkjqsxF8iwQy0mfFr2KB7.jpg", // Inside Out 2
+    "https://image.tmdb.org/t/p/original/kHlX3xIm4cFcM78NjOtd3P8WATD.jpg", // Sound of Freedom
+    "https://image.tmdb.org/t/p/original/4woSOUD0equAYzvwhWBHIJDCM88.jpg", // Furiosa
+    "https://image.tmdb.org/t/p/original/nTPFkLUARmo1bYHfkfdNpRKgEOs.jpg", // Bad Boys
+    "https://image.tmdb.org/t/p/original/efNu0fNtQlnF6C6rZThEP4LX5En.jpg"  // Fall Guy
   ];
   
   // Show nothing while loading or if no images available
@@ -87,13 +91,13 @@ export function DynamicBackground() {
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
           style={{ 
             backgroundImage: `url(${imageUrl})`,
-            opacity: index === currentImageIndex ? 0.6 : 0, // Increased opacity to 0.6 for better visibility
+            opacity: index === currentImageIndex ? 0.75 : 0, // Increased opacity to 0.75 for much better visibility
             zIndex: index === currentImageIndex ? -1 : -2
           }}
         />
       ))}
-      {/* Dark overlay for better text readability - reduced opacity for better visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/40 to-[#0f1129]/75 backdrop-blur-[2px] z-[-1]" />
+      {/* Dark overlay with reduced opacity for better image visibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/30 to-[#0f1129]/65 backdrop-blur-[1px] z-[-1]" />
     </div>
   );
 }
