@@ -66,16 +66,18 @@ export function DynamicBackground() {
     return () => clearInterval(interval);
   }, [backgroundImages]);
   
-  // Fallback images if API fails - high-quality popular movie backdrops
+  // Fallback images if API fails - mix of Indian and Hollywood content
   const getFallbackImages = () => [
+    // Bollywood & Indian content
+    "https://image.tmdb.org/t/p/original/xtqZ3lWdYhBERG8kSiKQMgxXpE0.jpg", // Kalki 2898 AD
+    "https://image.tmdb.org/t/p/original/fI9CYjJbapkSfEqfdztrH692Qq0.jpg", // Stree 2
+    "https://image.tmdb.org/t/p/original/4j5AbP0AY3wFg99KcKDBQuYTPX6.jpg", // Mirzapur (Series) 
+    "https://image.tmdb.org/t/p/original/2VnghWG9dsHwFfqlT2va2ewlOhS.jpg", // Panchayat (Series)
+    // Hollywood & Global content
     "https://image.tmdb.org/t/p/original/rMvPXy8PUjj1o8o1pzgQbdNCsvj.jpg", // Deadpool & Wolverine
     "https://image.tmdb.org/t/p/original/t5zCBSB5xMDKcDqe91qahCOUYVV.jpg", // Dune 2
-    "https://image.tmdb.org/t/p/original/xgDj56UWyeWQcxAa0n5QJDhdeCs.jpg", // Godzilla x Kong
     "https://image.tmdb.org/t/p/original/4m1Au3YkjqsxF8iwQy0mfFr2KB7.jpg", // Inside Out 2
-    "https://image.tmdb.org/t/p/original/kHlX3xIm4cFcM78NjOtd3P8WATD.jpg", // Sound of Freedom
-    "https://image.tmdb.org/t/p/original/4woSOUD0equAYzvwhWBHIJDCM88.jpg", // Furiosa
-    "https://image.tmdb.org/t/p/original/nTPFkLUARmo1bYHfkfdNpRKgEOs.jpg", // Bad Boys
-    "https://image.tmdb.org/t/p/original/efNu0fNtQlnF6C6rZThEP4LX5En.jpg"  // Fall Guy
+    "https://image.tmdb.org/t/p/original/d8j7JVb3iVvaJu0GjdA6pCqtIKH.jpg"  // Stranger Things (Series)
   ];
   
   // Show nothing while loading or if no images available

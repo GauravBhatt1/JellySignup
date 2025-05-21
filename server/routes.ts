@@ -37,7 +37,7 @@ const adminAuth = (req: Request, res: Response, next: NextFunction) => {
   return res.status(401).json({ message: "Unauthorized" });
 };
 
-// TMDB API route to fetch trending movies for background
+// TMDB API route to fetch trending movies, TV shows and Indian content for background
 async function fetchTrendingMovies() {
   try {
     const tmdbApiKey = process.env.TMDB_API_KEY;
@@ -46,14 +46,39 @@ async function fetchTrendingMovies() {
       return { results: [] };
     }
 
-    const response = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${tmdbApiKey}`);
-    if (!response.ok) {
-      throw new Error(`TMDB API responded with status: ${response.status}`);
+    // Fetch trending movies globally (includes Hollywood, Bollywood, etc)
+    const moviesResponse = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${tmdbApiKey}`);
+    if (!moviesResponse.ok) {
+      throw new Error(`TMDB API movies endpoint responded with status: ${moviesResponse.status}`);
     }
-    const data = await response.json();
-    return data;
+    const moviesData = await moviesResponse.json();
+    
+    // Fetch trending TV shows globally (includes web series)
+    const tvResponse = await fetch(`https://api.themoviedb.org/3/trending/tv/week?api_key=${tmdbApiKey}`);
+    if (!tvResponse.ok) {
+      throw new Error(`TMDB API TV endpoint responded with status: ${tvResponse.status}`);
+    }
+    const tvData = await tvResponse.json();
+    
+    // Fetch Indian content specifically (region=IN)
+    const indianContentResponse = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}&with_original_language=hi|ta|te|ml|bn&sort_by=popularity.desc&page=1`);
+    if (!indianContentResponse.ok) {
+      throw new Error(`TMDB API Indian content endpoint responded with status: ${indianContentResponse.status}`);
+    }
+    const indianContentData = await indianContentResponse.json();
+    
+    // Combine results from all three requests
+    const combinedResults = [
+      ...moviesData.results.slice(0, 10),      // 10 trending global movies
+      ...tvData.results.slice(0, 5),           // 5 trending TV shows/web series
+      ...indianContentData.results.slice(0, 5)  // 5 trending Indian movies
+    ];
+    
+    console.log(`Fetched ${combinedResults.length} items: ${moviesData.results.length} movies, ${tvData.results.length} TV shows, ${indianContentData.results.length} Indian content items`);
+    
+    return { results: combinedResults };
   } catch (error) {
-    console.error('Error fetching trending movies from TMDB:', error);
+    console.error('Error fetching trending content from TMDB:', error);
     return { results: [] };
   }
 }
