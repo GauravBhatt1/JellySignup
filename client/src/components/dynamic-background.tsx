@@ -91,18 +91,23 @@ export function DynamicBackground() {
       
       {backgroundImages.map((imageUrl, index) => (
         <div 
-          key={imageUrl}
+          key={`bg-${index}-${imageUrl.slice(-20)}`}
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
           style={{ 
             backgroundImage: `url(${imageUrl})`,
-            opacity: index === currentImageIndex ? 0.75 : 0,
+            opacity: index === currentImageIndex ? 0.8 : 0, // Increased opacity further to 0.8
             zIndex: index === currentImageIndex ? -22 : -23
           }}
         />
       ))}
       
-      {/* Dark overlay with reduced opacity for better image visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/30 to-[#0f1129]/65 backdrop-blur-[1px] z-[-21]" />
+      {/* Dark overlay with reduced opacity for much better image visibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/20 to-[#0f1129]/60 backdrop-blur-[1px] z-[-21]" />
+      
+      {/* Add a subtle animation to make background more noticeable */}
+      <div className="absolute inset-0 z-[-20] opacity-30">
+        <div className="absolute inset-0 bg-gradient-radial from-purple-500/10 via-transparent to-transparent animate-pulse-slow" />
+      </div>
     </div>
   );
 }
