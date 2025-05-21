@@ -387,15 +387,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cache trending content for better performance
+  let cachedTrendingContent: any = null;
+  let lastCacheTime: number = 0;
+  const CACHE_TTL = 2 * 60 * 60 * 1000; // Cache TTL: 2 hours
+  
   // API endpoint to fetch trending movies from TMDB
   app.get('/api/trending-movies', async (req: Request, res: Response) => {
     try {
-      console.log('Fetching trending movies from TMDB API');
+      const currentTime = Date.now();
+      
+      // Check if cache is valid (less than 2 hours old)
+      if (cachedTrendingContent && (currentTime - lastCacheTime) < CACHE_TTL) {
+        console.log('Serving cached trending content, age:', Math.round((currentTime - lastCacheTime)/60000), 'minutes');
+        return res.json(cachedTrendingContent);
+      }
+      
+      // Cache expired or doesn't exist, fetch fresh data
+      console.log('Cache expired or missing, fetching fresh trending content from TMDB API');
       const trendingMovies = await fetchTrendingMovies();
-      console.log(`Found ${trendingMovies.results?.length || 0} trending movies`);
+      console.log(`Fetched and caching ${trendingMovies.results?.length || 0} trending items`);
+      
+      // Update the cache
+      cachedTrendingContent = trendingMovies;
+      lastCacheTime = currentTime;
+      
       res.json(trendingMovies);
     } catch (error) {
       console.error('Error in trending-movies endpoint:', error);
+      
+      // If there's cached data, serve it even if expired
+      if (cachedTrendingContent) {
+        console.log('Error fetching fresh data, serving cached content');
+        return res.json(cachedTrendingContent);
+      }
+      
       res.status(500).json({ error: 'Failed to fetch trending movies' });
     }
   });
