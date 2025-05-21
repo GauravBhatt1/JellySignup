@@ -1,9 +1,9 @@
-// Exporting SVG for favicon use
+// Exporting official Jellyfin SVG for favicon use
 export const JellyfinSvgIcon = () => (
   <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
     <path 
-      d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm-33.9 400V112l160 144-160 144z" 
-      fill="#ffffff"
+      d="M358.87,511.3H153.13a34.56,34.56,0,0,1-34.52-34.52V34.52A34.56,34.56,0,0,1,153.13,0H358.87a34.56,34.56,0,0,1,34.52,34.52V476.78A34.56,34.56,0,0,1,358.87,511.3ZM256,374.09a118.08,118.08,0,0,0,118-118h0V137.22A118.08,118.08,0,0,0,256,19.13h0a118.08,118.08,0,0,0-118,118.09H138V256.09A118.08,118.08,0,0,0,256,374.09ZM202.33,256a53.67,53.67,0,1,0,53.67-53.67A53.72,53.72,0,0,0,202.33,256Z" 
+      fill="#00A4DC"
     />
   </svg>
 );
@@ -11,19 +11,20 @@ export const JellyfinSvgIcon = () => (
 export function JellyfinLogo() {
   return (
     <div className="flex flex-col items-center justify-center mb-8">
-      <div className="relative w-24 h-24 mb-2">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full opacity-30 blur-xl"></div>
-        <div className="relative flex items-center justify-center w-full h-full bg-[#1c1c4e]/60 backdrop-blur-sm rounded-full border border-indigo-800/40">
-          <svg width="60" height="60" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <div className="relative w-28 h-28 mb-3">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#00A4DC]/50 to-[#aa5cc3]/50 rounded-full opacity-30 blur-xl"></div>
+        <div className="relative flex items-center justify-center w-full h-full bg-[#1c1c4e]/60 backdrop-blur-sm rounded-full border border-[#00A4DC]/30">
+          {/* Official Jellyfin Logo */}
+          <svg width="65" height="65" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
             <path 
-              d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm-33.9 400V112l160 144-160 144z" 
-              className="fill-white"
+              d="M358.87,511.3H153.13a34.56,34.56,0,0,1-34.52-34.52V34.52A34.56,34.56,0,0,1,153.13,0H358.87a34.56,34.56,0,0,1,34.52,34.52V476.78A34.56,34.56,0,0,1,358.87,511.3ZM256,374.09a118.08,118.08,0,0,0,118-118h0V137.22A118.08,118.08,0,0,0,256,19.13h0a118.08,118.08,0,0,0-118,118.09H138V256.09A118.08,118.08,0,0,0,256,374.09ZM202.33,256a53.67,53.67,0,1,0,53.67-53.67A53.72,53.72,0,0,0,202.33,256Z" 
+              fill="#00A4DC"
             />
           </svg>
         </div>
       </div>
       <div className="text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Jellyfin</h1>
+        <h1 className="text-3xl font-bold text-[#00A4DC]">Jellyfin</h1>
         <p className="text-gray-400 text-sm">Your media, your way</p>
       </div>
     </div>
