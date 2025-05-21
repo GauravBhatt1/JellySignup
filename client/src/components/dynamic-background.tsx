@@ -50,7 +50,7 @@ export function DynamicBackground() {
       setCurrentImageIndex(prevIndex => 
         prevIndex === backgroundImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 8000);
+    }, 10000); // Longer duration (10s) for smoother experience
     
     return () => clearInterval(interval);
   }, [backgroundImages]);
@@ -81,10 +81,10 @@ export function DynamicBackground() {
         {backgroundImages.map((imageUrl, index) => (
           <div 
             key={`bg-${index}-${imageUrl.slice(-20)}`}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-2000"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-3000 ease-in-out bg-fade-in"
             style={{ 
               backgroundImage: `url(${imageUrl})`,
-              opacity: index === currentImageIndex ? 0.35 : 0,
+              opacity: index === currentImageIndex ? 0.55 : 0,
               zIndex: -25
             }}
           />

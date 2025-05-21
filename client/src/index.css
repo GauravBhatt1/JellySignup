@@ -18,6 +18,16 @@ html, body {
   animation: pulse-slow 8s ease-in-out infinite;
 }
 
+/* Add smooth fade animation for background images */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 0.55; }
+}
+
+.bg-fade-in {
+  animation: fadeIn 3s ease-in-out;
+}
+
 :root {
   /* Jellyfin official colors */
   --jellyfin-primary: #00a4dc; /* Official Jellyfin blue */
