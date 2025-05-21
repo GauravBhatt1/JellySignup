@@ -39,6 +39,21 @@ A modern web application that allows users to create accounts for your Jellyfin 
 ### Admin Dashboard
 ![Admin Dashboard](./docs/images/admin-dashboard.jpg)
 
+## One-Click Deployment with Vercel
+
+Click the "Deploy with Vercel" button at the top of this README to instantly deploy your Jellyfin Signup application to Vercel's global CDN.
+
+### Vercel Deployment Steps
+
+1. Click the "Deploy with Vercel" button
+2. Connect your GitHub account and select where to import the repository
+3. Configure the required environment variables:
+   - `JELLYFIN_API_KEY`: Your Jellyfin API key
+   - `JELLYFIN_SERVER_URL`: Your Jellyfin server URL (e.g., https://jellyfin.yourdomain.com)
+   - `TMDB_API_KEY`: Your TMDB API key for movie backgrounds
+4. Click "Deploy" and wait for the build to complete
+5. Your application will be instantly available at a Vercel-provided URL
+
 ## Deployment Instructions for VPS with Portainer
 
 ### Prerequisites
