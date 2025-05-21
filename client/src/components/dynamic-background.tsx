@@ -80,32 +80,34 @@ export function DynamicBackground() {
     "https://image.tmdb.org/t/p/original/d8j7JVb3iVvaJu0GjdA6pCqtIKH.jpg"  // Stranger Things (Series)
   ];
   
-  // Show nothing while loading or if no images available
-  if (isLoading && backgroundImages.length === 0) {
-    return null;
+  // Always show background even while loading
+  if (backgroundImages.length === 0) {
+    return (
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-b from-blue-900/30 to-purple-900/40">
+        <div className="absolute inset-0 bg-[#0f1129]/70" />
+      </div>
+    );
   }
   
   return (
-    <div className="fixed inset-0 -z-20 overflow-hidden">
-      <div className="absolute inset-0 bg-[#0f1129] z-[-25]" /> {/* Solid background base layer */}
-      
+    <div className="fixed inset-0 -z-10 overflow-hidden">
       {backgroundImages.map((imageUrl, index) => (
         <div 
           key={`bg-${index}-${imageUrl.slice(-20)}`}
           className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1500 ease-in-out"
           style={{ 
             backgroundImage: `url(${imageUrl})`,
-            opacity: index === currentImageIndex ? 0.8 : 0, // Increased opacity further to 0.8
-            zIndex: index === currentImageIndex ? -22 : -23
+            opacity: index === currentImageIndex ? 1 : 0, // Full opacity for better visibility
+            zIndex: index === currentImageIndex ? -1 : -2
           }}
         />
       ))}
       
-      {/* Dark overlay with reduced opacity for much better image visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/20 to-[#0f1129]/60 backdrop-blur-[1px] z-[-21]" />
+      {/* Dark overlay with very low opacity for maximum image visibility */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0f1129]/10 to-[#0f1129]/40 backdrop-blur-[1px] z-[-1]" />
       
-      {/* Add a subtle animation to make background more noticeable */}
-      <div className="absolute inset-0 z-[-20] opacity-30">
+      {/* Add a subtle animation to make background more dynamic */}
+      <div className="absolute inset-0 z-[-1] opacity-30">
         <div className="absolute inset-0 bg-gradient-radial from-purple-500/10 via-transparent to-transparent animate-pulse-slow" />
       </div>
     </div>
