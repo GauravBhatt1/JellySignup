@@ -4,3 +4,13 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.production
+
+# Access logs that might contain personal data
+jellyfin-access-logs.json
+jellyfin-user-activity.json
