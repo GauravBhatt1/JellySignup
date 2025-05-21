@@ -188,7 +188,7 @@ export function SignupForm() {
               type="button" 
               variant="outline"
               className="w-full bg-transparent border-gray-700 hover:bg-gray-800 text-gray-300"
-              onClick={() => window.location.href = JELLYFIN_API_BASE_URL}
+              onClick={() => window.open("https://freemiuminfo.eu.org", "_blank")}
             >
               Login to Jellyfin
             </Button>
