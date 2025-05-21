@@ -76,22 +76,28 @@ export function DynamicBackground() {
       {/* Base background to prevent white flashes during scroll */}
       <div className="fixed inset-0 bg-[#0f1129] -z-30"></div>
       
-      {/* Movie backdrop images */}
-      <div className="fixed inset-0 -z-20">
-        {backgroundImages.map((imageUrl, index) => (
-          <div 
-            key={`bg-${index}-${imageUrl.slice(-20)}`}
-            className="absolute inset-0 bg-cover bg-center transition-opacity duration-3000 ease-in-out bg-fade-in"
-            style={{ 
-              backgroundImage: `url(${imageUrl})`,
-              opacity: index === currentImageIndex ? 0.55 : 0,
-              zIndex: -25,
-              // Responsive background positioning - optimized for both mobile and desktop
-              backgroundPosition: 'center 20%'
-            }}
-          />
-        ))}
-      </div>
+      {/* Current visible background image */}
+      {backgroundImages.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-cover bg-center -z-20"
+          style={{ 
+            backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+            opacity: 0.55,
+            backgroundPosition: 'center 20%'
+          }}
+        />
+      )}
+      
+      {/* Preload next image for smoother transition on VPS */}
+      {backgroundImages.length > 1 && (
+        <div 
+          className="fixed inset-0 bg-cover bg-center -z-29 hidden"
+          style={{ 
+            backgroundImage: `url(${backgroundImages[(currentImageIndex + 1) % backgroundImages.length]})`,
+            backgroundPosition: 'center 20%'
+          }}
+        />
+      )}
       
       {/* Dark overlay for readability */}
       <div className="fixed inset-0 bg-gradient-to-b from-[#0f1129]/40 to-[#0f1129]/80 backdrop-blur-[1px] -z-10"></div>
