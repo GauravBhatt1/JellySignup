@@ -36,9 +36,19 @@ A web application that allows users to create accounts for your Jellyfin server.
    ```
    JELLYFIN_API_KEY=your_jellyfin_api_key_here
    JELLYFIN_SERVER_URL=your_jellyfin_server_url_here
+   TMDB_API_KEY=your_tmdb_api_key_here
+   SESSION_SECRET=auto_generated_if_not_provided
    ```
 
-2. Replace the values with your actual Jellyfin API key and server URL
+2. Replace the values with your actual Jellyfin API key and server URL.
+
+3. For TMDB_API_KEY, get a free API key from [The Movie Database](https://www.themoviedb.org/settings/api) to enable the background movie posters.
+
+4. The SESSION_SECRET will be auto-generated if not provided, but for production you can generate a secure random string with:
+   ```bash
+   # Run this command to generate a secure SESSION_SECRET
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
 
 ### Step 2: Deploy with Portainer
 

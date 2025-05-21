@@ -86,12 +86,8 @@ export function DynamicBackground() {
               backgroundImage: `url(${imageUrl})`,
               opacity: index === currentImageIndex ? 0.55 : 0,
               zIndex: -25,
-              // Responsive background positioning using CSS variable
-              backgroundPosition: 'center 20%',
-              // Mobile optimization focuses on the center of characters/action in the poster
-              '@media (max-width: 640px)': {
-                backgroundPosition: 'center 30%'
-              }
+              // Responsive background positioning - optimized for both mobile and desktop
+              backgroundPosition: 'center 20%'
             }}
           />
         ))}
