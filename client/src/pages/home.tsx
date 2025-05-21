@@ -1,9 +1,13 @@
 import { JellyfinLogo } from "@/components/logo";
 import { SignupForm } from "@/components/signup-form";
+import { DynamicBackground } from "@/components/dynamic-background";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#0a0d14] to-[#121725]">
+    <div className="flex min-h-screen flex-col">
+      {/* Dynamic background with movie posters */}
+      <DynamicBackground />
+      
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
         <div className="absolute top-0 left-0 w-full h-64 bg-purple-600/5 blur-3xl rounded-full -translate-y-1/2"></div>
@@ -14,8 +18,6 @@ export default function Home() {
         {/* Jellyfin Logo and Title */}
         <div className="mb-8 text-center">
           <JellyfinLogo />
-          <h1 className="text-3xl font-bold gradient-text mb-2">Jellyfin</h1>
-          <p className="text-gray-400 mt-1">Your media, your way</p>
         </div>
 
         {/* Signup Form */}
