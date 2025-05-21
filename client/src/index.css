@@ -76,25 +76,25 @@ html {
 }
 
 body {
-  @apply bg-[#101010] text-white min-h-screen;
+  @apply bg-gradient-to-b from-gray-900 to-black text-white min-h-screen;
 }
 
-/* Clean card style matching Jellyfin */
+/* Modern glass card style */
 .glass-card {
-  @apply bg-opacity-90 bg-[#101820] border-[1px] border-[#1e2530] shadow-lg;
+  @apply bg-black/60 backdrop-blur-md border border-gray-800/50 shadow-xl;
 }
 
-/* Clean text style */
+/* Modern text style */
 .jellyfin-text {
-  @apply text-[#00a4dc] font-semibold;
+  @apply text-white font-bold;
 }
 
-/* Button effect */
+/* Modern gradient button */
 .jellyfin-button {
-  @apply transition-all duration-200 bg-[#00a4dc] hover:bg-[#0082b0] text-white;
+  @apply transition-all duration-200 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white;
 }
 
-/* Input focus style */
+/* Modern input focus style */
 .jellyfin-input:focus {
-  @apply border-[#00a4dc] outline-none ring-1 ring-[#00a4dc];
+  @apply border-indigo-500 outline-none ring-1 ring-purple-500;
 }
