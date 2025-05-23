@@ -364,74 +364,92 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Bulk Actions for Selected Users - Mobile Responsive */}
-                    {showNeverLoggedIn && selectedUsers.length > 0 && (
-                      <div className="w-full bg-gray-800 p-3 rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-gray-300">{selectedUsers.length} selected</span>
+                    {/* Debug: Show selection count always when inactive mode is on */}
+                    {showNeverLoggedIn && (
+                      <div className="w-full bg-gray-800 p-2 rounded-lg mb-3">
+                        <div className="text-center text-xs text-gray-300 mb-2">
+                          {selectedUsers.length} users selected | Total inactive: {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length}
                         </div>
                         
-                        <div className="grid grid-cols-4 gap-3">
-                          {/* Reset Password Action */}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center justify-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500"
-                            onClick={() => {
-                              toast({
-                                title: "Bulk Password Reset",
-                                description: `Password reset for ${selectedUsers.length} users`,
-                              });
-                            }}
-                          >
-                            <Lock className="h-4 w-4" />
-                          </Button>
-                          
-                          {/* Enable Downloads */}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
-                            onClick={() => {
-                              toast({
-                                title: "Bulk Download Enable",
-                                description: `Downloads enabled for ${selectedUsers.length} users`,
-                              });
-                            }}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          
-                          {/* Disable Users */}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center justify-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500"
-                            onClick={() => {
-                              toast({
-                                title: "Bulk Disable",
-                                description: `${selectedUsers.length} users disabled`,
-                              });
-                            }}
-                          >
-                            <UserX className="h-4 w-4" />
-                          </Button>
-                          
-                          {/* Delete Users */}
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="flex items-center justify-center p-3"
-                            onClick={() => {
-                              toast({
-                                title: "Bulk Delete",
-                                description: `${selectedUsers.length} users deleted`,
-                              });
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        {/* Quick Select All Button for Mobile */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full mb-2 text-xs"
+                          onClick={() => {
+                            if (selectedUsers.length > 0) {
+                              setSelectedUsers([]);
+                            } else {
+                              const inactiveUserIds = filteredUsers
+                                .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
+                                .map((user: any) => user.Id);
+                              setSelectedUsers(inactiveUserIds);
+                            }
+                          }}
+                        >
+                          {selectedUsers.length > 0 ? "Deselect All" : "Select All Inactive"}
+                        </Button>
+
+                        {/* Bulk Actions - Show when users are selected */}
+                        {selectedUsers.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center justify-center p-2 bg-amber-600 hover:bg-amber-700 border-amber-500"
+                              onClick={() => {
+                                toast({
+                                  title: "Bulk Password Reset",
+                                  description: `Password reset for ${selectedUsers.length} users`,
+                                });
+                              }}
+                            >
+                              <Lock className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center justify-center p-2 bg-blue-600 hover:bg-blue-700 border-blue-500"
+                              onClick={() => {
+                                toast({
+                                  title: "Bulk Download Enable",
+                                  description: `Downloads enabled for ${selectedUsers.length} users`,
+                                });
+                              }}
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center justify-center p-2 bg-orange-600 hover:bg-orange-700 border-orange-500"
+                              onClick={() => {
+                                toast({
+                                  title: "Bulk Disable",
+                                  description: `${selectedUsers.length} users disabled`,
+                                });
+                              }}
+                            >
+                              <UserX className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="flex items-center justify-center p-2"
+                              onClick={() => {
+                                toast({
+                                  title: "Bulk Delete",
+                                  description: `${selectedUsers.length} users deleted`,
+                                });
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
 
