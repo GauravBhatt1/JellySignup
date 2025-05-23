@@ -198,9 +198,8 @@ export function TrialManagement() {
                     value={settings.trialDurationDays}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
-                      
-                      // Allow direct input without restrictions during typing
-                      if (!isNaN(value) && value >= 1 && value <= 30) {
+                      // Simply update the value, no restrictions during typing
+                      if (!isNaN(value)) {
                         setSettings(prev => ({
                           ...prev,
                           trialDurationDays: value,
