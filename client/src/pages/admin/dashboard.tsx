@@ -15,7 +15,9 @@ import {
   UserX2,
   UserCheck2,
   Settings,
-  Clock
+  Clock,
+  CheckSquare,
+  Square
 } from "lucide-react";
 // Theme selector import removed
 import { useToast } from "@/hooks/use-toast";
@@ -81,6 +83,7 @@ interface ResetPasswordForm {
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<JellyfinApiUser | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [newPassword, setNewPassword] = useState("");
   const [showNeverLoggedIn, setShowNeverLoggedIn] = useState(false);
   const { toast } = useToast();
@@ -360,28 +363,52 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Bulk Delete Inactive Users Button */}
+                    {/* Bulk Selection Controls for Inactive Users */}
                     {showNeverLoggedIn && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex items-center gap-2"
-                        onClick={() => {
-                          const inactiveUsers = filteredUsers.filter(user => 
-                            !user.LastLoginDate && !user.Policy?.IsAdministrator
-                          );
-                          if (inactiveUsers.length > 0) {
-                            // Implement bulk delete functionality
-                            toast({
-                              title: "Bulk Delete",
-                              description: `${inactiveUsers.length} inactive users selected for deletion`,
-                            });
-                          }
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                        Delete All Inactive ({filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length})
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => {
+                            const inactiveUserIds = filteredUsers
+                              .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
+                              .map(user => user.Id);
+                            setSelectedUsers(inactiveUserIds);
+                          }}
+                        >
+                          <CheckSquare className="h-4 w-4" />
+                          Select All Inactive
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => setSelectedUsers([])}
+                        >
+                          <Square className="h-4 w-4" />
+                          Deselect All
+                        </Button>
+                        
+                        {selectedUsers.length > 0 && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex items-center gap-2"
+                            onClick={() => {
+                              toast({
+                                title: "Bulk Delete",
+                                description: `${selectedUsers.length} users selected for deletion`,
+                              });
+                              // Implement bulk delete functionality here
+                            }}
+                          >
+                            <Trash className="h-4 w-4" />
+                            Delete Selected ({selectedUsers.length})
+                          </Button>
+                        )}
+                      </div>
                     )}
 
                     {/* Search */}
@@ -481,6 +508,25 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-gray-800 hover:bg-gray-900/50">
+                      {showNeverLoggedIn && (
+                        <TableHead className="text-gray-400 w-12">
+                          <input
+                            type="checkbox"
+                            className="rounded border-gray-600 bg-gray-800"
+                            checked={selectedUsers.length > 0 && filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).every((user: any) => selectedUsers.includes(user.Id))}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                const inactiveUserIds = filteredUsers
+                                  .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
+                                  .map((user: any) => user.Id);
+                                setSelectedUsers(inactiveUserIds);
+                              } else {
+                                setSelectedUsers([]);
+                              }
+                            }}
+                          />
+                        </TableHead>
+                      )}
                       <TableHead className="text-gray-400">Username</TableHead>
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Activity</TableHead>
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Login</TableHead>
