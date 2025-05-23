@@ -33,14 +33,15 @@ export class MemStorage implements IStorage {
     this.trialUsers = new Map();
     this.currentId = 1;
     this.currentTrialId = 1;
-    // Initialize default trial settings
+    // Initialize default trial settings - ALWAYS ENABLED
     this.trialSettings = {
       id: 1,
-      isTrialModeEnabled: false,
+      isTrialModeEnabled: true,
       trialDurationDays: 7,
-      expiryAction: "disable",
+      expiryAction: "disable", 
       updatedAt: new Date(),
     };
+    console.log("🎯 Trial settings initialized: ENABLED by default");
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -116,6 +117,15 @@ export class MemStorage implements IStorage {
 
   // Trial Settings Management
   async getTrialSettings(): Promise<TrialSettings | undefined> {
+    if (!this.trialSettings) {
+      this.trialSettings = {
+        id: 1,
+        isTrialModeEnabled: true,
+        trialDurationDays: 7,
+        expiryAction: "disable",
+        updatedAt: new Date(),
+      };
+    }
     return this.trialSettings;
   }
 

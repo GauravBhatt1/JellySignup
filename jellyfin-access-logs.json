@@ -5656,5 +5656,25 @@
     "city": "Unknown",
     "path": "/api/jellyfin/users/signup",
     "userAgent": "curl/8.11.1"
+  },
+  {
+    "ip": "127.0.0.1",
+    "username": "trialtest",
+    "timestamp": 1748025476848,
+    "country": "Unknown",
+    "region": "Unknown",
+    "city": "Unknown",
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "curl/8.11.1"
+  },
+  {
+    "ip": "127.0.0.1",
+    "username": "nowworking",
+    "timestamp": 1748025495734,
+    "country": "Unknown",
+    "region": "Unknown",
+    "city": "Unknown",
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "curl/8.11.1"
   }
 ]
