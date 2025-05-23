@@ -108,6 +108,19 @@ export default function AdminDashboard() {
     checkAuth();
   }, []);
 
+  // Query to get trial users for mode tracking
+  const { data: trialUsersList } = useQuery({
+    queryKey: ['admin', 'trial-users'],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/admin/trial-users");
+      if (res.ok) {
+        return await res.json();
+      }
+      return [];
+    },
+    refetchOnWindowFocus: false
+  });
+
   // Query to get all users with improved error handling
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['admin', 'users'],
@@ -347,6 +360,30 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
+                    {/* Bulk Delete Inactive Users Button */}
+                    {showNeverLoggedIn && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={() => {
+                          const inactiveUsers = filteredUsers.filter(user => 
+                            !user.LastLoginDate && !user.Policy?.IsAdministrator
+                          );
+                          if (inactiveUsers.length > 0) {
+                            // Implement bulk delete functionality
+                            toast({
+                              title: "Bulk Delete",
+                              description: `${inactiveUsers.length} inactive users selected for deletion`,
+                            });
+                          }
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                        Delete All Inactive ({filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length})
+                      </Button>
+                    )}
+
                     {/* Search */}
                     <div className="relative w-64">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -484,6 +521,18 @@ export default function AdminDashboard() {
                             ) : (
                               <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
                                 Active
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {/* Check if user is trial user */}
+                            {trialUsersList?.some((trialUser: any) => trialUser.username === user.Name) ? (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                Trial User
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30">
+                                Regular
                               </span>
                             )}
                           </TableCell>
