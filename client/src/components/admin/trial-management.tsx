@@ -195,31 +195,25 @@ export function TrialManagement() {
                     min="1"
                     max="30"
                     step="1"
-                    value={settings.trialDurationDays.toString()}
+                    value={settings.trialDurationDays}
                     onChange={(e) => {
-                      let value = parseInt(e.target.value);
+                      const value = parseInt(e.target.value);
                       
-                      // Allow any number input temporarily
-                      if (e.target.value === '' || isNaN(value)) {
-                        return; // Allow empty for editing
+                      // Allow direct input without restrictions during typing
+                      if (!isNaN(value) && value >= 1 && value <= 30) {
+                        setSettings(prev => ({
+                          ...prev,
+                          trialDurationDays: value,
+                        }));
                       }
-                      
-                      // Clamp value between 1 and 30
-                      if (value < 1) value = 1;
-                      if (value > 30) value = 30;
-                      
-                      setSettings(prev => ({
-                        ...prev,
-                        trialDurationDays: value,
-                      }));
                     }}
                     onBlur={(e) => {
                       const value = parseInt(e.target.value);
-                      if (isNaN(value) || value < 1 || value > 30) {
-                        setSettings(prev => ({
-                          ...prev,
-                          trialDurationDays: 7, // Reset to default if invalid
-                        }));
+                      // Fix invalid values on blur
+                      if (isNaN(value) || value < 1) {
+                        setSettings(prev => ({ ...prev, trialDurationDays: 1 }));
+                      } else if (value > 30) {
+                        setSettings(prev => ({ ...prev, trialDurationDays: 30 }));
                       }
                     }}
                     placeholder="1-30"
