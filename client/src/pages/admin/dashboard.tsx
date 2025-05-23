@@ -546,6 +546,24 @@ export default function AdminDashboard() {
                     ) : (
                       filteredUsers.map((user: JellyfinApiUser) => (
                         <TableRow key={user.Id} className="border-gray-800 hover:bg-gray-900/50">
+                          {showNeverLoggedIn && (
+                            <TableCell className="w-12">
+                              {!user.LastLoginDate && !user.Policy?.IsAdministrator && (
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-gray-600 bg-gray-800"
+                                  checked={selectedUsers.includes(user.Id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedUsers(prev => [...prev, user.Id]);
+                                    } else {
+                                      setSelectedUsers(prev => prev.filter(id => id !== user.Id));
+                                    }
+                                  }}
+                                />
+                              )}
+                            </TableCell>
+                          )}
                           <TableCell className="font-medium text-white">
                             {user.Name}
                           </TableCell>
