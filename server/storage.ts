@@ -95,7 +95,8 @@ export class MemStorage implements IStorage {
   }
 
   async markTrialUserExpired(username: string): Promise<void> {
-    for (const [id, trialUser] of this.trialUsers.entries()) {
+    const trialUsersArray = Array.from(this.trialUsers.entries());
+    for (const [id, trialUser] of trialUsersArray) {
       if (trialUser.username === username) {
         this.trialUsers.set(id, { ...trialUser, isExpired: true });
         break;
@@ -104,7 +105,8 @@ export class MemStorage implements IStorage {
   }
 
   async deleteTrialUser(username: string): Promise<void> {
-    for (const [id, trialUser] of this.trialUsers.entries()) {
+    const trialUsersArray = Array.from(this.trialUsers.entries());
+    for (const [id, trialUser] of trialUsersArray) {
       if (trialUser.username === username) {
         this.trialUsers.delete(id);
         break;
@@ -118,8 +120,18 @@ export class MemStorage implements IStorage {
   }
 
   async updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings> {
+    if (!this.trialSettings) {
+      this.trialSettings = {
+        id: 1,
+        isTrialModeEnabled: false,
+        trialDurationDays: 7,
+        expiryAction: "disable",
+        updatedAt: new Date(),
+      };
+    }
+    
     this.trialSettings = {
-      id: this.trialSettings?.id || 1,
+      id: this.trialSettings.id,
       isTrialModeEnabled: settings.isTrialModeEnabled,
       trialDurationDays: settings.trialDurationDays,
       expiryAction: settings.expiryAction,

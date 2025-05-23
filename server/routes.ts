@@ -426,6 +426,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trial Management API Routes
+  
+  // Get trial settings
+  app.get('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const settings = await storage.getTrialSettings();
+      res.json(settings || {
+        isTrialModeEnabled: false,
+        trialDurationDays: 7,
+        expiryAction: 'disable'
+      });
+    } catch (error) {
+      console.error('Error fetching trial settings:', error);
+      res.status(500).json({ message: 'Failed to fetch trial settings' });
+    }
+  });
+
+  // Update trial settings
+  app.put('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = trialSettingsSchema.parse(req.body);
+      const updatedSettings = await storage.updateTrialSettings(validatedData);
+      res.json(updatedSettings);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid trial settings data', errors: error.errors });
+      }
+      console.error('Error updating trial settings:', error);
+      res.status(500).json({ message: 'Failed to update trial settings' });
+    }
+  });
+
+  // Get all trial users
+  app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const trialUsers = await storage.getAllTrialUsers();
+      res.json(trialUsers);
+    } catch (error) {
+      console.error('Error fetching trial users:', error);
+      res.status(500).json({ message: 'Failed to fetch trial users' });
+    }
+  });
+
+  // Get trial settings for signup page
+  app.get('/api/trial-info', async (req: Request, res: Response) => {
+    try {
+      const settings = await storage.getTrialSettings();
+      if (settings?.isTrialModeEnabled) {
+        res.json({
+          isTrialMode: true,
+          trialDurationDays: settings.trialDurationDays
+        });
+      } else {
+        res.json({ isTrialMode: false });
+      }
+    } catch (error) {
+      console.error('Error fetching trial info:', error);
+      res.json({ isTrialMode: false });
+    }
+  });
+
+  // Process expired trial users
+  app.post('/api/admin/process-expired-trials', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const expiredUsers = await storage.getExpiredTrialUsers();
+      const settings = await storage.getTrialSettings();
+      
+      let processedCount = 0;
+      
+      for (const trialUser of expiredUsers) {
+        try {
+          if (settings?.expiryAction === 'delete') {
+            const users = await getAllUsers();
+            const jellyfinUser = users.find((u: any) => u.Name === trialUser.username);
+            if (jellyfinUser) {
+              await deleteUser(jellyfinUser.Id);
+            }
+            await storage.deleteTrialUser(trialUser.username);
+          } else {
+            const users = await getAllUsers();
+            const jellyfinUser = users.find((u: any) => u.Name === trialUser.username);
+            if (jellyfinUser) {
+              await setUserStatus(jellyfinUser.Id, true);
+            }
+            await storage.markTrialUserExpired(trialUser.username);
+          }
+          processedCount++;
+        } catch (error) {
+          console.error(`Failed to process expired user ${trialUser.username}:`, error);
+        }
+      }
+      
+      res.json({ 
+        message: `Processed ${processedCount} expired trial users`,
+        processedCount,
+        action: settings?.expiryAction || 'disable'
+      });
+    } catch (error) {
+      console.error('Error processing expired trials:', error);
+      res.status(500).json({ message: 'Failed to process expired trials' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
