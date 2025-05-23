@@ -123,27 +123,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // We don't throw the error here to allow user creation to succeed
       }
       
-      // Check if trial mode is enabled and create trial user record
-      const trialSettings = await storage.getTrialSettings();
-      if (trialSettings?.isTrialModeEnabled) {
+      // TRIAL USER TRACKING - Check if trial mode is enabled
+      console.log(`🔍 Checking trial settings for user: ${validatedData.username}`);
+      try {
+        const trialSettings = await storage.getTrialSettings();
+        console.log(`🔍 Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
+        
+        if (trialSettings && trialSettings.isTrialModeEnabled === true) {
+          console.log(`🎯 CREATING TRIAL USER: ${validatedData.username}`);
         const signupDate = new Date();
         const expiryDate = new Date();
         expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
         
-        try {
-          await storage.createTrialUser({
-            username: validatedData.username,
-            signupDate: signupDate,
-            expiryDate: expiryDate,
-            isExpired: false,
-            trialDurationDays: trialSettings.trialDurationDays
-          });
-          console.log(`✓ Trial user successfully created: ${validatedData.username}`);
-        } catch (trialError) {
-          console.error(`Failed to create trial user: ${trialError}`);
+          try {
+            await storage.createTrialUser({
+              username: validatedData.username,
+              signupDate: signupDate,
+              expiryDate: expiryDate,
+              isExpired: false,
+              trialDurationDays: trialSettings.trialDurationDays
+            });
+            console.log(`✅ TRIAL USER CREATED: ${validatedData.username} expires ${expiryDate.toISOString()}`);
+          } catch (trialError) {
+            console.error(`❌ Failed to create trial user: ${trialError}`);
+          }
+        } else {
+          console.log(`❌ Trial mode disabled or no settings found`);
         }
-        
-        console.log(`Trial user created: ${validatedData.username}, expires: ${expiryDate.toISOString()}`);
+      } catch (trialCheckError) {
+        console.error(`❌ Error checking trial settings: ${trialCheckError}`);
       }
       
       // Track user location at signup
