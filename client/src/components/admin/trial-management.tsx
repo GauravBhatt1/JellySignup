@@ -195,13 +195,21 @@ export function TrialManagement() {
                     min="1"
                     max="30"
                     value={settings.trialDurationDays}
-                    onChange={(e) =>
-                      setSettings({
-                        ...settings,
-                        trialDurationDays: parseInt(e.target.value) || 7,
-                      })
-                    }
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value >= 1 && value <= 30) {
+                        setSettings({
+                          ...settings,
+                          trialDurationDays: value,
+                        });
+                      }
+                    }}
+                    placeholder="Enter 1-30 days"
+                    className="w-full"
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Set between 1 to 30 days
+                  </p>
                 </div>
 
                 <div>

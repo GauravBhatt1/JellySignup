@@ -448,6 +448,7 @@ export default function AdminDashboard() {
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Activity</TableHead>
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Login</TableHead>
                       <TableHead className="text-gray-400">Status</TableHead>
+                      <TableHead className="text-gray-400">Account Mode</TableHead>
                       <TableHead className="text-gray-400">Downloads</TableHead>
                       <TableHead className="text-gray-400 text-right">Actions</TableHead>
                     </TableRow>
@@ -455,7 +456,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {filteredUsers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center text-gray-500">
+                        <TableCell colSpan={6} className="h-24 text-center text-gray-500">
                           No users found
                         </TableCell>
                       </TableRow>

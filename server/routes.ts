@@ -123,6 +123,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // We don't throw the error here to allow user creation to succeed
       }
       
+      // Check if trial mode is enabled and create trial user record
+      const trialSettings = await storage.getTrialSettings();
+      if (trialSettings?.isTrialModeEnabled) {
+        const signupDate = new Date();
+        const expiryDate = new Date();
+        expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
+        
+        await storage.createTrialUser({
+          username: validatedData.username,
+          signupDate: signupDate.toISOString(),
+          expiryDate: expiryDate.toISOString(),
+          isExpired: false,
+          trialDurationDays: trialSettings.trialDurationDays
+        });
+        
+        console.log(`Trial user created: ${validatedData.username}, expires: ${expiryDate.toISOString()}`);
+      }
+      
       // Track user location at signup
       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       // Using our new access tracking system for real location data
