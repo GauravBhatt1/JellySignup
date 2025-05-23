@@ -189,37 +189,28 @@ export function TrialManagement() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="trial-duration">Trial Duration (Days)</Label>
-                  <Input
-                    id="trial-duration"
-                    type="number"
-                    min="1"
-                    max="30"
-                    step="1"
-                    value={settings.trialDurationDays}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value);
-                      // Simply update the value, no restrictions during typing
-                      if (!isNaN(value)) {
-                        setSettings(prev => ({
-                          ...prev,
-                          trialDurationDays: value,
-                        }));
-                      }
+                  <Select
+                    value={settings.trialDurationDays.toString()}
+                    onValueChange={(value) => {
+                      setSettings(prev => ({
+                        ...prev,
+                        trialDurationDays: parseInt(value),
+                      }));
                     }}
-                    onBlur={(e) => {
-                      const value = parseInt(e.target.value);
-                      // Fix invalid values on blur
-                      if (isNaN(value) || value < 1) {
-                        setSettings(prev => ({ ...prev, trialDurationDays: 1 }));
-                      } else if (value > 30) {
-                        setSettings(prev => ({ ...prev, trialDurationDays: 30 }));
-                      }
-                    }}
-                    placeholder="1-30"
-                    className="w-full"
-                  />
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
+                        <SelectItem key={day} value={day.toString()}>
+                          {day} {day === 1 ? 'Day' : 'Days'}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Set between 1 to 30 days
+                    Choose between 1 to 30 days
                   </p>
                 </div>
 
