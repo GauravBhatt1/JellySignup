@@ -17,7 +17,8 @@ import {
   Settings,
   Clock,
   CheckSquare,
-  Square
+  Square,
+  Download
 } from "lucide-react";
 // Theme selector import removed
 import { useToast } from "@/hooks/use-toast";
@@ -363,74 +364,82 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Bulk Actions for Selected Users */}
+                    {/* Bulk Actions for Selected Users - Mobile Responsive */}
                     {showNeverLoggedIn && selectedUsers.length > 0 && (
-                      <div className="flex items-center gap-2 bg-gray-800 p-3 rounded-lg">
-                        <span className="text-sm text-gray-300">{selectedUsers.length} selected:</span>
+                      <div className="w-full bg-gray-800 p-3 rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-gray-300">{selectedUsers.length} selected</span>
+                        </div>
                         
-                        {/* Reset Password Action */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 border-amber-500"
-                          onClick={() => {
-                            toast({
-                              title: "Bulk Password Reset",
-                              description: `Password reset for ${selectedUsers.length} users`,
-                            });
-                          }}
-                        >
-                          <Lock className="h-4 w-4" />
-                          Reset Password
-                        </Button>
-                        
-                        {/* Enable Downloads */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 border-blue-500"
-                          onClick={() => {
-                            toast({
-                              title: "Bulk Download Enable",
-                              description: `Downloads enabled for ${selectedUsers.length} users`,
-                            });
-                          }}
-                        >
-                          <Download className="h-4 w-4" />
-                          Enable Downloads
-                        </Button>
-                        
-                        {/* Disable Users */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 border-orange-500"
-                          onClick={() => {
-                            toast({
-                              title: "Bulk Disable",
-                              description: `${selectedUsers.length} users disabled`,
-                            });
-                          }}
-                        >
-                          <UserX className="h-4 w-4" />
-                          Disable Users
-                        </Button>
-                        
-                        {/* Delete Users */}
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="flex items-center gap-2"
-                          onClick={() => {
-                            toast({
-                              title: "Bulk Delete",
-                              description: `${selectedUsers.length} users deleted`,
-                            });
-                          }}
-                        >
-                          <Trash className="h-4 w-4" />
-                          Delete Users
-                        </Button>
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                          {/* Reset Password Action */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 bg-amber-600 hover:bg-amber-700 border-amber-500 text-xs"
+                            onClick={() => {
+                              toast({
+                                title: "Bulk Password Reset",
+                                description: `Password reset for ${selectedUsers.length} users`,
+                              });
+                            }}
+                          >
+                            <Lock className="h-3 w-3" />
+                            <span className="hidden sm:inline">Reset Password</span>
+                            <span className="sm:hidden">Reset</span>
+                          </Button>
+                          
+                          {/* Enable Downloads */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 border-blue-500 text-xs"
+                            onClick={() => {
+                              toast({
+                                title: "Bulk Download Enable",
+                                description: `Downloads enabled for ${selectedUsers.length} users`,
+                              });
+                            }}
+                          >
+                            <Download className="h-3 w-3" />
+                            <span className="hidden sm:inline">Enable Downloads</span>
+                            <span className="sm:hidden">Downloads</span>
+                          </Button>
+                          
+                          {/* Disable Users */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-1 bg-orange-600 hover:bg-orange-700 border-orange-500 text-xs"
+                            onClick={() => {
+                              toast({
+                                title: "Bulk Disable",
+                                description: `${selectedUsers.length} users disabled`,
+                              });
+                            }}
+                          >
+                            <UserX className="h-3 w-3" />
+                            <span className="hidden sm:inline">Disable Users</span>
+                            <span className="sm:hidden">Disable</span>
+                          </Button>
+                          
+                          {/* Delete Users */}
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex items-center gap-1 text-xs"
+                            onClick={() => {
+                              toast({
+                                title: "Bulk Delete",
+                                description: `${selectedUsers.length} users deleted`,
+                              });
+                            }}
+                          >
+                            <Trash className="h-3 w-3" />
+                            <span className="hidden sm:inline">Delete Users</span>
+                            <span className="sm:hidden">Delete</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
 
