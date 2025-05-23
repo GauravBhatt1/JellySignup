@@ -194,23 +194,31 @@ export function TrialManagement() {
                     type="number"
                     min="1"
                     max="30"
-                    value={settings.trialDurationDays}
+                    step="1"
+                    value={settings.trialDurationDays.toString()}
                     onChange={(e) => {
-                      const value = parseInt(e.target.value);
+                      const inputValue = e.target.value;
+                      if (inputValue === '') {
+                        return; // Allow empty for editing
+                      }
+                      const value = parseInt(inputValue);
                       if (!isNaN(value) && value >= 1 && value <= 30) {
-                        setSettings({
-                          ...settings,
+                        setSettings(prev => ({
+                          ...prev,
                           trialDurationDays: value,
-                        });
-                      } else if (e.target.value === '') {
-                        // Allow empty field for editing
-                        setSettings({
-                          ...settings,
-                          trialDurationDays: 7, // default value
-                        });
+                        }));
                       }
                     }}
-                    placeholder="Enter 1-30 days"
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (isNaN(value) || value < 1 || value > 30) {
+                        setSettings(prev => ({
+                          ...prev,
+                          trialDurationDays: 7, // Reset to default if invalid
+                        }));
+                      }
+                    }}
+                    placeholder="1-30"
                     className="w-full"
                   />
                   <p className="text-xs text-muted-foreground mt-1">

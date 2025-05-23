@@ -5496,5 +5496,75 @@
     "longitude": 76.9701,
     "path": "/api/admin/users",
     "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.10.77",
+    "username": "admin-view",
+    "timestamp": 1748024827831,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.9.4",
+    "username": "admin-view",
+    "timestamp": 1748024828167,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.9.4",
+    "username": "Taree",
+    "timestamp": 1748024868212,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.2.4",
+    "username": "admin-view",
+    "timestamp": 1748024906959,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.11.11",
+    "username": "admin-view",
+    "timestamp": 1748024907266,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "127.0.0.1",
+    "username": "testfix",
+    "timestamp": 1748025144579,
+    "country": "Unknown",
+    "region": "Unknown",
+    "city": "Unknown",
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "curl/8.11.1"
   }
 ]

@@ -132,9 +132,9 @@ export class MemStorage implements IStorage {
     
     this.trialSettings = {
       id: this.trialSettings.id,
-      isTrialModeEnabled: settings.isTrialModeEnabled,
-      trialDurationDays: settings.trialDurationDays,
-      expiryAction: settings.expiryAction,
+      isTrialModeEnabled: settings.isTrialModeEnabled !== undefined ? settings.isTrialModeEnabled : this.trialSettings.isTrialModeEnabled,
+      trialDurationDays: settings.trialDurationDays !== undefined ? settings.trialDurationDays : this.trialSettings.trialDurationDays,
+      expiryAction: settings.expiryAction !== undefined ? settings.expiryAction : this.trialSettings.expiryAction,
       updatedAt: new Date(),
     };
     return this.trialSettings;

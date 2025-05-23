@@ -32,6 +32,10 @@ export function SignupForm() {
     refetchInterval: 60000, // Refresh every minute
   });
 
+  // Type guard for trial info
+  const isTrialMode = trialInfo && typeof trialInfo === 'object' && 'isTrialModeEnabled' in trialInfo;
+  const trialDays = isTrialMode && 'trialDurationDays' in trialInfo ? trialInfo.trialDurationDays : 7;
+
   const form = useForm<JellyfinUser>({
     resolver: zodResolver(jellyfinUserSchema),
     defaultValues: {
@@ -59,14 +63,14 @@ export function SignupForm() {
       </div>
 
       {/* Trial Mode Notice */}
-      {trialInfo?.isTrialModeEnabled && (
+      {isTrialMode && trialInfo.isTrialModeEnabled && (
         <Alert className="mb-6 bg-blue-500/10 border border-blue-800/30 rounded-lg">
           <Clock className="h-5 w-5 text-blue-400" />
           <AlertDescription className="text-sm font-medium text-blue-300">
             <div className="flex flex-col gap-1">
               <div className="font-semibold">Free Trial Available!</div>
               <div>
-                New accounts get a <strong>{trialInfo.trialDurationDays} day</strong> free trial. 
+                New accounts get a <strong>{trialDays} day</strong> free trial. 
                 Your account will be automatically managed after the trial period.
               </div>
             </div>
