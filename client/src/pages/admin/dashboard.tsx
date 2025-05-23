@@ -371,12 +371,12 @@ export default function AdminDashboard() {
                           <span className="text-sm text-gray-300">{selectedUsers.length} selected</span>
                         </div>
                         
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-4 gap-3">
                           {/* Reset Password Action */}
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center gap-1 bg-amber-600 hover:bg-amber-700 border-amber-500 text-xs"
+                            className="flex items-center justify-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500"
                             onClick={() => {
                               toast({
                                 title: "Bulk Password Reset",
@@ -384,16 +384,14 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Lock className="h-3 w-3" />
-                            <span className="hidden sm:inline">Reset Password</span>
-                            <span className="sm:hidden">Reset</span>
+                            <Lock className="h-4 w-4" />
                           </Button>
                           
                           {/* Enable Downloads */}
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 border-blue-500 text-xs"
+                            className="flex items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
                             onClick={() => {
                               toast({
                                 title: "Bulk Download Enable",
@@ -401,16 +399,14 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Download className="h-3 w-3" />
-                            <span className="hidden sm:inline">Enable Downloads</span>
-                            <span className="sm:hidden">Downloads</span>
+                            <Download className="h-4 w-4" />
                           </Button>
                           
                           {/* Disable Users */}
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center gap-1 bg-orange-600 hover:bg-orange-700 border-orange-500 text-xs"
+                            className="flex items-center justify-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500"
                             onClick={() => {
                               toast({
                                 title: "Bulk Disable",
@@ -418,16 +414,14 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <UserX className="h-3 w-3" />
-                            <span className="hidden sm:inline">Disable Users</span>
-                            <span className="sm:hidden">Disable</span>
+                            <UserX className="h-4 w-4" />
                           </Button>
                           
                           {/* Delete Users */}
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="flex items-center gap-1 text-xs"
+                            className="flex items-center justify-center p-3"
                             onClick={() => {
                               toast({
                                 title: "Bulk Delete",
@@ -435,9 +429,7 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Trash className="h-3 w-3" />
-                            <span className="hidden sm:inline">Delete Users</span>
-                            <span className="sm:hidden">Delete</span>
+                            <Trash className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
