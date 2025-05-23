@@ -14,7 +14,8 @@ import {
   Lock,
   UserX2,
   UserCheck2,
-  Settings
+  Settings,
+  Clock
 } from "lucide-react";
 // Theme selector import removed
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +41,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TrialManagement } from "@/components/admin/trial-management";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -311,37 +314,52 @@ export default function AdminDashboard() {
         )}
         
         <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 rounded-lg p-6 shadow-lg">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold flex items-center">
-              <Users className="mr-2 h-5 w-5 text-primary" />
-              User Management
-            </h2>
+          <Tabs defaultValue="users" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-800 border-gray-700">
+              <TabsTrigger value="users" className="flex items-center gap-2 data-[state=active]:bg-gray-700">
+                <Users className="h-4 w-4" />
+                User Management
+              </TabsTrigger>
+              <TabsTrigger value="trials" className="flex items-center gap-2 data-[state=active]:bg-gray-700">
+                <Clock className="h-4 w-4" />
+                Trial Management
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="users" className="mt-6">
+              <div className="space-y-6">
+                {/* Moved all user management content here */}
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold flex items-center">
+                    <Users className="mr-2 h-5 w-5 text-primary" />
+                    User Management
+                  </h2>
 
-            <div className="flex items-center gap-4">
-              {/* Toggle to show only users who never logged in */}
-              <Button
-                variant={showNeverLoggedIn ? "default" : "outline"}
-                size="sm"
-                className={`flex items-center gap-2 ${showNeverLoggedIn ? 'bg-amber-600 hover:bg-amber-700' : 'bg-gray-800 hover:bg-gray-700 border-gray-700'}`}
-                onClick={() => setShowNeverLoggedIn(!showNeverLoggedIn)}
-              >
-                <UserX className="h-4 w-4" />
-                {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
-              </Button>
+                  <div className="flex items-center gap-4">
+                    {/* Toggle to show only users who never logged in */}
+                    <Button
+                      variant={showNeverLoggedIn ? "default" : "outline"}
+                      size="sm"
+                      className={`flex items-center gap-2 ${showNeverLoggedIn ? 'bg-amber-600 hover:bg-amber-700' : 'bg-gray-800 hover:bg-gray-700 border-gray-700'}`}
+                      onClick={() => setShowNeverLoggedIn(!showNeverLoggedIn)}
+                    >
+                      <UserX className="h-4 w-4" />
+                      {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
+                    </Button>
 
-              {/* Search */}
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input 
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
-                />
-              </div>
-            </div>
-          </div>
+                    {/* Search */}
+                    <div className="relative w-64">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 bg-gray-900/50 border-gray-700 text-white placeholder-gray-500"
+                      />
+                    </div>
+                  </div>
+                </div>
 
           {/* Loading state */}
           {isLoading && (
@@ -653,6 +671,13 @@ export default function AdminDashboard() {
               </div>
             </>
           )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="trials" className="mt-6">
+              <TrialManagement />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
