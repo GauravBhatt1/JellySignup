@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useJellyfin } from "@/hooks/use-jellyfin";
 import { JellyfinUser, jellyfinUserSchema } from "@shared/schema";
@@ -19,11 +19,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordStrength } from "./password-strength";
+import { useQuery } from "@tanstack/react-query";
 
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const { createUser, isCreating, error, success, rateLimitInfo } = useJellyfin();
+
+  // Fetch trial settings to show trial notice
+  const { data: trialInfo } = useQuery({
+    queryKey: ['/api/trial-info'],
+    refetchInterval: 60000, // Refresh every minute
+  });
 
   const form = useForm<JellyfinUser>({
     resolver: zodResolver(jellyfinUserSchema),
@@ -50,6 +57,22 @@ export function SignupForm() {
         <h2 className="text-2xl font-bold jellyfin-text mb-2">Create Your Account</h2>
         <p className="text-gray-400">Join Jellyfin to access your media library</p>
       </div>
+
+      {/* Trial Mode Notice */}
+      {trialInfo?.isTrialModeEnabled && (
+        <Alert className="mb-6 bg-blue-500/10 border border-blue-800/30 rounded-lg">
+          <Clock className="h-5 w-5 text-blue-400" />
+          <AlertDescription className="text-sm font-medium text-blue-300">
+            <div className="flex flex-col gap-1">
+              <div className="font-semibold">Free Trial Available!</div>
+              <div>
+                New accounts get a <strong>{trialInfo.trialDurationDays} day</strong> free trial. 
+                Your account will be automatically managed after the trial period.
+              </div>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Alerts */}
       {error && (

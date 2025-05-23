@@ -475,15 +475,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const settings = await storage.getTrialSettings();
       if (settings?.isTrialModeEnabled) {
         res.json({
-          isTrialMode: true,
+          isTrialModeEnabled: true,
           trialDurationDays: settings.trialDurationDays
         });
       } else {
-        res.json({ isTrialMode: false });
+        res.json({ isTrialModeEnabled: false });
       }
     } catch (error) {
       console.error('Error fetching trial info:', error);
-      res.json({ isTrialMode: false });
+      res.json({ isTrialModeEnabled: false });
     }
   });
 
