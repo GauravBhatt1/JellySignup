@@ -197,10 +197,16 @@ export function TrialManagement() {
                     value={settings.trialDurationDays}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
-                      if (value >= 1 && value <= 30) {
+                      if (!isNaN(value) && value >= 1 && value <= 30) {
                         setSettings({
                           ...settings,
                           trialDurationDays: value,
+                        });
+                      } else if (e.target.value === '') {
+                        // Allow empty field for editing
+                        setSettings({
+                          ...settings,
+                          trialDurationDays: 7, // default value
                         });
                       }
                     }}
