@@ -35,7 +35,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertTrialUserSchema = createInsertSchema(trialUsers).pick({
   username: true,
+  signupDate: true,
   expiryDate: true,
+  isExpired: true,
   trialDurationDays: true,
 });
 

@@ -130,13 +130,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const expiryDate = new Date();
         expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
         
-        await storage.createTrialUser({
-          username: validatedData.username,
-          signupDate: signupDate.toISOString(),
-          expiryDate: expiryDate.toISOString(),
-          isExpired: false,
-          trialDurationDays: trialSettings.trialDurationDays
-        });
+        try {
+          await storage.createTrialUser({
+            username: validatedData.username,
+            signupDate: signupDate,
+            expiryDate: expiryDate,
+            isExpired: false,
+            trialDurationDays: trialSettings.trialDurationDays
+          });
+          console.log(`✓ Trial user successfully created: ${validatedData.username}`);
+        } catch (trialError) {
+          console.error(`Failed to create trial user: ${trialError}`);
+        }
         
         console.log(`Trial user created: ${validatedData.username}, expires: ${expiryDate.toISOString()}`);
       }
