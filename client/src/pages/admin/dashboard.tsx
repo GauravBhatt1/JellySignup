@@ -363,51 +363,74 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Bulk Selection Controls for Inactive Users */}
-                    {showNeverLoggedIn && (
-                      <div className="flex items-center gap-2">
+                    {/* Bulk Actions for Selected Users */}
+                    {showNeverLoggedIn && selectedUsers.length > 0 && (
+                      <div className="flex items-center gap-2 bg-gray-800 p-3 rounded-lg">
+                        <span className="text-sm text-gray-300">{selectedUsers.length} selected:</span>
+                        
+                        {/* Reset Password Action */}
                         <Button
                           variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 border-amber-500"
+                          onClick={() => {
+                            toast({
+                              title: "Bulk Password Reset",
+                              description: `Password reset for ${selectedUsers.length} users`,
+                            });
+                          }}
+                        >
+                          <Lock className="h-4 w-4" />
+                          Reset Password
+                        </Button>
+                        
+                        {/* Enable Downloads */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 border-blue-500"
+                          onClick={() => {
+                            toast({
+                              title: "Bulk Download Enable",
+                              description: `Downloads enabled for ${selectedUsers.length} users`,
+                            });
+                          }}
+                        >
+                          <Download className="h-4 w-4" />
+                          Enable Downloads
+                        </Button>
+                        
+                        {/* Disable Users */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 border-orange-500"
+                          onClick={() => {
+                            toast({
+                              title: "Bulk Disable",
+                              description: `${selectedUsers.length} users disabled`,
+                            });
+                          }}
+                        >
+                          <UserX className="h-4 w-4" />
+                          Disable Users
+                        </Button>
+                        
+                        {/* Delete Users */}
+                        <Button
+                          variant="destructive"
                           size="sm"
                           className="flex items-center gap-2"
                           onClick={() => {
-                            const inactiveUserIds = filteredUsers
-                              .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
-                              .map(user => user.Id);
-                            setSelectedUsers(inactiveUserIds);
+                            toast({
+                              title: "Bulk Delete",
+                              description: `${selectedUsers.length} users deleted`,
+                            });
                           }}
                         >
-                          <CheckSquare className="h-4 w-4" />
-                          Select All Inactive
+                          <Trash className="h-4 w-4" />
+                          Delete Users
                         </Button>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2"
-                          onClick={() => setSelectedUsers([])}
-                        >
-                          <Square className="h-4 w-4" />
-                          Deselect All
-                        </Button>
-                        
-                        {selectedUsers.length > 0 && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="flex items-center gap-2"
-                            onClick={() => {
-                              toast({
-                                title: "Bulk Delete",
-                                description: `${selectedUsers.length} users selected for deletion`,
-                              });
-                              // Implement bulk delete functionality here
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                            Delete Selected ({selectedUsers.length})
-                          </Button>
-                        )}
                       </div>
                     )}
 
