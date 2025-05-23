@@ -4,7 +4,7 @@ import session from "express-session";
 import rateLimit from "express-rate-limit";
 import { storage } from "./storage";
 import { z } from "zod";
-import { jellyfinUserSchema } from "@shared/schema";
+import { jellyfinUserSchema, trialSettingsSchema } from "@shared/schema";
 import { adminLoginSchema, userActionSchema } from "@shared/admin-schema";
 import { 
   createJellyfinUser, 
