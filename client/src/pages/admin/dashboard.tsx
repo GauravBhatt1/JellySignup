@@ -541,19 +541,19 @@ export default function AdminDashboard() {
                   <TableHeader>
                     <TableRow className="border-gray-800 hover:bg-gray-900/50">
                       {showNeverLoggedIn && (
-                        <TableHead className="text-gray-400 w-12">
-                          <input
-                            type="checkbox"
-                            className="rounded border-gray-600 bg-gray-800"
-                            checked={selectedUsers.length > 0 && filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).every((user: any) => selectedUsers.includes(user.Id))}
-                            onChange={(e) => {
-                              if (e.target.checked) {
+                        <TableHead className="text-gray-400 w-8">
+                          <CheckSquare 
+                            className={`h-4 w-4 cursor-pointer ${
+                              selectedUsers.length > 0 ? 'text-blue-400' : 'text-gray-600'
+                            }`}
+                            onClick={() => {
+                              if (selectedUsers.length > 0) {
+                                setSelectedUsers([]);
+                              } else {
                                 const inactiveUserIds = filteredUsers
                                   .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
                                   .map((user: any) => user.Id);
                                 setSelectedUsers(inactiveUserIds);
-                              } else {
-                                setSelectedUsers([]);
                               }
                             }}
                           />
@@ -579,17 +579,17 @@ export default function AdminDashboard() {
                       filteredUsers.map((user: JellyfinApiUser) => (
                         <TableRow key={user.Id} className="border-gray-800 hover:bg-gray-900/50">
                           {showNeverLoggedIn && (
-                            <TableCell className="w-12">
+                            <TableCell className="w-8">
                               {!user.LastLoginDate && !user.Policy?.IsAdministrator && (
-                                <input
-                                  type="checkbox"
-                                  className="rounded border-gray-600 bg-gray-800"
-                                  checked={selectedUsers.includes(user.Id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedUsers(prev => [...prev, user.Id]);
-                                    } else {
+                                <Square
+                                  className={`h-4 w-4 cursor-pointer ${
+                                    selectedUsers.includes(user.Id) ? 'text-blue-400 fill-blue-400' : 'text-gray-600'
+                                  }`}
+                                  onClick={() => {
+                                    if (selectedUsers.includes(user.Id)) {
                                       setSelectedUsers(prev => prev.filter(id => id !== user.Id));
+                                    } else {
+                                      setSelectedUsers(prev => [...prev, user.Id]);
                                     }
                                   }}
                                 />
