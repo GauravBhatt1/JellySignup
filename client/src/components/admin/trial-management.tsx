@@ -197,17 +197,21 @@ export function TrialManagement() {
                     step="1"
                     value={settings.trialDurationDays.toString()}
                     onChange={(e) => {
-                      const inputValue = e.target.value;
-                      if (inputValue === '') {
+                      let value = parseInt(e.target.value);
+                      
+                      // Allow any number input temporarily
+                      if (e.target.value === '' || isNaN(value)) {
                         return; // Allow empty for editing
                       }
-                      const value = parseInt(inputValue);
-                      if (!isNaN(value) && value >= 1 && value <= 30) {
-                        setSettings(prev => ({
-                          ...prev,
-                          trialDurationDays: value,
-                        }));
-                      }
+                      
+                      // Clamp value between 1 and 30
+                      if (value < 1) value = 1;
+                      if (value > 30) value = 30;
+                      
+                      setSettings(prev => ({
+                        ...prev,
+                        trialDurationDays: value,
+                      }));
                     }}
                     onBlur={(e) => {
                       const value = parseInt(e.target.value);

@@ -5676,5 +5676,101 @@
     "city": "Unknown",
     "path": "/api/jellyfin/users/signup",
     "userAgent": "curl/8.11.1"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.1.2",
+    "username": "admin-view",
+    "timestamp": 1748025580260,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.0.17",
+    "username": "admin-view",
+    "timestamp": 1748025580731,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.0.17",
+    "username": "admin-view",
+    "timestamp": 1748025581209,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.0.17",
+    "username": "admin-view",
+    "timestamp": 1748025581541,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.8.18",
+    "username": "Geysyd",
+    "timestamp": 1748025743238,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.1.2",
+    "username": "admin-view",
+    "timestamp": 1748025765002,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.8.18",
+    "username": "admin-view",
+    "timestamp": 1748025765305,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.180.167, 10.83.1.2",
+    "username": "admin-view",
+    "timestamp": 1748026073506,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
   }
 ]
