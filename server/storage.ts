@@ -1,4 +1,6 @@
-import { users, type User, type InsertUser, type TrialUser, type InsertTrialUser, type TrialSettings, type InsertTrialSettings } from "@shared/schema";
+import { users, type User, type InsertUser, type TrialUser, type InsertTrialUser, type TrialSettings, type InsertTrialSettings, trialUsers, trialSettings } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -21,6 +23,93 @@ export interface IStorage {
   updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings>;
 }
 
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async createTrialUser(insertTrialUser: InsertTrialUser): Promise<TrialUser> {
+    const [trialUser] = await db
+      .insert(trialUsers)
+      .values(insertTrialUser)
+      .returning();
+    return trialUser;
+  }
+
+  async getTrialUser(username: string): Promise<TrialUser | undefined> {
+    const [trialUser] = await db.select().from(trialUsers).where(eq(trialUsers.username, username));
+    return trialUser || undefined;
+  }
+
+  async getAllTrialUsers(): Promise<TrialUser[]> {
+    return await db.select().from(trialUsers);
+  }
+
+  async getExpiredTrialUsers(): Promise<TrialUser[]> {
+    return await db.select().from(trialUsers).where(eq(trialUsers.isExpired, true));
+  }
+
+  async markTrialUserExpired(username: string): Promise<void> {
+    await db.update(trialUsers)
+      .set({ isExpired: true })
+      .where(eq(trialUsers.username, username));
+  }
+
+  async deleteTrialUser(username: string): Promise<void> {
+    await db.delete(trialUsers).where(eq(trialUsers.username, username));
+  }
+
+  async getTrialSettings(): Promise<TrialSettings | undefined> {
+    const [settings] = await db.select().from(trialSettings).limit(1);
+    if (!settings) {
+      // Create default settings if none exist
+      const defaultSettings = {
+        isTrialModeEnabled: true,
+        trialDurationDays: 7,
+        expiryAction: "disable" as const,
+      };
+      const [created] = await db
+        .insert(trialSettings)
+        .values(defaultSettings)
+        .returning();
+      return created;
+    }
+    return settings;
+  }
+
+  async updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings> {
+    const existing = await this.getTrialSettings();
+    if (existing) {
+      const [updated] = await db
+        .update(trialSettings)
+        .set(settings)
+        .where(eq(trialSettings.id, existing.id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(trialSettings)
+        .values(settings)
+        .returning();
+      return created;
+    }
+  }
+}
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private trialUsers: Map<number, TrialUser>;
@@ -41,36 +130,7 @@ export class MemStorage implements IStorage {
       expiryAction: "disable", 
       updatedAt: new Date(),
     };
-    
-    // Add some demo trial users for testing
-    const demoTrialUsers = [
-      {
-        id: 1,
-        username: "Geysyd",
-        signupDate: new Date("2025-05-23").toISOString(),
-        expiryDate: new Date("2025-05-30").toISOString(),
-        isExpired: false,
-        trialDurationDays: 7,
-        createdAt: new Date("2025-05-23"),
-      },
-      {
-        id: 2,
-        username: "Motrdz",
-        signupDate: new Date("2025-05-24").toISOString(),
-        expiryDate: new Date("2025-05-31").toISOString(),
-        isExpired: false,
-        trialDurationDays: 7,
-        createdAt: new Date("2025-05-24"),
-      }
-    ];
-    
-    demoTrialUsers.forEach(user => {
-      this.trialUsers.set(user.id, user);
-    });
-    this.currentTrialId = 3;
-    
     console.log("🎯 Trial settings initialized: ENABLED by default");
-    console.log("📝 Demo trial users added for testing");
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -180,4 +240,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
