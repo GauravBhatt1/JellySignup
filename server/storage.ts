@@ -41,7 +41,36 @@ export class MemStorage implements IStorage {
       expiryAction: "disable", 
       updatedAt: new Date(),
     };
+    
+    // Add some demo trial users for testing
+    const demoTrialUsers = [
+      {
+        id: 1,
+        username: "Geysyd",
+        signupDate: new Date("2025-05-23").toISOString(),
+        expiryDate: new Date("2025-05-30").toISOString(),
+        isExpired: false,
+        trialDurationDays: 7,
+        createdAt: new Date("2025-05-23"),
+      },
+      {
+        id: 2,
+        username: "Motrdz",
+        signupDate: new Date("2025-05-24").toISOString(),
+        expiryDate: new Date("2025-05-31").toISOString(),
+        isExpired: false,
+        trialDurationDays: 7,
+        createdAt: new Date("2025-05-24"),
+      }
+    ];
+    
+    demoTrialUsers.forEach(user => {
+      this.trialUsers.set(user.id, user);
+    });
+    this.currentTrialId = 3;
+    
     console.log("🎯 Trial settings initialized: ENABLED by default");
+    console.log("📝 Demo trial users added for testing");
   }
 
   async getUser(id: number): Promise<User | undefined> {
