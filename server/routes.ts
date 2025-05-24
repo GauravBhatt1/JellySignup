@@ -333,6 +333,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       switch (action) {
         case "delete":
+          // Handle bulk delete when userIds array is provided
+          if (userIds && userIds.length > 0) {
+            let success = 0;
+            let failure = 0;
+            
+            for (const id of userIds) {
+              try {
+                await deleteUser(id);
+                success++;
+              } catch (error) {
+                console.error(`Error deleting user ${id}:`, error);
+                failure++;
+              }
+            }
+            
+            return res.status(200).json({ 
+              message: `Deleted ${success} users successfully${failure > 0 ? `, ${failure} failed` : ''}` 
+            });
+          }
+          
+          // Handle single user delete
           if (!userId) {
             return res.status(400).json({ message: "User ID is required for delete action" });
           }
@@ -354,6 +375,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(200).json({ message: "User enabled successfully" });
           
         case "reset-password":
+          // Handle bulk password reset when userIds array is provided
+          if (userIds && userIds.length > 0) {
+            const defaultPassword = "jellyfin123"; // Default password for bulk reset
+            let success = 0;
+            let failure = 0;
+            
+            for (const id of userIds) {
+              try {
+                await resetUserPassword(id, defaultPassword);
+                success++;
+              } catch (error) {
+                console.error(`Error resetting password for user ${id}:`, error);
+                failure++;
+              }
+            }
+            
+            return res.status(200).json({ 
+              message: `Reset passwords for ${success} users successfully${failure > 0 ? `, ${failure} failed` : ''}. Default password: ${defaultPassword}` 
+            });
+          }
+          
+          // Handle single user password reset
           if (!userId) {
             return res.status(400).json({ message: "User ID is required for reset-password action" });
           }
@@ -376,6 +419,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
         case "toggle-downloads":
+          // Handle bulk downloads toggle when userIds array is provided
+          if (userIds && userIds.length > 0) {
+            const enableDownloads = true; // Enable downloads for bulk operation
+            let success = 0;
+            let failure = 0;
+            
+            for (const id of userIds) {
+              try {
+                await updateUserPolicy(id, enableDownloads);
+                success++;
+              } catch (error) {
+                console.error(`Error toggling downloads for user ${id}:`, error);
+                failure++;
+              }
+            }
+            
+            return res.status(200).json({ 
+              message: `Downloads enabled for ${success} users successfully${failure > 0 ? `, ${failure} failed` : ''}` 
+            });
+          }
+          
+          // Handle single user downloads toggle
           if (!userId) {
             return res.status(400).json({ message: "User ID is required for toggle-downloads action" });
           }
