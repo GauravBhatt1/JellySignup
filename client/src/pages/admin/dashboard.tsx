@@ -415,11 +415,11 @@ export default function AdminDashboard() {
                           🎯 {selectedUsers.length} Users Selected
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="flex justify-center items-center gap-4">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex flex-col items-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
+                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600 hover:bg-amber-700 border-amber-500 text-white p-0"
                             onClick={() => {
                               toast({
                                 title: "🔒 Password Reset",
@@ -427,14 +427,13 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Lock className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Reset</span>
+                            <Lock className="h-6 w-6" />
                           </Button>
                           
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex flex-col items-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
+                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 border-blue-500 text-white p-0"
                             onClick={() => {
                               toast({
                                 title: "📥 Enable Downloads",
@@ -442,14 +441,13 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Download className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Downloads</span>
+                            <Download className="h-6 w-6" />
                           </Button>
                           
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex flex-col items-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
+                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-600 hover:bg-orange-700 border-orange-500 text-white p-0"
                             onClick={() => {
                               toast({
                                 title: "🚫 Disable Users",
@@ -457,14 +455,13 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <UserX className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Disable</span>
+                            <UserX className="h-6 w-6" />
                           </Button>
                           
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="flex flex-col items-center p-3"
+                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white p-0"
                             onClick={() => {
                               toast({
                                 title: "🗑️ Delete Users",
@@ -472,8 +469,7 @@ export default function AdminDashboard() {
                               });
                             }}
                           >
-                            <Trash className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Delete</span>
+                            <Trash className="h-6 w-6" />
                           </Button>
                         </div>
                       </div>
