@@ -8040,5 +8040,65 @@
     "longitude": 76.9701,
     "path": "/api/admin/users",
     "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.181.239, 10.83.11.11",
+    "username": "Kuta45",
+    "timestamp": 1748059189317,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/jellyfin/users/signup",
+    "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-E156B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/136.0.7103.60 Mobile Safari/537.36 Replit-Bonsai/2.137.0 (samsung/m15xnndins/m15x:14/UP1A.231005.007/E156BXXU4AXL1:user/release-keys 14)"
+  },
+  {
+    "ip": "157.49.181.239, 10.83.0.17",
+    "username": "admin-view",
+    "timestamp": 1748059232976,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.181.239, 10.83.9.4",
+    "username": "admin-view",
+    "timestamp": 1748059233262,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.181.239, 10.83.9.4",
+    "username": "admin-view",
+    "timestamp": 1748059315591,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+  },
+  {
+    "ip": "157.49.181.239, 10.83.1.2",
+    "username": "admin-view",
+    "timestamp": 1748059315917,
+    "country": "IN",
+    "region": "Tamil Nadu",
+    "city": "Coimbatore",
+    "latitude": 11.0102,
+    "longitude": 76.9701,
+    "path": "/api/admin/users",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
   }
 ]

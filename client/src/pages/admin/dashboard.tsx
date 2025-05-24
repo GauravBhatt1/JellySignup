@@ -421,11 +421,12 @@ export default function AdminDashboard() {
                             size="sm"
                             className="flex items-center justify-center h-12 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
                             onClick={() => {
-                              toast({
-                                title: "🔒 Password Reset",
-                                description: `Reset passwords for ${selectedUsers.length} users`,
+                              actionMutation.mutate({
+                                action: "reset-password",
+                                userIds: selectedUsers
                               });
                             }}
+                            disabled={actionMutation.isPending}
                           >
                             <Lock className="h-6 w-6" />
                           </Button>
@@ -435,11 +436,12 @@ export default function AdminDashboard() {
                             size="sm"
                             className="flex items-center justify-center h-12 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
                             onClick={() => {
-                              toast({
-                                title: "📥 Enable Downloads",
-                                description: `Downloads enabled for ${selectedUsers.length} users`,
+                              actionMutation.mutate({
+                                action: "toggle-downloads",
+                                userIds: selectedUsers
                               });
                             }}
+                            disabled={actionMutation.isPending}
                           >
                             <Download className="h-6 w-6" />
                           </Button>
@@ -449,11 +451,12 @@ export default function AdminDashboard() {
                             size="sm"
                             className="flex items-center justify-center h-12 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
                             onClick={() => {
-                              toast({
-                                title: "🚫 Disable Users",
-                                description: `${selectedUsers.length} users disabled`,
+                              actionMutation.mutate({
+                                action: "bulk-disable",
+                                userIds: selectedUsers
                               });
                             }}
+                            disabled={actionMutation.isPending}
                           >
                             <UserX className="h-6 w-6" />
                           </Button>
@@ -463,11 +466,12 @@ export default function AdminDashboard() {
                             size="sm"
                             className="flex items-center justify-center h-12 bg-red-600 hover:bg-red-700 text-white"
                             onClick={() => {
-                              toast({
-                                title: "🗑️ Delete Users",
-                                description: `${selectedUsers.length} users deleted`,
+                              actionMutation.mutate({
+                                action: "delete",
+                                userIds: selectedUsers
                               });
                             }}
+                            disabled={actionMutation.isPending}
                           >
                             <Trash className="h-6 w-6" />
                           </Button>
