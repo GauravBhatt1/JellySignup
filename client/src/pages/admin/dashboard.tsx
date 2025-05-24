@@ -415,11 +415,11 @@ export default function AdminDashboard() {
                           🎯 {selectedUsers.length} Users Selected
                         </div>
                         
-                        <div className="flex justify-center items-center gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-600 hover:bg-amber-700 border-amber-500 text-white p-0"
+                            className="flex items-center justify-center h-12 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
                             onClick={() => {
                               toast({
                                 title: "🔒 Password Reset",
@@ -433,7 +433,7 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 hover:bg-blue-700 border-blue-500 text-white p-0"
+                            className="flex items-center justify-center h-12 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
                             onClick={() => {
                               toast({
                                 title: "📥 Enable Downloads",
@@ -447,7 +447,7 @@ export default function AdminDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-orange-600 hover:bg-orange-700 border-orange-500 text-white p-0"
+                            className="flex items-center justify-center h-12 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
                             onClick={() => {
                               toast({
                                 title: "🚫 Disable Users",
@@ -461,7 +461,7 @@ export default function AdminDashboard() {
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="flex items-center justify-center w-12 h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white p-0"
+                            className="flex items-center justify-center h-12 bg-red-600 hover:bg-red-700 text-white"
                             onClick={() => {
                               toast({
                                 title: "🗑️ Delete Users",
