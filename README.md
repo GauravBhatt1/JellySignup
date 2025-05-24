@@ -43,40 +43,37 @@ A comprehensive web application that provides user signup capabilities and advan
 - **VPS Ready**: Easy setup on personal servers
 - **Rate Limiting**: Built-in protection against abuse
 
-## 📱 Screenshots
+## ✨ Key Interface Features
 
 ### 🏠 Homepage with Trial Notice
-![Homepage with Dynamic Background](docs/images/signup-form.jpg)
 Beautiful landing page with TMDB movie backgrounds and trial mode information display.
 
-### 📝 User Signup Form
-![Signup Form with Password Strength](docs/images/signup-form.jpg)
+### 📝 User Signup Form  
 - Real-time password strength validation with color indicators
 - Trial period notice and duration display
 - Clean glass-card design with dynamic backgrounds
+- Username availability checking
 
 ### 🔐 Admin Login
-![Admin Authentication](docs/images/admin-login.jpg)
 - Jellyfin administrator credentials authentication
 - "Back to Home" navigation button
 - Secure session management with auto-redirect
+- Rate limiting protection
 
 ### 🎛️ Admin Dashboard - Desktop View
-![Desktop Admin Dashboard](docs/images/admin-dashboard-desktop.jpg)
-- Complete user management interface with 138+ users
+- Complete user management interface
 - Bulk selection with master checkbox
 - Icon-only bulk actions (Reset, Downloads, Disable, Delete)
 - User analytics and "Never Logged In" filtering
+- Real-time user count display
 
 ### 📱 Admin Dashboard - Mobile View
-![Mobile Admin Interface](docs/images/admin-dashboard-mobile.jpg)
 - Mobile-optimized responsive design
 - Clean icon-based bulk action buttons
 - Touch-friendly selection interface
 - Simplified table layout for small screens
 
 ### ⚙️ Trial Management System
-![Trial Settings Panel](docs/images/trial-management.jpg)
 - Configurable trial duration (1-30 days)
 - Automatic expiry action settings (Disable/Delete)
 - Real-time trial user tracking and statistics
@@ -204,22 +201,30 @@ nano .env
 docker-compose up -d
 ```
 
-## 🎯 Latest Updates & Features
+## 🎯 What's New
 
-### ✨ New in v2.0
-- **Bulk User Management**: Select multiple users and perform actions simultaneously
-- **Trial Mode System**: Configurable trial periods with automatic expiry
-- **Mobile-Optimized Admin**: Icon-only interface for mobile devices
-- **SQLite Support**: File-based database option for easy VPS deployment
-- **Enhanced Security**: Rate limiting and improved session management
-- **Real-time Updates**: Live user data synchronization across interface
+### ✨ Version 2.0 Features
+- **Bulk User Management**: Select multiple users and perform batch operations
+- **Trial Mode System**: Configurable trial periods (1-30 days) with automatic expiry
+- **Mobile-Optimized Interface**: Clean icon-based design for mobile admin access
+- **SQLite Database Support**: File-based storage for easy VPS deployment
+- **Enhanced Security**: Built-in rate limiting and session management
+- **Real-time Synchronization**: Live user data updates across all interfaces
 
-### 🔧 Admin Dashboard Features
-- **User Analytics**: Track inactive users and login patterns
-- **Bulk Actions**: Reset passwords, enable downloads, disable/delete users
-- **Password Management**: Bulk password reset with default password
-- **Download Control**: Granular permission management
-- **Trial Tracking**: Monitor trial users and expiry dates
+### 🔧 Advanced Admin Capabilities
+- **User Analytics Dashboard**: Track inactive users and login patterns
+- **Batch Operations**: Reset passwords, manage downloads, enable/disable accounts
+- **Intelligent Password Management**: Bulk password reset with secure defaults
+- **Granular Permission Control**: Fine-tune download permissions per user
+- **Trial User Monitoring**: Complete lifecycle management of trial accounts
+
+## 🚀 Tech Stack
+
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend**: Node.js + Express + Drizzle ORM
+- **Database**: PostgreSQL / SQLite / Supabase
+- **Authentication**: Jellyfin API integration
+- **Deployment**: Docker + Portainer support
 
 ### Step 3: Configure Network (if needed)
 
