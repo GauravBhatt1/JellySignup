@@ -112,42 +112,110 @@ For advanced users with existing PostgreSQL setup.
 - Portainer set up and running
 - Your Jellyfin server running (either on the same VPS or accessible via network)
 
-### Step 1: Prepare the Environment File
+### Step 1: Complete Environment Configuration
 
-1. Create a `.env` file based on the example:
-   ```
-   JELLYFIN_API_KEY=your_jellyfin_api_key_here
-   JELLYFIN_SERVER_URL=your_jellyfin_server_url_here
-   TMDB_API_KEY=your_tmdb_api_key_here
-   SESSION_SECRET=auto_generated_if_not_provided
-   ```
+Create a single `.env` file with all required settings:
 
-2. Replace the values with your actual Jellyfin API key and server URL.
+```env
+# Database Configuration (Choose one option)
+DATABASE_URL="file:./data/users.db"
+# OR for Supabase: DATABASE_URL="postgresql://postgres:password@db.xxx.supabase.co:5432/postgres"
 
-3. For TMDB_API_KEY, get a free API key from [The Movie Database](https://www.themoviedb.org/settings/api) to enable the background movie posters.
+# Jellyfin Server Configuration
+JELLYFIN_SERVER_URL="https://your-jellyfin-server.com"
+JELLYFIN_API_KEY="your-jellyfin-api-key"
 
-4. The SESSION_SECRET will be auto-generated if not provided, but for production you can generate a secure random string with:
-   ```bash
-   # Run this command to generate a secure SESSION_SECRET
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   ```
+# TMDB API for Background Movies (Optional)
+TMDB_API_KEY="your-tmdb-api-key"
 
-### Step 2: Deploy with Portainer
+# Session Security
+SESSION_SECRET="your-random-secret-key"
+```
 
-#### Option 1: Using the Docker Compose Stack
+**Required APIs:**
+1. **Jellyfin API Key**: Get from Jellyfin Admin Dashboard → Settings → API Keys
+2. **TMDB API Key**: Free from [The Movie Database](https://www.themoviedb.org/settings/api)
 
-1. In Portainer, go to "Stacks" and click "Add stack"
-2. Give it a name like "jellyfin-signup"
-3. In the "Web editor" tab, paste the content of your `docker-compose.yml` file
-4. Click "Deploy the stack"
+**Database Options:**
+- **SQLite** (Recommended): Just use `file:./data/users.db` - completely free
+- **Supabase**: Free 500MB PostgreSQL tier
+- **Local PostgreSQL**: For advanced setups
 
-#### Option 2: Using Docker Compose CLI
+### Step 2: Initialize Database
 
-If you prefer using the command line:
+```bash
+# Create database tables automatically
+npm run db:push
 
-1. Upload the entire project to your VPS (using SCP, SFTP, or Git)
-2. Navigate to the project directory
-3. Run `docker-compose up -d`
+# Start the application  
+npm start
+```
+
+**Generate Secure Session Secret:**
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+### Step 3: Quick VPS Setup (Non-Docker)
+
+For direct VPS deployment without Docker:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/jellyfin-signup.git
+cd jellyfin-signup
+
+# Install dependencies
+npm install
+
+# Create .env file (use the template above)
+nano .env
+
+# Initialize database
+npm run db:push
+
+# Start in production mode
+npm start
+```
+
+### Step 4: Docker Deployment with Portainer
+
+#### Option A: Portainer Stack Deployment
+1. In Portainer → Stacks → Add stack
+2. Name: `jellyfin-signup`
+3. Paste your `docker-compose.yml` content
+4. Add environment variables in the stack editor
+5. Deploy the stack
+
+#### Option B: Command Line Docker
+```bash
+# Upload project to VPS
+git clone https://github.com/your-username/jellyfin-signup.git
+cd jellyfin-signup
+
+# Create .env file
+nano .env
+
+# Deploy with Docker Compose
+docker-compose up -d
+```
+
+## 🎯 Latest Updates & Features
+
+### ✨ New in v2.0
+- **Bulk User Management**: Select multiple users and perform actions simultaneously
+- **Trial Mode System**: Configurable trial periods with automatic expiry
+- **Mobile-Optimized Admin**: Icon-only interface for mobile devices
+- **SQLite Support**: File-based database option for easy VPS deployment
+- **Enhanced Security**: Rate limiting and improved session management
+- **Real-time Updates**: Live user data synchronization across interface
+
+### 🔧 Admin Dashboard Features
+- **User Analytics**: Track inactive users and login patterns
+- **Bulk Actions**: Reset passwords, enable downloads, disable/delete users
+- **Password Management**: Bulk password reset with default password
+- **Download Control**: Granular permission management
+- **Trial Tracking**: Monitor trial users and expiry dates
 
 ### Step 3: Configure Network (if needed)
 
