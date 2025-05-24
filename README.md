@@ -1,44 +1,110 @@
-# Jellyfin Signup Application
+# Jellyfin Signup & Admin Management Platform
 
-A modern web application that allows users to create accounts for your Jellyfin media server. This user-friendly signup tool integrates directly with your Jellyfin server API to create and manage user accounts.
+A comprehensive web application that provides user signup capabilities and advanced admin controls for your Jellyfin media server. Features include trial user management, bulk operations, and intelligent admin dashboard with real-time user tracking.
 
 [![Jellyfin][jellyfin-shield]][jellyfin-url]
 [![Docker][docker-shield]][docker-url]
-[![SEO Optimized][seo-shield]][seo-url]
+[![PostgreSQL][postgres-shield]][postgres-url]
+[![React][react-shield]][react-url]
 
 [jellyfin-shield]: https://img.shields.io/badge/media%20server-jellyfin-00a4dc?style=for-the-badge&logo=jellyfin&logoColor=white
 [jellyfin-url]: https://jellyfin.org/
 [docker-shield]: https://img.shields.io/badge/container-docker-2496ED?style=for-the-badge&logo=docker&logoColor=white
 [docker-url]: https://www.docker.com/
-[seo-shield]: https://img.shields.io/badge/SEO-Optimized-brightgreen?style=for-the-badge
-[seo-url]: #
+[postgres-shield]: https://img.shields.io/badge/database-postgresql-336791?style=for-the-badge&logo=postgresql&logoColor=white
+[postgres-url]: https://www.postgresql.org/
+[react-shield]: https://img.shields.io/badge/frontend-react-61DAFB?style=for-the-badge&logo=react&logoColor=black
+[react-url]: https://reactjs.org/
 
-## Features
+## ✨ Key Features
 
-- **Easy Account Creation**: User-friendly signup form with username and password fields
-- **Security**: Password strength indicator ensures users create secure passwords
-- **Modern Design**: Beautiful UI with responsive design for all devices
-- **Direct Integration**: Connects directly to your Jellyfin server API without additional configuration
-- **Content Management**: Disables downloads for new users automatically to protect your media
-- **Admin Control**: Admin dashboard for user management with automatic admin authentication
-- **Dynamic Background**: Shows trending movies and TV shows in the background (customizable for Indian content)
-- **Multilingual Support**: Works across languages and regions
-- **Docker Ready**: Easy deployment with Docker and Portainer on your VPS
+### 🔐 User Management
+- **Smart Signup Form**: Password strength indicator and real-time validation
+- **Trial Mode**: Configurable trial periods (1-30 days) with automatic expiry
+- **Bulk Operations**: Select and manage multiple users simultaneously
+- **Download Control**: Granular permissions for user download capabilities
 
-## Screenshots
+### 🎛️ Admin Dashboard
+- **Jellyfin Integration**: Direct admin authentication using Jellyfin credentials
+- **User Analytics**: Track inactive users, never-logged-in accounts
+- **Bulk Actions**: Reset passwords, enable downloads, disable/delete users
+- **Mobile Optimized**: Clean icon-based interface for mobile devices
+- **Real-time Updates**: Live user data synchronization
 
-### Signup Page
-![Signup Page](./docs/images/signup-page.jpg)
+### 🎨 Modern Interface
+- **Dynamic Backgrounds**: TMDB API integration for trending movie backdrops
+- **Glass Morphism**: Modern UI with backdrop blur effects
+- **Responsive Design**: Optimized for desktop, tablet, and mobile
+- **Dark Theme**: Jellyfin-branded color scheme throughout
 
-### Admin Login
-![Admin Login](./docs/images/admin-login.jpg)
+### 🚀 Deployment Options
+- **Docker Support**: One-click deployment with Portainer
+- **Multiple Databases**: PostgreSQL, SQLite, or Supabase support
+- **VPS Ready**: Easy setup on personal servers
+- **Rate Limiting**: Built-in protection against abuse
 
-### Admin Dashboard
-![Admin Dashboard](./docs/images/admin-dashboard.jpg)
+## 📱 Screenshots
 
+### 🏠 Homepage with Trial Notice
+Beautiful landing page with dynamic movie backgrounds and trial mode information.
 
+### 📝 User Signup Form
+![Signup Form with Password Strength](https://i.imgur.com/signup-form.png)
+- Real-time password strength validation
+- Trial period display
+- Clean material design
 
-## Deployment Instructions for VPS with Portainer
+### 🔐 Admin Login
+![Admin Authentication](https://i.imgur.com/admin-login.png)
+- Jellyfin admin credentials authentication
+- "Back to Home" navigation
+- Secure session management
+
+### 🎛️ Admin Dashboard - Desktop
+![Desktop Admin Dashboard](https://i.imgur.com/admin-dashboard-desktop.png)
+- Complete user management interface
+- Bulk selection and actions
+- User analytics and filtering
+
+### 📱 Admin Dashboard - Mobile
+![Mobile Admin Interface](https://i.imgur.com/admin-dashboard-mobile.png)
+- Mobile-optimized icon-only buttons
+- Responsive table design
+- Touch-friendly bulk operations
+
+### ⚙️ Trial Management
+![Trial Settings Panel](https://i.imgur.com/trial-management.png)
+- Configure trial duration (1-30 days)
+- Expiry action settings
+- Real-time trial user tracking
+
+## 💾 Database Configuration
+
+### Option 1: SQLite (Recommended for VPS)
+Perfect for self-hosted deployments - completely free and file-based.
+
+```env
+# .env file
+DATABASE_URL="file:./data/users.db"
+```
+
+**Setup:**
+```bash
+npm run db:push  # Creates tables automatically
+npm start       # Ready to go!
+```
+
+### Option 2: Supabase (Free Cloud PostgreSQL)
+500MB free tier with web dashboard.
+
+```env
+DATABASE_URL="postgresql://postgres:password@db.xxx.supabase.co:5432/postgres"
+```
+
+### Option 3: Local PostgreSQL
+For advanced users with existing PostgreSQL setup.
+
+## 🚀 VPS Deployment with Portainer
 
 ### Prerequisites
 
