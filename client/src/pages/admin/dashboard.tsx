@@ -347,39 +347,45 @@ export default function AdminDashboard() {
             <TabsContent value="users" className="mt-6">
               <div className="space-y-6">
                 {/* Moved all user management content here */}
-                {/* Mobile Notice - Desktop Required (Top of page) */}
-                <div className="block sm:hidden w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 border-2 border-orange-400">
-                  <div className="text-center text-white">
+                {/* Mobile Notice - Desktop Required */}
+                <div className="block sm:hidden w-full bg-gray-900/90 backdrop-blur-sm border border-amber-500/30 rounded-xl p-4 mb-6 shadow-lg">
+                  <div className="text-center">
                     <div className="flex items-center justify-center mb-3">
-                      <Settings className="h-6 w-6 mr-2" />
-                      <span className="font-bold text-lg">💻 Desktop Required</span>
+                      <div className="bg-amber-600 rounded-full p-2 mr-3">
+                        <Settings className="h-5 w-5 text-white" />
+                      </div>
+                      <span className="font-bold text-lg text-amber-400">Desktop Recommended</span>
                     </div>
                     
-                    <div className="text-sm mb-3 leading-relaxed">
-                      <strong>For complete admin functionality and bulk actions,</strong><br />
-                      please access this dashboard on a <strong>desktop computer</strong> or <strong>request desktop site</strong> in your mobile browser.
+                    <div className="text-sm text-gray-300 mb-4 leading-relaxed">
+                      For <span className="text-amber-400 font-semibold">complete admin functionality</span> and bulk user actions,<br />
+                      please use a <span className="text-white font-medium">desktop browser</span> or enable <span className="text-white font-medium">"Desktop site"</span> mode.
                     </div>
                     
-                    <div className="bg-white/20 rounded-lg p-3 mb-3">
-                      <div className="text-xs font-medium mb-2">📋 Available on Desktop:</div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-gray-800/60 rounded-lg p-3 mb-4 border border-gray-700">
+                      <div className="text-xs font-medium mb-2 text-amber-300">⚡ Advanced Features:</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
                         <div className="flex items-center">
-                          <Lock className="h-3 w-3 mr-1" /> Password Reset
+                          <Lock className="h-3 w-3 mr-1 text-amber-400" /> 
+                          <span>Password Reset</span>
                         </div>
                         <div className="flex items-center">
-                          <Download className="h-3 w-3 mr-1" /> Enable Downloads
+                          <Download className="h-3 w-3 mr-1 text-blue-400" /> 
+                          <span>Enable Downloads</span>
                         </div>
                         <div className="flex items-center">
-                          <UserX className="h-3 w-3 mr-1" /> Disable Users
+                          <UserX className="h-3 w-3 mr-1 text-orange-400" /> 
+                          <span>Disable Users</span>
                         </div>
                         <div className="flex items-center">
-                          <Trash className="h-3 w-3 mr-1" /> Delete Users
+                          <Trash className="h-3 w-3 mr-1 text-red-400" /> 
+                          <span>Delete Users</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="text-xs text-orange-100">
-                      💡 Tip: In Chrome/Safari, tap menu and select "Desktop site"
+                    <div className="text-xs text-gray-500 bg-gray-800/40 rounded-md px-3 py-2">
+                      💡 Mobile browsers: Menu → Request Desktop Site
                     </div>
                   </div>
                 </div>
