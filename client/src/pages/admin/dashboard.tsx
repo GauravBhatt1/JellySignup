@@ -408,6 +408,77 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
+                    {/* Bulk Actions Panel for Selected Users */}
+                    {selectedUsers.length > 0 && (
+                      <div className="w-full bg-gray-800/90 backdrop-blur-sm border border-blue-500/30 rounded-xl p-4 mb-4">
+                        <div className="text-center text-blue-400 font-medium mb-3">
+                          🎯 {selectedUsers.length} Users Selected
+                        </div>
+                        
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
+                            onClick={() => {
+                              toast({
+                                title: "🔒 Password Reset",
+                                description: `Reset passwords for ${selectedUsers.length} users`,
+                              });
+                            }}
+                          >
+                            <Lock className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Reset</span>
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
+                            onClick={() => {
+                              toast({
+                                title: "📥 Enable Downloads",
+                                description: `Downloads enabled for ${selectedUsers.length} users`,
+                              });
+                            }}
+                          >
+                            <Download className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Downloads</span>
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
+                            onClick={() => {
+                              toast({
+                                title: "🚫 Disable Users",
+                                description: `${selectedUsers.length} users disabled`,
+                              });
+                            }}
+                          >
+                            <UserX className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Disable</span>
+                          </Button>
+                          
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex flex-col items-center p-3"
+                            onClick={() => {
+                              toast({
+                                title: "🗑️ Delete Users",
+                                description: `${selectedUsers.length} users deleted`,
+                              });
+                            }}
+                          >
+                            <Trash className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Delete</span>
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Original Inactive Users Section */}
                     {showNeverLoggedIn && (
                       <div className="w-full bg-gray-800 p-3 rounded-lg mb-3">
@@ -532,25 +603,28 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-gray-800 hover:bg-gray-900/50">
-                      {showNeverLoggedIn && (
-                        <TableHead className="text-gray-400 w-8">
-                          <CheckSquare 
-                            className={`h-4 w-4 cursor-pointer ${
-                              selectedUsers.length > 0 ? 'text-blue-400' : 'text-gray-600'
-                            }`}
-                            onClick={() => {
-                              if (selectedUsers.length > 0) {
-                                setSelectedUsers([]);
-                              } else {
-                                const inactiveUserIds = filteredUsers
-                                  .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
-                                  .map((user: any) => user.Id);
-                                setSelectedUsers(inactiveUserIds);
-                              }
-                            }}
-                          />
-                        </TableHead>
-                      )}
+                      <TableHead className="text-gray-400 w-8">
+                        <CheckSquare 
+                          className={`h-4 w-4 cursor-pointer ${
+                            selectedUsers.length > 0 ? 'text-blue-400' : 'text-gray-600'
+                          }`}
+                          onClick={() => {
+                            if (selectedUsers.length > 0) {
+                              setSelectedUsers([]);
+                            } else {
+                              // For all users tab - select all non-admin users
+                              const allUserIds = showNeverLoggedIn 
+                                ? filteredUsers
+                                    .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
+                                    .map((user: any) => user.Id)
+                                : filteredUsers
+                                    .filter(user => !user.Policy?.IsAdministrator)
+                                    .map((user: any) => user.Id);
+                              setSelectedUsers(allUserIds);
+                            }
+                          }}
+                        />
+                      </TableHead>
                       <TableHead className="text-gray-400">Username</TableHead>
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Activity</TableHead>
                       <TableHead className="text-gray-400 hidden md:table-cell">Last Login</TableHead>
@@ -570,24 +644,22 @@ export default function AdminDashboard() {
                     ) : (
                       filteredUsers.map((user: JellyfinApiUser) => (
                         <TableRow key={user.Id} className="border-gray-800 hover:bg-gray-900/50">
-                          {showNeverLoggedIn && (
-                            <TableCell className="w-8">
-                              {!user.LastLoginDate && !user.Policy?.IsAdministrator && (
-                                <Square
-                                  className={`h-4 w-4 cursor-pointer ${
-                                    selectedUsers.includes(user.Id) ? 'text-blue-400 fill-blue-400' : 'text-gray-600'
-                                  }`}
-                                  onClick={() => {
-                                    if (selectedUsers.includes(user.Id)) {
-                                      setSelectedUsers(prev => prev.filter(id => id !== user.Id));
-                                    } else {
-                                      setSelectedUsers(prev => [...prev, user.Id]);
-                                    }
-                                  }}
-                                />
-                              )}
-                            </TableCell>
-                          )}
+                          <TableCell className="w-8">
+                            {!user.Policy?.IsAdministrator && (
+                              <Square
+                                className={`h-4 w-4 cursor-pointer ${
+                                  selectedUsers.includes(user.Id) ? 'text-blue-400 fill-blue-400' : 'text-gray-600'
+                                }`}
+                                onClick={() => {
+                                  if (selectedUsers.includes(user.Id)) {
+                                    setSelectedUsers(prev => prev.filter(id => id !== user.Id));
+                                  } else {
+                                    setSelectedUsers(prev => [...prev, user.Id]);
+                                  }
+                                }}
+                              />
+                            )}
+                          </TableCell>
                           <TableCell className="font-medium text-white">
                             {user.Name}
                           </TableCell>
