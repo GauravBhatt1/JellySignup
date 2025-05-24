@@ -479,30 +479,10 @@ export default function AdminDashboard() {
                       </div>
                     )}
 
-                    {/* Original Inactive Users Section */}
+                    {/* Inactive Users Info */}
                     {showNeverLoggedIn && (
-                      <div className="w-full bg-gray-800 p-3 rounded-lg mb-3">
-                        <div className="text-center text-sm text-gray-300 mb-3">
-                          Found {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
-                        </div>
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full bg-blue-600 hover:bg-blue-700 border-blue-500"
-                          onClick={() => {
-                            if (selectedUsers.length > 0) {
-                              setSelectedUsers([]);
-                            } else {
-                              const inactiveUserIds = filteredUsers
-                                .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
-                                .map((user: any) => user.Id);
-                              setSelectedUsers(inactiveUserIds);
-                            }
-                          }}
-                        >
-                          {selectedUsers.length > 0 ? "Deselect All" : "Select All Inactive"}
-                        </Button>
+                      <div className="text-center text-sm text-amber-400 mb-4">
+                        Found {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
                       </div>
                     )}
 
