@@ -13,6 +13,7 @@ import {
   Trash,
   Lock,
   UserX2,
+  Monitor,
   UserCheck2,
   Settings,
   Clock,
@@ -364,75 +365,40 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Mobile Bulk Actions Panel */}
-                    <div className="w-full bg-gradient-to-r from-blue-900 to-purple-900 p-4 rounded-lg mb-4 md:hidden">
-                      <div className="text-center text-white font-semibold mb-3">
-                        📱 Mobile Bulk Actions
-                      </div>
-                      
-                      {/* Always Show Action Buttons */}
-                      <div className="grid grid-cols-2 gap-3 mb-3">
-                        <Button
-                          variant="outline"
-                          className="flex flex-col items-center justify-center p-4 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
-                          onClick={() => {
-                            toast({
-                              title: "🔒 Password Reset",
-                              description: "Reset passwords for selected users",
-                            });
-                          }}
-                        >
-                          <Lock className="h-6 w-6 mb-2" />
-                          <span className="text-sm font-medium">Reset</span>
-                        </Button>
+                    {/* Mobile Notice - Request Desktop */}
+                    <div className="w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 md:hidden border-2 border-orange-400">
+                      <div className="text-center text-white">
+                        <div className="flex items-center justify-center mb-3">
+                          <Settings className="h-6 w-6 mr-2" />
+                          <span className="font-bold text-lg">💻 Desktop Required</span>
+                        </div>
                         
-                        <Button
-                          variant="outline"
-                          className="flex flex-col items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
-                          onClick={() => {
-                            toast({
-                              title: "📥 Enable Downloads", 
-                              description: "Downloads enabled for selected users",
-                            });
-                          }}
-                        >
-                          <Download className="h-6 w-6 mb-2" />
-                          <span className="text-sm font-medium">Downloads</span>
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <Button
-                          variant="outline"
-                          className="flex flex-col items-center justify-center p-4 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
-                          onClick={() => {
-                            toast({
-                              title: "🚫 Disable Users",
-                              description: "Selected users disabled",
-                            });
-                          }}
-                        >
-                          <UserX className="h-6 w-6 mb-2" />
-                          <span className="text-sm font-medium">Disable</span>
-                        </Button>
+                        <div className="text-sm mb-3 leading-relaxed">
+                          <strong>For complete admin functionality and bulk actions,</strong><br />
+                          please access this dashboard on a <strong>desktop computer</strong> or <strong>request desktop site</strong> in your mobile browser.
+                        </div>
                         
-                        <Button
-                          variant="destructive"
-                          className="flex flex-col items-center justify-center p-4 bg-red-600 hover:bg-red-700 text-white"
-                          onClick={() => {
-                            toast({
-                              title: "🗑️ Delete Users",
-                              description: "Selected users deleted",
-                            });
-                          }}
-                        >
-                          <Trash className="h-6 w-6 mb-2" />
-                          <span className="text-sm font-medium">Delete</span>
-                        </Button>
-                      </div>
-                      
-                      <div className="text-center text-blue-200 text-xs mt-3">
-                        Select users from table to enable actions
+                        <div className="bg-white/20 rounded-lg p-3 mb-3">
+                          <div className="text-xs font-medium mb-2">📋 Available on Desktop:</div>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div className="flex items-center">
+                              <Lock className="h-3 w-3 mr-1" /> Password Reset
+                            </div>
+                            <div className="flex items-center">
+                              <Download className="h-3 w-3 mr-1" /> Enable Downloads
+                            </div>
+                            <div className="flex items-center">
+                              <UserX className="h-3 w-3 mr-1" /> Disable Users
+                            </div>
+                            <div className="flex items-center">
+                              <Trash className="h-3 w-3 mr-1" /> Delete Users
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-xs text-orange-100">
+                          💡 Tip: In Chrome/Safari, tap menu and select "Desktop site"
+                        </div>
                       </div>
                     </div>
 
