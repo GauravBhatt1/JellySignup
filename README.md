@@ -119,18 +119,18 @@ Create a single `.env` file with all required settings:
 
 ```env
 # Database Configuration (Choose one option)
-DATABASE_URL="file:./data/users.db"
-# OR for Supabase: DATABASE_URL="postgresql://postgres:password@db.xxx.supabase.co:5432/postgres"
+DATABASE_URL=file:./data/users.db
+# OR for Supabase: DATABASE_URL=postgresql://postgres:password@db.xxx.supabase.co:5432/postgres
 
 # Jellyfin Server Configuration
-JELLYFIN_SERVER_URL="https://your-jellyfin-server.com"
-JELLYFIN_API_KEY="your-jellyfin-api-key"
+JELLYFIN_SERVER_URL=https://your-jellyfin-server.com
+JELLYFIN_API_KEY=your-jellyfin-api-key
 
 # TMDB API for Background Movies (Optional)
-TMDB_API_KEY="your-tmdb-api-key"
+TMDB_API_KEY=your-tmdb-api-key
 
 # Session Security
-SESSION_SECRET="your-random-secret-key"
+SESSION_SECRET=your-random-secret-key
 ```
 
 **Required APIs:**
