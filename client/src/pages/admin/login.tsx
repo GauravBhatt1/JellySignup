@@ -201,6 +201,17 @@ export default function AdminLogin() {
             <p>Only Jellyfin administrators can access the admin dashboard.</p>
             <p className="mt-1">Use the same credentials you use to log in to Jellyfin with administrator rights.</p>
           </div>
+          
+          {/* Back to Home Button */}
+          <div className="mt-4 text-center">
+            <Button
+              variant="outline"
+              className="text-sm text-gray-400 border-gray-700 hover:bg-gray-800 hover:text-white"
+              onClick={() => navigate("/")}
+            >
+              ← Back to Home
+            </Button>
+          </div>
         </Card>
       </div>
       
