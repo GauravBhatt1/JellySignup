@@ -364,18 +364,23 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Debug: Show selection count always when inactive mode is on */}
+                    {/* Mobile Bulk Actions - Always show when inactive mode is on */}
                     {showNeverLoggedIn && (
-                      <div className="w-full bg-gray-800 p-2 rounded-lg mb-3">
-                        <div className="text-center text-xs text-gray-300 mb-2">
-                          {selectedUsers.length} users selected | Total inactive: {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length}
+                      <div className="w-full bg-gray-800 p-3 rounded-lg mb-3">
+                        <div className="text-center text-sm text-gray-300 mb-3">
+                          Found {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
                         </div>
                         
-                        {/* Quick Select All Button for Mobile */}
+                        {/* Selection Info */}
+                        <div className="text-center text-xs text-blue-400 mb-3">
+                          {selectedUsers.length} users selected
+                        </div>
+                        
+                        {/* Quick Select Button */}
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full mb-2 text-xs"
+                          className="w-full mb-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
                           onClick={() => {
                             if (selectedUsers.length > 0) {
                               setSelectedUsers([]);
@@ -390,66 +395,72 @@ export default function AdminDashboard() {
                           {selectedUsers.length > 0 ? "Deselect All" : "Select All Inactive"}
                         </Button>
 
-                        {/* Bulk Actions - Show when users are selected */}
-                        {selectedUsers.length > 0 && (
-                          <div className="grid grid-cols-4 gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center justify-center p-2 bg-amber-600 hover:bg-amber-700 border-amber-500"
-                              onClick={() => {
-                                toast({
-                                  title: "Bulk Password Reset",
-                                  description: `Password reset for ${selectedUsers.length} users`,
-                                });
-                              }}
-                            >
-                              <Lock className="h-4 w-4" />
-                            </Button>
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center justify-center p-2 bg-blue-600 hover:bg-blue-700 border-blue-500"
-                              onClick={() => {
-                                toast({
-                                  title: "Bulk Download Enable",
-                                  description: `Downloads enabled for ${selectedUsers.length} users`,
-                                });
-                              }}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center justify-center p-2 bg-orange-600 hover:bg-orange-700 border-orange-500"
-                              onClick={() => {
-                                toast({
-                                  title: "Bulk Disable",
-                                  description: `${selectedUsers.length} users disabled`,
-                                });
-                              }}
-                            >
-                              <UserX className="h-4 w-4" />
-                            </Button>
-                            
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="flex items-center justify-center p-2"
-                              onClick={() => {
-                                toast({
-                                  title: "Bulk Delete",
-                                  description: `${selectedUsers.length} users deleted`,
-                                });
-                              }}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
+                        {/* Bulk Action Icons - Always visible */}
+                        <div className="grid grid-cols-4 gap-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center justify-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500"
+                            disabled={selectedUsers.length === 0}
+                            onClick={() => {
+                              toast({
+                                title: "Password Reset",
+                                description: `Reset ${selectedUsers.length} users`,
+                              });
+                            }}
+                          >
+                            <Lock className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Reset</span>
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
+                            disabled={selectedUsers.length === 0}
+                            onClick={() => {
+                              toast({
+                                title: "Enable Downloads",
+                                description: `${selectedUsers.length} users enabled`,
+                              });
+                            }}
+                          >
+                            <Download className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Download</span>
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex flex-col items-center justify-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500"
+                            disabled={selectedUsers.length === 0}
+                            onClick={() => {
+                              toast({
+                                title: "Disable Users",
+                                description: `${selectedUsers.length} users disabled`,
+                              });
+                            }}
+                          >
+                            <UserX className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Disable</span>
+                          </Button>
+                          
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="flex flex-col items-center justify-center p-3"
+                            disabled={selectedUsers.length === 0}
+                            onClick={() => {
+                              toast({
+                                title: "Delete Users",
+                                description: `${selectedUsers.length} users deleted`,
+                              });
+                            }}
+                          >
+                            <Trash className="h-5 w-5 mb-1" />
+                            <span className="text-xs">Delete</span>
+                          </Button>
+                        </div>
                       </div>
                     )}
 
