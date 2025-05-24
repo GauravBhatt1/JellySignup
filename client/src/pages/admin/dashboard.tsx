@@ -347,6 +347,43 @@ export default function AdminDashboard() {
             <TabsContent value="users" className="mt-6">
               <div className="space-y-6">
                 {/* Moved all user management content here */}
+                {/* Mobile Notice - Desktop Required (Top of page) */}
+                <div className="block sm:hidden w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 border-2 border-orange-400">
+                  <div className="text-center text-white">
+                    <div className="flex items-center justify-center mb-3">
+                      <Settings className="h-6 w-6 mr-2" />
+                      <span className="font-bold text-lg">💻 Desktop Required</span>
+                    </div>
+                    
+                    <div className="text-sm mb-3 leading-relaxed">
+                      <strong>For complete admin functionality and bulk actions,</strong><br />
+                      please access this dashboard on a <strong>desktop computer</strong> or <strong>request desktop site</strong> in your mobile browser.
+                    </div>
+                    
+                    <div className="bg-white/20 rounded-lg p-3 mb-3">
+                      <div className="text-xs font-medium mb-2">📋 Available on Desktop:</div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center">
+                          <Lock className="h-3 w-3 mr-1" /> Password Reset
+                        </div>
+                        <div className="flex items-center">
+                          <Download className="h-3 w-3 mr-1" /> Enable Downloads
+                        </div>
+                        <div className="flex items-center">
+                          <UserX className="h-3 w-3 mr-1" /> Disable Users
+                        </div>
+                        <div className="flex items-center">
+                          <Trash className="h-3 w-3 mr-1" /> Delete Users
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-orange-100">
+                      💡 Tip: In Chrome/Safari, tap menu and select "Desktop site"
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold flex items-center">
                     <Users className="mr-2 h-5 w-5 text-primary" />
@@ -364,43 +401,6 @@ export default function AdminDashboard() {
                       <UserX className="h-4 w-4" />
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
-
-                    {/* Mobile Notice - Request Desktop */}
-                    <div className="block sm:hidden w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 border-2 border-orange-400">
-                      <div className="text-center text-white">
-                        <div className="flex items-center justify-center mb-3">
-                          <Settings className="h-6 w-6 mr-2" />
-                          <span className="font-bold text-lg">💻 Desktop Required</span>
-                        </div>
-                        
-                        <div className="text-sm mb-3 leading-relaxed">
-                          <strong>For complete admin functionality and bulk actions,</strong><br />
-                          please access this dashboard on a <strong>desktop computer</strong> or <strong>request desktop site</strong> in your mobile browser.
-                        </div>
-                        
-                        <div className="bg-white/20 rounded-lg p-3 mb-3">
-                          <div className="text-xs font-medium mb-2">📋 Available on Desktop:</div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className="flex items-center">
-                              <Lock className="h-3 w-3 mr-1" /> Password Reset
-                            </div>
-                            <div className="flex items-center">
-                              <Download className="h-3 w-3 mr-1" /> Enable Downloads
-                            </div>
-                            <div className="flex items-center">
-                              <UserX className="h-3 w-3 mr-1" /> Disable Users
-                            </div>
-                            <div className="flex items-center">
-                              <Trash className="h-3 w-3 mr-1" /> Delete Users
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="text-xs text-orange-100">
-                          💡 Tip: In Chrome/Safari, tap menu and select "Desktop site"
-                        </div>
-                      </div>
-                    </div>
 
                     {/* Original Inactive Users Section */}
                     {showNeverLoggedIn && (
