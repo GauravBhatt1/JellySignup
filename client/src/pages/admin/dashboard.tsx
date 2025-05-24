@@ -364,23 +364,89 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Mobile Bulk Actions - Always show when inactive mode is on */}
+                    {/* Mobile Bulk Actions Panel */}
+                    <div className="w-full bg-gradient-to-r from-blue-900 to-purple-900 p-4 rounded-lg mb-4 md:hidden">
+                      <div className="text-center text-white font-semibold mb-3">
+                        📱 Mobile Bulk Actions
+                      </div>
+                      
+                      {/* Always Show Action Buttons */}
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <Button
+                          variant="outline"
+                          className="flex flex-col items-center justify-center p-4 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
+                          onClick={() => {
+                            toast({
+                              title: "🔒 Password Reset",
+                              description: "Reset passwords for selected users",
+                            });
+                          }}
+                        >
+                          <Lock className="h-6 w-6 mb-2" />
+                          <span className="text-sm font-medium">Reset</span>
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          className="flex flex-col items-center justify-center p-4 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
+                          onClick={() => {
+                            toast({
+                              title: "📥 Enable Downloads", 
+                              description: "Downloads enabled for selected users",
+                            });
+                          }}
+                        >
+                          <Download className="h-6 w-6 mb-2" />
+                          <span className="text-sm font-medium">Downloads</span>
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          variant="outline"
+                          className="flex flex-col items-center justify-center p-4 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
+                          onClick={() => {
+                            toast({
+                              title: "🚫 Disable Users",
+                              description: "Selected users disabled",
+                            });
+                          }}
+                        >
+                          <UserX className="h-6 w-6 mb-2" />
+                          <span className="text-sm font-medium">Disable</span>
+                        </Button>
+                        
+                        <Button
+                          variant="destructive"
+                          className="flex flex-col items-center justify-center p-4 bg-red-600 hover:bg-red-700 text-white"
+                          onClick={() => {
+                            toast({
+                              title: "🗑️ Delete Users",
+                              description: "Selected users deleted",
+                            });
+                          }}
+                        >
+                          <Trash className="h-6 w-6 mb-2" />
+                          <span className="text-sm font-medium">Delete</span>
+                        </Button>
+                      </div>
+                      
+                      <div className="text-center text-blue-200 text-xs mt-3">
+                        Select users from table to enable actions
+                      </div>
+                    </div>
+
+                    {/* Original Inactive Users Section */}
                     {showNeverLoggedIn && (
                       <div className="w-full bg-gray-800 p-3 rounded-lg mb-3">
                         <div className="text-center text-sm text-gray-300 mb-3">
                           Found {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
                         </div>
                         
-                        {/* Selection Info */}
-                        <div className="text-center text-xs text-blue-400 mb-3">
-                          {selectedUsers.length} users selected
-                        </div>
-                        
-                        {/* Quick Select Button */}
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full mb-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
+                          className="w-full bg-blue-600 hover:bg-blue-700 border-blue-500"
                           onClick={() => {
                             if (selectedUsers.length > 0) {
                               setSelectedUsers([]);
@@ -394,73 +460,6 @@ export default function AdminDashboard() {
                         >
                           {selectedUsers.length > 0 ? "Deselect All" : "Select All Inactive"}
                         </Button>
-
-                        {/* Bulk Action Icons - Always visible */}
-                        <div className="grid grid-cols-4 gap-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex flex-col items-center justify-center p-3 bg-amber-600 hover:bg-amber-700 border-amber-500"
-                            disabled={selectedUsers.length === 0}
-                            onClick={() => {
-                              toast({
-                                title: "Password Reset",
-                                description: `Reset ${selectedUsers.length} users`,
-                              });
-                            }}
-                          >
-                            <Lock className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Reset</span>
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex flex-col items-center justify-center p-3 bg-blue-600 hover:bg-blue-700 border-blue-500"
-                            disabled={selectedUsers.length === 0}
-                            onClick={() => {
-                              toast({
-                                title: "Enable Downloads",
-                                description: `${selectedUsers.length} users enabled`,
-                              });
-                            }}
-                          >
-                            <Download className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Download</span>
-                          </Button>
-                          
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex flex-col items-center justify-center p-3 bg-orange-600 hover:bg-orange-700 border-orange-500"
-                            disabled={selectedUsers.length === 0}
-                            onClick={() => {
-                              toast({
-                                title: "Disable Users",
-                                description: `${selectedUsers.length} users disabled`,
-                              });
-                            }}
-                          >
-                            <UserX className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Disable</span>
-                          </Button>
-                          
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="flex flex-col items-center justify-center p-3"
-                            disabled={selectedUsers.length === 0}
-                            onClick={() => {
-                              toast({
-                                title: "Delete Users",
-                                description: `${selectedUsers.length} users deleted`,
-                              });
-                            }}
-                          >
-                            <Trash className="h-5 w-5 mb-1" />
-                            <span className="text-xs">Delete</span>
-                          </Button>
-                        </div>
                       </div>
                     )}
 
