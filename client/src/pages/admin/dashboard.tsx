@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                     </Button>
 
                     {/* Mobile Notice - Request Desktop */}
-                    <div className="w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 md:hidden border-2 border-orange-400">
+                    <div className="block sm:hidden w-full bg-gradient-to-r from-orange-600 to-red-600 p-4 rounded-lg mb-4 border-2 border-orange-400">
                       <div className="text-center text-white">
                         <div className="flex items-center justify-center mb-3">
                           <Settings className="h-6 w-6 mr-2" />
