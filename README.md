@@ -46,37 +46,41 @@ A comprehensive web application that provides user signup capabilities and advan
 ## 📱 Screenshots
 
 ### 🏠 Homepage with Trial Notice
-Beautiful landing page with dynamic movie backgrounds and trial mode information.
+![Homepage with Dynamic Background](docs/images/signup-form.jpg)
+Beautiful landing page with TMDB movie backgrounds and trial mode information display.
 
 ### 📝 User Signup Form
-![Signup Form with Password Strength](https://i.imgur.com/signup-form.png)
-- Real-time password strength validation
-- Trial period display
-- Clean material design
+![Signup Form with Password Strength](docs/images/signup-form.jpg)
+- Real-time password strength validation with color indicators
+- Trial period notice and duration display
+- Clean glass-card design with dynamic backgrounds
 
 ### 🔐 Admin Login
-![Admin Authentication](https://i.imgur.com/admin-login.png)
-- Jellyfin admin credentials authentication
-- "Back to Home" navigation
-- Secure session management
+![Admin Authentication](docs/images/admin-login.jpg)
+- Jellyfin administrator credentials authentication
+- "Back to Home" navigation button
+- Secure session management with auto-redirect
 
-### 🎛️ Admin Dashboard - Desktop
-![Desktop Admin Dashboard](https://i.imgur.com/admin-dashboard-desktop.png)
-- Complete user management interface
-- Bulk selection and actions
-- User analytics and filtering
+### 🎛️ Admin Dashboard - Desktop View
+![Desktop Admin Dashboard](docs/images/admin-dashboard-desktop.jpg)
+- Complete user management interface with 138+ users
+- Bulk selection with master checkbox
+- Icon-only bulk actions (Reset, Downloads, Disable, Delete)
+- User analytics and "Never Logged In" filtering
 
-### 📱 Admin Dashboard - Mobile
-![Mobile Admin Interface](https://i.imgur.com/admin-dashboard-mobile.png)
-- Mobile-optimized icon-only buttons
-- Responsive table design
-- Touch-friendly bulk operations
+### 📱 Admin Dashboard - Mobile View
+![Mobile Admin Interface](docs/images/admin-dashboard-mobile.jpg)
+- Mobile-optimized responsive design
+- Clean icon-based bulk action buttons
+- Touch-friendly selection interface
+- Simplified table layout for small screens
 
-### ⚙️ Trial Management
-![Trial Settings Panel](https://i.imgur.com/trial-management.png)
-- Configure trial duration (1-30 days)
-- Expiry action settings
-- Real-time trial user tracking
+### ⚙️ Trial Management System
+![Trial Settings Panel](docs/images/trial-management.jpg)
+- Configurable trial duration (1-30 days)
+- Automatic expiry action settings (Disable/Delete)
+- Real-time trial user tracking and statistics
+- PostgreSQL/SQLite persistent storage
 
 ## 💾 Database Configuration
 
