@@ -14,3 +14,7 @@ vite.config.ts.*
 # Access logs that might contain personal data
 jellyfin-access-logs.json
 jellyfin-user-activity.json
+
+# Replit configuration files
+.replit
+replit.nix
