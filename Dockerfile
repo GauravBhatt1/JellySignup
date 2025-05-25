@@ -9,6 +9,9 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
+# Create data directory for SQLite
+RUN mkdir -p data
+
 # Build the application
 RUN npm run build
 
