@@ -1,6 +1,18 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: jellyfin_user
+      POSTGRES_PASSWORD: jellyfin_pass
+      POSTGRES_DB: jellyfin_signup
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   jellyfin-signup:
     build:
       context: .
@@ -8,9 +20,15 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
-    volumes:
-      - ./data:/app/data
-    env_file:
-      - .env
+    depends_on:
+      - postgres
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://jellyfin_user:jellyfin_pass@postgres:5432/jellyfin_signup
+      - JELLYFIN_SERVER_URL=${JELLYFIN_SERVER_URL}
+      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET}
+
+volumes:
+  postgres_data:
