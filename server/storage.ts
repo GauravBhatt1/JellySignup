@@ -196,13 +196,11 @@ export class MemStorage implements IStorage {
 
 import { MongoStorage } from './mongo-storage';
 
-// Choose your storage type:
-// For development: MemStorage (temporary)
-// For VPS with MongoDB: MongoStorage 
-// For VPS with PostgreSQL: DatabaseStorage
+// Auto-detect storage based on environment
+// If DATABASE_URL exists and starts with mongodb, use MongoDB
+// Otherwise use MemStorage for development
+const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
 
-export const storage = new MemStorage();
-
-// For VPS deployment, uncomment one of these:
-// export const storage = new MongoStorage(); // For MongoDB
-// export const storage = new DatabaseStorage(); // For PostgreSQL
+export const storage = isDatabaseUrlMongoDB 
+  ? new MongoStorage() 
+  : new MemStorage();
