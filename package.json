@@ -68,6 +68,7 @@
     "ipinfo": "^1.5.2",
     "lucide-react": "^0.453.0",
     "memorystore": "^1.6.7",
+    "mongoose": "^8.15.0",
     "next-themes": "^0.4.6",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
