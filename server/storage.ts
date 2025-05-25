@@ -1,8 +1,6 @@
-import { connectMongoDB, UserModel, TrialUserModel, TrialSettingsModel } from "./mongodb";
-import { type User, type InsertUser, type TrialUser, type InsertTrialUser, type TrialSettings, type InsertTrialSettings } from "@shared/schema";
-
-// modify the interface with any CRUD methods
-// you might need
+import { users, trialUsers, trialSettings, type User, type InsertUser, type TrialUser, type InsertTrialUser, type TrialSettings, type InsertTrialSettings } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -22,6 +20,7 @@ export interface IStorage {
   updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings>;
 }
 
+// Database Storage using PostgreSQL
 export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -59,11 +58,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getExpiredTrialUsers(): Promise<TrialUser[]> {
+    const now = new Date();
     return await db.select().from(trialUsers).where(eq(trialUsers.isExpired, true));
   }
 
   async markTrialUserExpired(username: string): Promise<void> {
-    await db.update(trialUsers)
+    await db
+      .update(trialUsers)
       .set({ isExpired: true })
       .where(eq(trialUsers.username, username));
   }
@@ -73,42 +74,32 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTrialSettings(): Promise<TrialSettings | undefined> {
-    const [settings] = await db.select().from(trialSettings).limit(1);
-    if (!settings) {
-      // Create default settings if none exist
-      const defaultSettings = {
-        isTrialModeEnabled: true,
-        trialDurationDays: 7,
-        expiryAction: "disable" as const,
-      };
-      const [created] = await db
-        .insert(trialSettings)
-        .values(defaultSettings)
-        .returning();
-      return created;
-    }
-    return settings;
+    const [settings] = await db.select().from(trialSettings);
+    return settings || undefined;
   }
 
-  async updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings> {
+  async updateTrialSettings(newSettings: InsertTrialSettings): Promise<TrialSettings> {
+    // Check if settings exist
     const existing = await this.getTrialSettings();
+    
     if (existing) {
       const [updated] = await db
         .update(trialSettings)
-        .set(settings)
+        .set(newSettings)
         .where(eq(trialSettings.id, existing.id))
         .returning();
       return updated;
     } else {
       const [created] = await db
         .insert(trialSettings)
-        .values(settings)
+        .values(newSettings)
         .returning();
       return created;
     }
   }
 }
 
+// Memory Storage for development
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private trialUsers: Map<number, TrialUser>;
@@ -121,15 +112,6 @@ export class MemStorage implements IStorage {
     this.trialUsers = new Map();
     this.currentId = 1;
     this.currentTrialId = 1;
-    // Initialize default trial settings - ALWAYS ENABLED
-    this.trialSettings = {
-      id: 1,
-      isTrialModeEnabled: true,
-      trialDurationDays: 7,
-      expiryAction: "disable", 
-      updatedAt: new Date(),
-    };
-    console.log("🎯 Trial settings initialized: ENABLED by default");
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -137,9 +119,12 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -149,27 +134,24 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  // Trial Users Management
   async createTrialUser(insertTrialUser: InsertTrialUser): Promise<TrialUser> {
     const id = this.currentTrialId++;
-    const now = new Date();
     const trialUser: TrialUser = {
+      ...insertTrialUser,
       id,
-      username: insertTrialUser.username,
-      signupDate: now,
-      expiryDate: insertTrialUser.expiryDate,
-      isExpired: false,
-      trialDurationDays: insertTrialUser.trialDurationDays,
-      createdAt: now,
+      createdAt: new Date(),
     };
     this.trialUsers.set(id, trialUser);
     return trialUser;
   }
 
   async getTrialUser(username: string): Promise<TrialUser | undefined> {
-    return Array.from(this.trialUsers.values()).find(
-      (trialUser) => trialUser.username === username,
-    );
+    for (const trialUser of this.trialUsers.values()) {
+      if (trialUser.username === username) {
+        return trialUser;
+      }
+    }
+    return undefined;
   }
 
   async getAllTrialUsers(): Promise<TrialUser[]> {
@@ -177,25 +159,19 @@ export class MemStorage implements IStorage {
   }
 
   async getExpiredTrialUsers(): Promise<TrialUser[]> {
-    const now = new Date();
-    return Array.from(this.trialUsers.values()).filter(
-      trialUser => trialUser.expiryDate <= now && !trialUser.isExpired
-    );
+    return Array.from(this.trialUsers.values()).filter(user => user.isExpired);
   }
 
   async markTrialUserExpired(username: string): Promise<void> {
-    const trialUsersArray = Array.from(this.trialUsers.entries());
-    for (const [id, trialUser] of trialUsersArray) {
-      if (trialUser.username === username) {
-        this.trialUsers.set(id, { ...trialUser, isExpired: true });
-        break;
-      }
+    const trialUser = await this.getTrialUser(username);
+    if (trialUser) {
+      trialUser.isExpired = true;
+      this.trialUsers.set(trialUser.id, trialUser);
     }
   }
 
   async deleteTrialUser(username: string): Promise<void> {
-    const trialUsersArray = Array.from(this.trialUsers.entries());
-    for (const [id, trialUser] of trialUsersArray) {
+    for (const [id, trialUser] of this.trialUsers.entries()) {
       if (trialUser.username === username) {
         this.trialUsers.delete(id);
         break;
@@ -203,170 +179,19 @@ export class MemStorage implements IStorage {
     }
   }
 
-  // Trial Settings Management
   async getTrialSettings(): Promise<TrialSettings | undefined> {
-    if (!this.trialSettings) {
-      this.trialSettings = {
-        id: 1,
-        isTrialModeEnabled: true,
-        trialDurationDays: 7,
-        expiryAction: "disable",
-        updatedAt: new Date(),
-      };
-    }
     return this.trialSettings;
   }
 
   async updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings> {
-    if (!this.trialSettings) {
-      this.trialSettings = {
-        id: 1,
-        isTrialModeEnabled: false,
-        trialDurationDays: 7,
-        expiryAction: "disable",
-        updatedAt: new Date(),
-      };
-    }
-    
     this.trialSettings = {
-      id: this.trialSettings.id,
-      isTrialModeEnabled: settings.isTrialModeEnabled !== undefined ? settings.isTrialModeEnabled : this.trialSettings.isTrialModeEnabled,
-      trialDurationDays: settings.trialDurationDays !== undefined ? settings.trialDurationDays : this.trialSettings.trialDurationDays,
-      expiryAction: settings.expiryAction !== undefined ? settings.expiryAction : this.trialSettings.expiryAction,
+      id: 1,
+      ...settings,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
     return this.trialSettings;
   }
 }
 
-// MongoDB Storage Class
-export class MongoStorage implements IStorage {
-  constructor() {
-    connectMongoDB().catch(console.error);
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    const user = await UserModel.findById(id);
-    return user ? { id: parseInt(user._id.toString()), username: user.username, password: user.password } : undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const user = await UserModel.findOne({ username });
-    return user ? { id: parseInt(user._id.toString()), username: user.username, password: user.password } : undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const user = new UserModel(insertUser);
-    const savedUser = await user.save();
-    return { id: parseInt(savedUser._id.toString()), username: savedUser.username, password: savedUser.password };
-  }
-
-  async createTrialUser(insertTrialUser: InsertTrialUser): Promise<TrialUser> {
-    const trialUser = new TrialUserModel(insertTrialUser);
-    const savedTrialUser = await trialUser.save();
-    return {
-      id: parseInt(savedTrialUser._id.toString()),
-      username: savedTrialUser.username,
-      signupDate: savedTrialUser.signupDate,
-      expiryDate: savedTrialUser.expiryDate,
-      isExpired: savedTrialUser.isExpired,
-      trialDurationDays: savedTrialUser.trialDurationDays,
-      createdAt: savedTrialUser.createdAt,
-    };
-  }
-
-  async getTrialUser(username: string): Promise<TrialUser | undefined> {
-    const trialUser = await TrialUserModel.findOne({ username });
-    return trialUser ? {
-      id: parseInt(trialUser._id.toString()),
-      username: trialUser.username,
-      signupDate: trialUser.signupDate,
-      expiryDate: trialUser.expiryDate,
-      isExpired: trialUser.isExpired,
-      trialDurationDays: trialUser.trialDurationDays,
-      createdAt: trialUser.createdAt,
-    } : undefined;
-  }
-
-  async getAllTrialUsers(): Promise<TrialUser[]> {
-    const trialUsers = await TrialUserModel.find();
-    return trialUsers.map(user => ({
-      id: parseInt(user._id.toString()),
-      username: user.username,
-      signupDate: user.signupDate,
-      expiryDate: user.expiryDate,
-      isExpired: user.isExpired,
-      trialDurationDays: user.trialDurationDays,
-      createdAt: user.createdAt,
-    }));
-  }
-
-  async getExpiredTrialUsers(): Promise<TrialUser[]> {
-    const expiredUsers = await TrialUserModel.find({ isExpired: true });
-    return expiredUsers.map(user => ({
-      id: parseInt(user._id.toString()),
-      username: user.username,
-      signupDate: user.signupDate,
-      expiryDate: user.expiryDate,
-      isExpired: user.isExpired,
-      trialDurationDays: user.trialDurationDays,
-      createdAt: user.createdAt,
-    }));
-  }
-
-  async markTrialUserExpired(username: string): Promise<void> {
-    await TrialUserModel.updateOne({ username }, { isExpired: true });
-  }
-
-  async deleteTrialUser(username: string): Promise<void> {
-    await TrialUserModel.deleteOne({ username });
-  }
-
-  async getTrialSettings(): Promise<TrialSettings | undefined> {
-    let settings = await TrialSettingsModel.findOne();
-    if (!settings) {
-      // Create default settings
-      settings = new TrialSettingsModel({
-        isTrialModeEnabled: true,
-        trialDurationDays: 7,
-        expiryAction: 'disable'
-      });
-      await settings.save();
-    }
-    return {
-      id: parseInt(settings._id.toString()),
-      isTrialModeEnabled: settings.isTrialModeEnabled,
-      trialDurationDays: settings.trialDurationDays,
-      expiryAction: settings.expiryAction,
-      updatedAt: settings.updatedAt,
-    };
-  }
-
-  async updateTrialSettings(newSettings: InsertTrialSettings): Promise<TrialSettings> {
-    let settings = await TrialSettingsModel.findOne();
-    
-    if (settings) {
-      settings.isTrialModeEnabled = newSettings.isTrialModeEnabled ?? settings.isTrialModeEnabled;
-      settings.trialDurationDays = newSettings.trialDurationDays ?? settings.trialDurationDays;
-      settings.expiryAction = newSettings.expiryAction ?? settings.expiryAction;
-      settings.updatedAt = new Date();
-      await settings.save();
-    } else {
-      settings = new TrialSettingsModel({
-        ...newSettings,
-        updatedAt: new Date()
-      });
-      await settings.save();
-    }
-
-    return {
-      id: parseInt(settings._id.toString()),
-      isTrialModeEnabled: settings.isTrialModeEnabled,
-      trialDurationDays: settings.trialDurationDays,
-      expiryAction: settings.expiryAction,
-      updatedAt: settings.updatedAt,
-    };
-  }
-}
-
-export const storage = new MongoStorage();
+export const storage = new MemStorage();
