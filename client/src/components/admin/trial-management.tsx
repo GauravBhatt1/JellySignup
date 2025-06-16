@@ -31,7 +31,7 @@ export function TrialManagement() {
     expiryAction: "disable"
   });
   const [trialUsers, setTrialUsers] = useState<TrialUser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
@@ -42,7 +42,7 @@ export function TrialManagement() {
 
   const loadData = async () => {
     try {
-      // Load both settings and users in parallel for better performance
+      // Load both settings and users in parallel
       const [settingsResponse, usersResponse] = await Promise.all([
         fetch('/api/admin/trial-settings'),
         fetch('/api/admin/trial-users')
@@ -64,8 +64,6 @@ export function TrialManagement() {
         description: "Failed to load trial data",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 

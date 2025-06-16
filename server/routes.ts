@@ -528,10 +528,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
     try {
       const settings = await storage.getTrialSettings();
+      // Return immediate response with defaults for development
       res.json(settings || {
+        id: 1,
         isTrialModeEnabled: false,
         trialDurationDays: 7,
-        expiryAction: 'disable'
+        expiryAction: 'disable',
+        updatedAt: new Date()
       });
     } catch (error) {
       console.error('Error fetching trial settings:', error);
@@ -558,7 +561,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
     try {
       const trialUsers = await storage.getAllTrialUsers();
-      res.json(trialUsers);
+      // Return immediate empty array for development if no users exist
+      res.json(trialUsers || []);
     } catch (error) {
       console.error('Error fetching trial users:', error);
       res.status(500).json({ message: 'Failed to fetch trial users' });
