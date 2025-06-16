@@ -37,9 +37,37 @@ export function TrialManagement() {
   const { toast } = useToast();
 
   useEffect(() => {
-    loadTrialSettings();
-    loadTrialUsers();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    try {
+      // Load both settings and users in parallel for better performance
+      const [settingsResponse, usersResponse] = await Promise.all([
+        fetch('/api/admin/trial-settings'),
+        fetch('/api/admin/trial-users')
+      ]);
+
+      if (settingsResponse.ok) {
+        const settingsData = await settingsResponse.json();
+        setSettings(settingsData);
+      }
+
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        setTrialUsers(usersData);
+      }
+    } catch (error: any) {
+      console.error('Error loading trial data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load trial data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadTrialSettings = async () => {
     try {
@@ -50,13 +78,6 @@ export function TrialManagement() {
       }
     } catch (error) {
       console.error('Error loading trial settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load trial settings",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -156,7 +177,35 @@ export function TrialManagement() {
   };
 
   if (loading) {
-    return <div className="p-4">Loading trial management...</div>;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="h-6 bg-gray-200 rounded animate-pulse w-48"></div>
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-64 mt-2"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="h-8 bg-gray-200 rounded animate-pulse w-32"></div>
+              <div className="h-12 bg-gray-200 rounded animate-pulse w-full"></div>
+              <div className="h-10 bg-gray-200 rounded animate-pulse w-24"></div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <div className="h-6 bg-gray-200 rounded animate-pulse w-40"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
