@@ -31,7 +31,6 @@ export function TrialManagement() {
     expiryAction: "disable"
   });
   const [trialUsers, setTrialUsers] = useState<TrialUser[]>([]);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
@@ -174,37 +173,7 @@ export function TrialManagement() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="h-6 bg-gray-200 rounded animate-pulse w-48"></div>
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-64 mt-2"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="h-8 bg-gray-200 rounded animate-pulse w-32"></div>
-              <div className="h-12 bg-gray-200 rounded animate-pulse w-full"></div>
-              <div className="h-10 bg-gray-200 rounded animate-pulse w-24"></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <div className="h-6 bg-gray-200 rounded animate-pulse w-40"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 bg-gray-200 rounded animate-pulse"></div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-6">
