@@ -107,7 +107,14 @@ export class MongoStorage implements IStorage {
   }
 
   async getExpiredTrialUsers(): Promise<TrialUser[]> {
-    const expiredUsers = await TrialUserModel.find({ isExpired: true });
+    const now = new Date();
+    // Find users who are either marked as expired OR have passed their expiry date
+    const expiredUsers = await TrialUserModel.find({
+      $or: [
+        { isExpired: true },
+        { expiryDate: { $lt: now } }
+      ]
+    });
     return expiredUsers.map(user => ({
       id: parseInt(user._id.toString()),
       username: user.username,

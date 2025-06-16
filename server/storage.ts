@@ -59,7 +59,11 @@ export class DatabaseStorage implements IStorage {
 
   async getExpiredTrialUsers(): Promise<TrialUser[]> {
     const now = new Date();
-    return await db.select().from(trialUsers).where(eq(trialUsers.isExpired, true));
+    // Get users who are either marked as expired OR have passed their expiry date
+    const allTrialUsers = await db.select().from(trialUsers);
+    return allTrialUsers.filter((user: any) => 
+      user.isExpired || new Date(user.expiryDate) < now
+    );
   }
 
   async markTrialUserExpired(username: string): Promise<void> {
@@ -159,7 +163,10 @@ export class MemStorage implements IStorage {
   }
 
   async getExpiredTrialUsers(): Promise<TrialUser[]> {
-    return Array.from(this.trialUsers.values()).filter(user => user.isExpired);
+    const now = new Date();
+    return Array.from(this.trialUsers.values()).filter(user => 
+      user.isExpired || new Date(user.expiryDate) < now
+    );
   }
 
   async markTrialUserExpired(username: string): Promise<void> {
