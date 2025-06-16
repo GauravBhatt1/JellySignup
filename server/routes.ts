@@ -555,11 +555,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update trial settings
   app.put('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log('Trial settings update request body:', req.body);
       const validatedData = trialSettingsSchema.parse(req.body);
+      console.log('Validated trial settings data:', validatedData);
       const updatedSettings = await storage.updateTrialSettings(validatedData);
+      console.log('Updated trial settings successfully:', updatedSettings);
       res.json(updatedSettings);
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error('Trial settings validation error:', error.errors);
         return res.status(400).json({ message: 'Invalid trial settings data', errors: error.errors });
       }
       console.error('Error updating trial settings:', error);

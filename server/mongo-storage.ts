@@ -174,13 +174,17 @@ export class MongoStorage implements IStorage {
     let settings = await TrialSettingsModel.findOne({});
     
     if (settings) {
-      settings.trialDurationDays = newSettings.trialDurationDays;
-      settings.isTrialModeEnabled = newSettings.isTrialModeEnabled;
-      settings.expiryAction = newSettings.expiryAction;
+      if (newSettings.trialDurationDays !== undefined) settings.trialDurationDays = newSettings.trialDurationDays;
+      if (newSettings.isTrialModeEnabled !== undefined) settings.isTrialModeEnabled = newSettings.isTrialModeEnabled;
+      if (newSettings.expiryAction !== undefined) settings.expiryAction = newSettings.expiryAction;
       settings.updatedAt = new Date();
       await settings.save();
     } else {
-      settings = new TrialSettingsModel(newSettings);
+      settings = new TrialSettingsModel({
+        ...newSettings,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
       await settings.save();
     }
 

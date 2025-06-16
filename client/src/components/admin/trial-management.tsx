@@ -93,6 +93,7 @@ export function TrialManagement() {
   const saveSettings = async () => {
     setSaving(true);
     try {
+      console.log('Sending trial settings:', settings);
       const response = await fetch('/api/admin/trial-settings', {
         method: 'PUT',
         headers: {
@@ -101,13 +102,22 @@ export function TrialManagement() {
         body: JSON.stringify(settings),
       });
 
+      const responseData = await response.json();
+      console.log('Server response:', responseData);
+
       if (response.ok) {
+        setSettings(responseData); // Update local settings with server response
         toast({
           title: "Success",
           description: "Trial settings updated successfully",
         });
       } else {
-        throw new Error('Failed to update settings');
+        console.error('Server error response:', responseData);
+        toast({
+          title: "Error",
+          description: responseData.message || "Failed to update trial settings",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error saving trial settings:', error);
