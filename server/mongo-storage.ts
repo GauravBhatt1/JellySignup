@@ -2,15 +2,40 @@ import mongoose from 'mongoose';
 import { IStorage } from './storage';
 import { User, InsertUser, TrialUser, InsertTrialUser, TrialSettings, InsertTrialSettings } from '@shared/schema';
 
-// MongoDB Connection
+// MongoDB Connection with VPS optimization
 async function connectMongoDB() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is required for MongoDB connection');
   }
   
   try {
-    await mongoose.connect(process.env.DATABASE_URL);
-    console.log('✅ MongoDB connected successfully');
+    // VPS-optimized connection settings
+    const options = {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      bufferMaxEntries: 0,
+      bufferCommands: false,
+      maxIdleTimeMS: 30000,
+      family: 4 // Use IPv4 for better VPS compatibility
+    };
+    
+    await mongoose.connect(process.env.DATABASE_URL, options);
+    console.log('✅ MongoDB connected successfully with VPS optimization');
+    
+    // Connection event handlers for production monitoring
+    mongoose.connection.on('error', (err) => {
+      console.error('❌ MongoDB connection error:', err);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      console.log('⚠️ MongoDB disconnected - attempting reconnection');
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      console.log('✅ MongoDB reconnected successfully');
+    });
+    
   } catch (error) {
     console.error('❌ MongoDB connection failed:', error);
     throw error;

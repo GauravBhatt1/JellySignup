@@ -84,6 +84,16 @@ async function fetchTrendingMovies() {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for Docker deployment
+  app.get('/health', (req: Request, res: Response) => {
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: process.env.DATABASE_URL ? 'connected' : 'not configured'
+    });
+  });
+
   // Apply rate limiting to signup endpoint - configured for proxy environments (like Portainer)
   const signupLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
