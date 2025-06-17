@@ -14,10 +14,7 @@ async function connectMongoDB() {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      bufferMaxEntries: 0,
-      bufferCommands: false,
-      maxIdleTimeMS: 30000,
-      family: 4 // Use IPv4 for better VPS compatibility
+      maxIdleTimeMS: 30000
     };
     
     const mongoUrl = process.env.MONGODB_URL || process.env.DATABASE_URL;

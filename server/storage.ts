@@ -206,15 +206,14 @@ import { MongoStorage } from './mongo-storage';
 // Auto-detect storage based on environment
 // If DATABASE_URL exists and starts with mongodb, use MongoDB
 // FORCE_MONGODB flag can override detection for VPS deployment
-const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
-const hasMongoUrl = process.env.MONGODB_URL?.startsWith('mongodb');
-console.log('DEBUG: DATABASE_URL value:', process.env.DATABASE_URL);
-console.log('DEBUG: MONGODB_URL value:', process.env.MONGODB_URL);
-console.log('DEBUG: Is MongoDB URL?', isDatabaseUrlMongoDB || hasMongoUrl);
-// Force MongoDB everywhere - development and production
+// Force MongoDB everywhere - development and production  
 const forceMongoEverywhere = true;
-// Use MongoDB if valid URL is provided (either DATABASE_URL or MONGODB_URL)
-const useMongoStorage = (isDatabaseUrlMongoDB || hasMongoUrl) && forceMongoEverywhere;
+// For development testing, use provided MongoDB URL
+if (forceMongoEverywhere && !process.env.DATABASE_URL?.startsWith('mongodb')) {
+  process.env.DATABASE_URL = "mongodb+srv://gauravbhatt8160:9PgTpvopw3OJD9Ny@cluster0.yalif93.mongodb.net/jellyfin_signup?retryWrites=true&w=majority&appName=Cluster0";
+}
+const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
+const useMongoStorage = isDatabaseUrlMongoDB && forceMongoEverywhere;
 
 console.log(`Storage Configuration:
   DATABASE_URL detected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}
