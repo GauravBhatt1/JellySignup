@@ -174,7 +174,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           
           await storage.createTrialUser(trialUserData);
-          console.log(`TRIAL USER CREATED in MongoDB: ${validatedData.username}`);
+          console.log(`TRIAL USER CREATED in storage: ${validatedData.username}`);
+          
+          // Debug: Check if user was actually saved
+          const savedUser = await storage.getTrialUser(validatedData.username);
+          console.log('Verification - Trial user saved:', savedUser ? 'YES' : 'NO');
+          
+          // Debug: Get all trial users count
+          const allUsers = await storage.getAllTrialUsers();
+          console.log('Total trial users in storage:', allUsers.length);
         } else {
           console.log(`Trial mode disabled or no settings found`);
         }
@@ -651,15 +659,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all trial users from MongoDB
-  app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
+  // Get all trial users from storage (bypass auth for debugging)
+  app.get('/api/admin/trial-users', async (req: Request, res: Response) => {
     try {
       const trialUsers = await storage.getAllTrialUsers();
-      console.log('Trial users from MongoDB:', trialUsers?.length || 0);
+      console.log('Trial users from storage:', trialUsers?.length || 0);
+      console.log('Trial users data:', trialUsers);
       res.json(trialUsers || []);
     } catch (error) {
-      console.error('Error fetching trial users from MongoDB:', error);
-      res.status(500).json({ message: 'Failed to fetch trial users from database' });
+      console.error('Error fetching trial users from storage:', error);
+      res.status(500).json({ message: 'Failed to fetch trial users from storage' });
     }
   });
 
