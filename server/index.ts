@@ -68,8 +68,30 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Location tracking has been removed
+  console.log(`Jellyfin API Configuration: 
+  Server URL: ${process.env.JELLYFIN_SERVER_URL}
+  API Key Set: ${process.env.JELLYFIN_API_KEY ? 'Yes' : 'No'}`);
+
   console.log('Location tracking features disabled as requested');
+
+  // Database configuration logging for VPS debugging
+  if (process.env.DATABASE_URL) {
+    const dbType = process.env.DATABASE_URL.includes('mongodb') ? 'MongoDB' : 'PostgreSQL';
+    console.log(`Database Configuration: ${dbType} detected`);
+    if (dbType === 'MongoDB') {
+      console.log('Testing MongoDB connection...');
+      try {
+        const { MongoStorage } = await import('./mongo-storage');
+        const mongoStorage = new MongoStorage();
+        await mongoStorage.getTrialSettings();
+        console.log('✅ MongoDB connection test successful');
+      } catch (error) {
+        console.error('❌ MongoDB connection test failed:', error instanceof Error ? error.message : error);
+      }
+    }
+  } else {
+    console.log('⚠️ No DATABASE_URL configured - using in-memory storage');
+  }
   
   const server = await registerRoutes(app);
 
