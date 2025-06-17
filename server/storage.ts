@@ -209,7 +209,8 @@ import { MongoStorage } from './mongo-storage';
 const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
 // Force MongoDB everywhere - development and production
 const forceMongoEverywhere = true;
-const useMongoStorage = isDatabaseUrlMongoDB || forceMongoEverywhere;
+// Only use MongoDB if valid URL is provided
+const useMongoStorage = isDatabaseUrlMongoDB && forceMongoEverywhere;
 
 console.log(`Storage Configuration:
   DATABASE_URL detected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}

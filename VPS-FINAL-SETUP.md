@@ -11,20 +11,17 @@
 ### VPS Commands
 
 ```bash
-# Set MongoDB URL in .env file
+# Set MongoDB URL in .env file (REQUIRED)
 DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/jellyfin_signup
 
-# Ensure production mode (automatically forces MongoDB)
-NODE_ENV=production
-
-# Or explicitly force MongoDB
-FORCE_MONGODB=true
+# Alternative: Local MongoDB
+# DATABASE_URL=mongodb://localhost:27017/jellyfin_signup
 
 # Restart containers
 docker-compose restart
 
 # Verify MongoDB usage in logs
-docker-compose logs | grep "Using storage: MongoDB"
+docker-compose logs | grep "MongoDB connected successfully"
 ```
 
 ## What This Achieves
