@@ -1,21 +1,28 @@
-FROM node:18
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy all files
-COPY . .
+# Install necessary packages
+RUN apk add --no-cache python3 make g++
 
-# Install dependencies
+# Copy package files and install dependencies
+COPY package*.json ./
 RUN npm install
 
-# Build application
+# Copy the rest of the application
+COPY . .
+
+# Create data directory for SQLite
+RUN mkdir -p data
+
+# Build the application
 RUN npm run build
 
-# Expose port
+# Expose the port
 EXPOSE 5000
 
-# Set environment
+# Set environment variables at runtime
 ENV NODE_ENV=production
 
-# Start application
+# Start the server
 CMD ["npm", "start"]
