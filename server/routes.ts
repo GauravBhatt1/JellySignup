@@ -672,13 +672,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get trial settings for signup page
   app.get('/api/trial-info', async (req: Request, res: Response) => {
     try {
-      const settings = await storage.getTrialSettings();
+      let settings = null;
+      
+      // Try storage first
+      try {
+        settings = await storage.getTrialSettings();
+        console.log('Storage trial settings:', settings);
+      } catch (storageError) {
+        console.log('Storage failed for trial settings, using file fallback:', storageError);
+      }
+      
+      // File fallback if storage fails or returns null
+      if (!settings) {
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const settingsFile = path.join(process.cwd(), 'trial-settings.json');
+          const data = await fs.readFile(settingsFile, 'utf-8');
+          settings = JSON.parse(data);
+          console.log('Trial settings loaded from file fallback:', settings);
+        } catch (fileError) {
+          console.log('No trial settings file found:', fileError);
+        }
+      }
+      
+      console.log('Final settings before response:', settings);
+      
       if (settings?.isTrialModeEnabled) {
+        console.log('Sending trial enabled response');
         res.json({
           isTrialModeEnabled: true,
           trialDurationDays: settings.trialDurationDays
         });
       } else {
+        console.log('Sending trial disabled response');
         res.json({ isTrialModeEnabled: false });
       }
     } catch (error) {
