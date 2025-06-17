@@ -143,6 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Try storage first, then file fallback
         try {
           trialSettings = await storage.getTrialSettings();
+          console.log('Storage trial settings:', trialSettings);
         } catch (storageError) {
           console.log('Storage failed for trial settings, checking file...');
           const fs = await import('fs/promises');
@@ -152,13 +153,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const data = await fs.readFile(settingsFile, 'utf-8');
             trialSettings = JSON.parse(data);
+            console.log('File trial settings loaded:', trialSettings);
           } catch (fileError) {
-            console.log('No trial settings file found');
+            console.log('No trial settings file found:', fileError.message);
           }
         }
         
+        // Final fallback - use default trial settings if nothing found
+        if (!trialSettings) {
+          trialSettings = {
+            isTrialModeEnabled: true,
+            trialDurationDays: 7,
+            expiryAction: 'disable'
+          };
+          console.log('Using default trial settings');
+        }
+        
         console.log(`Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
-        console.log('File-based trial settings check:', JSON.stringify(trialSettings));
         
         if (trialSettings && trialSettings.isTrialModeEnabled === true) {
           console.log(`CREATING TRIAL USER: ${validatedData.username}`);
