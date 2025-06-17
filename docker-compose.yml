@@ -6,21 +6,7 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JELLYFIN_SERVER_URL=${JELLYFIN_SERVER_URL}
-      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
-      - TMDB_API_KEY=${TMDB_API_KEY}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
-      - jellyfin-network
-
-networks:
-  jellyfin-network:
-    driver: bridge
