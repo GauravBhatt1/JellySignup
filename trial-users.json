@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "username": "testuser",
+    "signupDate": "2025-06-17T17:30:00.000Z",
+    "expiryDate": "2025-06-24T17:30:00.000Z",
+    "isExpired": false,
+    "trialDurationDays": 7,
+    "createdAt": "2025-06-17T17:30:00.000Z"
+  }
+]

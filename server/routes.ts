@@ -175,12 +175,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           try {
             await storage.createTrialUser(trialUserData);
-            console.log(`TRIAL USER CREATED in MongoDB: ${validatedData.username}`);
+            console.log(`TRIAL USER CREATED in storage: ${validatedData.username}`);
           } catch (trialError) {
-            console.error(`Failed to create trial user in MongoDB:`, trialError);
-            // Trial user creation failed - this should be investigated
-            const errorMessage = trialError instanceof Error ? trialError.message : 'Unknown error';
-            throw new Error(`Trial user creation failed: ${errorMessage}`);
+            console.error(`Failed to create trial user in storage:`, trialError);
+            
+            // File fallback for trial users
+            try {
+              const fs = await import('fs/promises');
+              const path = await import('path');
+              const usersFile = path.join(process.cwd(), 'trial-users.json');
+              
+              let existingUsers = [];
+              try {
+                const data = await fs.readFile(usersFile, 'utf-8');
+                existingUsers = JSON.parse(data);
+              } catch (fileError) {
+                // File doesn't exist, start with empty array
+              }
+              
+              const newUser = {
+                id: existingUsers.length + 1,
+                ...trialUserData,
+                createdAt: new Date()
+              };
+              
+              existingUsers.push(newUser);
+              await fs.writeFile(usersFile, JSON.stringify(existingUsers, null, 2));
+              console.log(`TRIAL USER CREATED via file fallback: ${validatedData.username}`);
+            } catch (fileError) {
+              console.error(`Failed to save trial user to file:`, fileError);
+              throw new Error(`Trial user creation failed completely`);
+            }
           }
         } else {
           console.log(`Trial mode disabled or no settings found`);
@@ -658,14 +683,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all trial users from MongoDB
+  // Get all trial users with fallback
   app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
     try {
-      const trialUsers = await storage.getAllTrialUsers();
+      let trialUsers = [];
+      
+      // Try storage first
+      try {
+        trialUsers = await storage.getAllTrialUsers();
+        console.log('Trial users from storage:', trialUsers?.length || 0);
+      } catch (storageError) {
+        console.error('Storage failed for trial users:', storageError);
+        
+        // File fallback for trial users if needed
+        try {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const usersFile = path.join(process.cwd(), 'trial-users.json');
+          const data = await fs.readFile(usersFile, 'utf-8');
+          trialUsers = JSON.parse(data);
+          console.log('Trial users from file fallback:', trialUsers?.length || 0);
+        } catch (fileError) {
+          console.log('No trial users file found');
+          trialUsers = [];
+        }
+      }
+      
       res.json(trialUsers || []);
     } catch (error) {
-      console.error('Error fetching trial users from MongoDB:', error);
-      res.status(500).json({ message: 'Failed to fetch trial users from database' });
+      console.error('Error fetching trial users:', error);
+      res.status(500).json({ message: 'Failed to fetch trial users' });
     }
   });
 
