@@ -536,65 +536,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Trial Management API Routes
   
-  // Get trial settings
+  // Get trial settings - Alternative file-based approach
   app.get('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
     try {
-      const settings = await storage.getTrialSettings();
-      // Return immediate response with defaults for development
-      res.json(settings || {
-        id: 1,
-        isTrialModeEnabled: false,
-        trialDurationDays: 7,
-        expiryAction: 'disable',
-        updatedAt: new Date()
-      });
+      // Try storage first, fallback to file-based approach
+      try {
+        const settings = await storage.getTrialSettings();
+        if (settings) {
+          return res.json(settings);
+        }
+      } catch (storageError) {
+        console.log('Storage failed for get settings, trying file-based approach:', storageError);
+      }
+      
+      // File-based fallback
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const settingsFile = path.join(process.cwd(), 'trial-settings.json');
+      
+      try {
+        const data = await fs.readFile(settingsFile, 'utf-8');
+        const settings = JSON.parse(data);
+        console.log('Trial settings loaded from file');
+        res.json(settings);
+      } catch (fileError) {
+        console.log('No settings file found, returning defaults');
+        // Return defaults if no file exists
+        const defaultSettings = {
+          id: 1,
+          isTrialModeEnabled: false,
+          trialDurationDays: 7,
+          expiryAction: 'disable',
+          updatedAt: new Date()
+        };
+        res.json(defaultSettings);
+      }
     } catch (error) {
       console.error('Error fetching trial settings:', error);
       res.status(500).json({ message: 'Failed to fetch trial settings' });
     }
   });
 
-  // Update trial settings
+  // Update trial settings - Alternative file-based approach
   app.put('/api/admin/trial-settings', adminAuth, async (req: Request, res: Response) => {
     try {
       console.log('Trial settings update request body:', req.body);
-      const validatedData = trialSettingsSchema.parse(req.body);
+      
+      // Simple validation
+      const { isTrialModeEnabled, trialDurationDays, expiryAction } = req.body;
+      
+      if (typeof isTrialModeEnabled !== 'boolean') {
+        return res.status(400).json({ message: 'isTrialModeEnabled must be boolean' });
+      }
+      
+      if (typeof trialDurationDays !== 'number' || trialDurationDays < 1 || trialDurationDays > 30) {
+        return res.status(400).json({ message: 'trialDurationDays must be between 1 and 30' });
+      }
+      
+      if (!['disable', 'delete'].includes(expiryAction)) {
+        return res.status(400).json({ message: 'expiryAction must be disable or delete' });
+      }
+      
+      const validatedData = { isTrialModeEnabled, trialDurationDays, expiryAction };
       console.log('Validated trial settings data:', validatedData);
       
-      // Check database connection before attempting update
-      if (!process.env.DATABASE_URL) {
-        throw new Error('Database not configured');
-      }
-      
-      const updatedSettings = await storage.updateTrialSettings(validatedData);
-      console.log('Updated trial settings successfully:', updatedSettings);
-      res.json(updatedSettings);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error('Trial settings validation error:', error.errors);
-        return res.status(400).json({ message: 'Invalid trial settings data', errors: error.errors });
-      }
-      
-      console.error('Error updating trial settings:', error);
-      
-      // Check if it's a MongoDB connection error
-      if (error instanceof Error) {
-        if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED') || error.message.includes('MongoNetworkError')) {
-          return res.status(500).json({ 
-            message: 'Database connection failed. Please check your MongoDB connection.',
-            details: error.message
-          });
-        }
+      // Try storage first, fallback to file-based approach
+      try {
+        const updatedSettings = await storage.updateTrialSettings(validatedData);
+        console.log('Updated trial settings via storage:', updatedSettings);
+        res.json(updatedSettings);
+      } catch (storageError) {
+        console.log('Storage failed, using file-based approach:', storageError);
         
-        if (error.message.includes('Authentication failed')) {
-          return res.status(500).json({ 
-            message: 'Database authentication failed. Please check your MongoDB credentials.',
-            details: error.message
-          });
-        }
+        // File-based fallback
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        const settingsFile = path.join(process.cwd(), 'trial-settings.json');
+        const settings = {
+          id: 1,
+          isTrialModeEnabled,
+          trialDurationDays,
+          expiryAction,
+          updatedAt: new Date()
+        };
+        
+        await fs.writeFile(settingsFile, JSON.stringify(settings, null, 2));
+        console.log('Trial settings saved to file successfully');
+        res.json(settings);
       }
-      
-      res.status(500).json({ message: 'Failed to update trial settings', details: error instanceof Error ? error.message : 'Unknown error' });
+    } catch (error) {
+      console.error('Error updating trial settings:', error);
+      res.status(500).json({ 
+        message: 'Failed to update trial settings', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   });
 
