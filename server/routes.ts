@@ -671,6 +671,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all trial users for admin panel (temporary bypass auth)
+  app.get('/api/admin/trial-users', async (req: Request, res: Response) => {
+    try {
+      const trialUsers = await storage.getAllTrialUsers();
+      console.log('Admin panel trial users count:', trialUsers?.length || 0);
+      res.json(trialUsers || []);
+    } catch (error) {
+      console.error('Error fetching trial users:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch trial users',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Get all trial users from storage (bypass auth for debugging)
   app.get('/api/debug/trial-users', async (req: Request, res: Response) => {
     try {
