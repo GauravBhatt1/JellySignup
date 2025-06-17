@@ -171,29 +171,53 @@ export class MongoStorage implements IStorage {
   }
 
   async updateTrialSettings(newSettings: InsertTrialSettings): Promise<TrialSettings> {
-    let settings = await TrialSettingsModel.findOne({});
-    
-    if (settings) {
-      if (newSettings.trialDurationDays !== undefined) settings.trialDurationDays = newSettings.trialDurationDays;
-      if (newSettings.isTrialModeEnabled !== undefined) settings.isTrialModeEnabled = newSettings.isTrialModeEnabled;
-      if (newSettings.expiryAction !== undefined) settings.expiryAction = newSettings.expiryAction;
-      settings.updatedAt = new Date();
-      await settings.save();
-    } else {
-      settings = new TrialSettingsModel({
-        ...newSettings,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-      await settings.save();
-    }
+    try {
+      // Ensure MongoDB connection is established
+      await connectMongoDB();
+      
+      // Log incoming data for debugging
+      console.log('MongoDB updateTrialSettings called with:', newSettings);
+      
+      // Use findOneAndUpdate with upsert for better reliability
+      const settings = await TrialSettingsModel.findOneAndUpdate(
+        {}, // Empty filter to find any document
+        {
+          $set: {
+            ...newSettings,
+            updatedAt: new Date()
+          },
+          $setOnInsert: {
+            createdAt: new Date()
+          }
+        },
+        {
+          upsert: true, // Create if doesn't exist
+          new: true, // Return updated document
+          runValidators: true // Run schema validation
+        }
+      );
 
-    return {
-      id: parseInt(settings._id.toString()),
-      trialDurationDays: settings.trialDurationDays,
-      isTrialModeEnabled: settings.isTrialModeEnabled,
-      expiryAction: settings.expiryAction,
-      updatedAt: settings.updatedAt,
-    };
+      console.log('MongoDB trial settings updated successfully:', settings);
+
+      return {
+        id: parseInt(settings._id.toString()),
+        trialDurationDays: settings.trialDurationDays,
+        isTrialModeEnabled: settings.isTrialModeEnabled,
+        expiryAction: settings.expiryAction,
+        updatedAt: settings.updatedAt,
+      };
+    } catch (error) {
+      console.error('MongoDB updateTrialSettings error details:', {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        newSettings
+      });
+      
+      // Re-throw with more specific error info
+      if (error instanceof Error) {
+        throw new Error(`Trial settings update failed: ${error.message}`);
+      }
+      throw error;
+    }
   }
 }

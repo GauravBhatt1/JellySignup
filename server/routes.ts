@@ -90,7 +90,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       status: 'healthy', 
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      database: process.env.DATABASE_URL ? 'connected' : 'not configured'
+      database: process.env.DATABASE_URL ? 'configured' : 'not configured',
+      databaseType: process.env.DATABASE_URL?.includes('mongodb') ? 'MongoDB' : 'PostgreSQL',
+      environment: process.env.NODE_ENV
     });
   });
 
@@ -558,6 +560,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('Trial settings update request body:', req.body);
       const validatedData = trialSettingsSchema.parse(req.body);
       console.log('Validated trial settings data:', validatedData);
+      
+      // Check database connection before attempting update
+      if (!process.env.DATABASE_URL) {
+        throw new Error('Database not configured');
+      }
+      
       const updatedSettings = await storage.updateTrialSettings(validatedData);
       console.log('Updated trial settings successfully:', updatedSettings);
       res.json(updatedSettings);
@@ -566,8 +574,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Trial settings validation error:', error.errors);
         return res.status(400).json({ message: 'Invalid trial settings data', errors: error.errors });
       }
+      
       console.error('Error updating trial settings:', error);
-      res.status(500).json({ message: 'Failed to update trial settings' });
+      
+      // Check if it's a MongoDB connection error
+      if (error instanceof Error) {
+        if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED') || error.message.includes('MongoNetworkError')) {
+          return res.status(500).json({ 
+            message: 'Database connection failed. Please check your MongoDB connection.',
+            details: error.message
+          });
+        }
+        
+        if (error.message.includes('Authentication failed')) {
+          return res.status(500).json({ 
+            message: 'Database authentication failed. Please check your MongoDB credentials.',
+            details: error.message
+          });
+        }
+      }
+      
+      res.status(500).json({ message: 'Failed to update trial settings', details: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
