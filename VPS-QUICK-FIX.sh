@@ -30,8 +30,27 @@ echo ""
 echo "Step 3: Ensuring proper MongoDB URL format..."
 if ! grep -q "mongodb+srv://" .env 2>/dev/null && ! grep -q "mongodb://" .env 2>/dev/null; then
     echo "WARNING: No MongoDB URL detected in .env file"
-    echo "Please add: DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/jellyfin_signup"
-    echo "Or update your existing DATABASE_URL to use MongoDB format"
+    echo ""
+    echo "Creating backup of current .env..."
+    cp .env .env.backup 2>/dev/null || true
+    echo ""
+    echo "Would you like me to update the DATABASE_URL to MongoDB format? (y/n)"
+    read -r response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo "Please enter your MongoDB connection string:"
+        echo "Format: mongodb+srv://username:password@cluster.mongodb.net/jellyfin_signup"
+        read -r mongodb_url
+        
+        # Update or add DATABASE_URL
+        if grep -q "DATABASE_URL=" .env 2>/dev/null; then
+            sed -i "s|DATABASE_URL=.*|DATABASE_URL=$mongodb_url|" .env
+        else
+            echo "DATABASE_URL=$mongodb_url" >> .env
+        fi
+        echo "Updated DATABASE_URL in .env file"
+    else
+        echo "Please manually update DATABASE_URL in .env file"
+    fi
 fi
 
 echo ""
