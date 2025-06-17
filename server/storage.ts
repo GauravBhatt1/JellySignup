@@ -208,6 +208,9 @@ import { MongoStorage } from './mongo-storage';
 // Otherwise use MemStorage for development
 const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
 
-export const storage = isDatabaseUrlMongoDB 
+// Force MongoDB for VPS deployment even if DATABASE_URL detection fails
+const forceMongoForVPS = process.env.NODE_ENV === 'production' || process.env.FORCE_MONGODB === 'true';
+
+export const storage = (isDatabaseUrlMongoDB || forceMongoForVPS)
   ? new MongoStorage() 
   : new MemStorage();

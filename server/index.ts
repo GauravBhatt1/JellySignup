@@ -75,10 +75,17 @@ app.use((req, res, next) => {
   console.log('Location tracking features disabled as requested');
 
   // Database configuration logging for VPS debugging
+  const forceMongoForVPS = process.env.NODE_ENV === 'production' || process.env.FORCE_MONGODB === 'true';
+  
   if (process.env.DATABASE_URL) {
     const dbType = process.env.DATABASE_URL.includes('mongodb') ? 'MongoDB' : 'PostgreSQL';
-    console.log(`Database Configuration: ${dbType} detected`);
-    if (dbType === 'MongoDB') {
+    console.log(`Database Configuration: ${dbType} detected from URL`);
+    
+    if (forceMongoForVPS) {
+      console.log('🔧 FORCE_MONGODB enabled - using MongoDB storage');
+    }
+    
+    if (dbType === 'MongoDB' || forceMongoForVPS) {
       console.log('Testing MongoDB connection...');
       try {
         const { MongoStorage } = await import('./mongo-storage');
@@ -90,7 +97,12 @@ app.use((req, res, next) => {
       }
     }
   } else {
-    console.log('⚠️ No DATABASE_URL configured - using in-memory storage');
+    console.log('⚠️ No DATABASE_URL configured');
+    if (forceMongoForVPS) {
+      console.log('🔧 FORCE_MONGODB enabled but no DATABASE_URL - check VPS configuration');
+    } else {
+      console.log('Using in-memory storage for development');
+    }
   }
   
   const server = await registerRoutes(app);
