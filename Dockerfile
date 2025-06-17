@@ -1,25 +1,30 @@
-FROM node:20-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install necessary packages
-RUN apk add --no-cache python3 make g++
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++ git
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+# Copy package files first for better layer caching
+COPY package.json package-lock.json ./
 
-# Copy the rest of the application
+# Install all dependencies (including dev dependencies needed for build)
+RUN npm ci
+
+# Copy source code
 COPY . .
 
-# Build the application
+# Build the application step by step
 RUN npm run build
 
-# Expose the port
+# Clean up dev dependencies to reduce image size
+RUN npm ci --only=production && npm cache clean --force
+
+# Expose port
 EXPOSE 5000
 
-# Set environment variables at runtime
+# Set production environment
 ENV NODE_ENV=production
 
-# Start the server
+# Start the application using the built output
 CMD ["npm", "start"]
