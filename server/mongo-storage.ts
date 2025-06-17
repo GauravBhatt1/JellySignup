@@ -20,7 +20,8 @@ async function connectMongoDB() {
       family: 4 // Use IPv4 for better VPS compatibility
     };
     
-    await mongoose.connect(process.env.DATABASE_URL, options);
+    const mongoUrl = process.env.MONGODB_URL || process.env.DATABASE_URL;
+    await mongoose.connect(mongoUrl, options);
     console.log('✅ MongoDB connected successfully with VPS optimization');
     
     // Connection event handlers for production monitoring
