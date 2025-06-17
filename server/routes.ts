@@ -135,35 +135,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // We don't throw the error here to allow user creation to succeed
       }
       
-      // TRIAL USER TRACKING - Check if trial mode is enabled
-      console.log(`🔍 Checking trial settings for user: ${validatedData.username}`);
+      // TRIAL USER TRACKING - Check if trial mode is enabled with file fallback
+      console.log(`Checking trial settings for user: ${validatedData.username}`);
       try {
-        const trialSettings = await storage.getTrialSettings();
-        console.log(`🔍 Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
+        let trialSettings;
+        
+        // Try storage first, then file fallback
+        try {
+          trialSettings = await storage.getTrialSettings();
+        } catch (storageError) {
+          console.log('Storage failed for trial settings, checking file...');
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const settingsFile = path.join(process.cwd(), 'trial-settings.json');
+          
+          try {
+            const data = await fs.readFile(settingsFile, 'utf-8');
+            trialSettings = JSON.parse(data);
+          } catch (fileError) {
+            console.log('No trial settings file found');
+          }
+        }
+        
+        console.log(`Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
         
         if (trialSettings && trialSettings.isTrialModeEnabled === true) {
-          console.log(`🎯 CREATING TRIAL USER: ${validatedData.username}`);
-        const signupDate = new Date();
-        const expiryDate = new Date();
-        expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
-        
+          console.log(`CREATING TRIAL USER: ${validatedData.username}`);
+          const signupDate = new Date();
+          const expiryDate = new Date();
+          expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
+          
+          const trialUserData = {
+            username: validatedData.username,
+            signupDate: signupDate,
+            expiryDate: expiryDate,
+            isExpired: false,
+            trialDurationDays: trialSettings.trialDurationDays
+          };
+          
           try {
-            await storage.createTrialUser({
-              username: validatedData.username,
-              signupDate: signupDate,
-              expiryDate: expiryDate,
-              isExpired: false,
-              trialDurationDays: trialSettings.trialDurationDays
-            });
-            console.log(`✅ TRIAL USER CREATED: ${validatedData.username} expires ${expiryDate.toISOString()}`);
+            await storage.createTrialUser(trialUserData);
+            console.log(`TRIAL USER CREATED via storage: ${validatedData.username}`);
           } catch (trialError) {
-            console.error(`❌ Failed to create trial user: ${trialError}`);
+            console.log('Storage failed for trial user, using file fallback...');
+            
+            // File-based fallback for trial users
+            const fs = await import('fs/promises');
+            const path = await import('path');
+            const usersFile = path.join(process.cwd(), 'trial-users.json');
+            
+            let existingUsers = [];
+            try {
+              const data = await fs.readFile(usersFile, 'utf-8');
+              existingUsers = JSON.parse(data);
+            } catch (fileError) {
+              // File doesn't exist, start with empty array
+            }
+            
+            const newUser = {
+              id: existingUsers.length + 1,
+              ...trialUserData,
+              createdAt: new Date()
+            };
+            
+            existingUsers.push(newUser);
+            await fs.writeFile(usersFile, JSON.stringify(existingUsers, null, 2));
+            console.log(`TRIAL USER CREATED via file: ${validatedData.username}`);
           }
         } else {
-          console.log(`❌ Trial mode disabled or no settings found`);
+          console.log(`Trial mode disabled or no settings found`);
         }
       } catch (trialCheckError) {
-        console.error(`❌ Error checking trial settings: ${trialCheckError}`);
+        console.error(`Error checking trial settings: ${trialCheckError}`);
       }
       
       // Track user location at signup
@@ -635,12 +678,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all trial users
+  // Get all trial users - with file fallback
   app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
     try {
-      const trialUsers = await storage.getAllTrialUsers();
-      // Return immediate empty array for development if no users exist
-      res.json(trialUsers || []);
+      // Try storage first, fallback to file-based approach
+      try {
+        const trialUsers = await storage.getAllTrialUsers();
+        return res.json(trialUsers || []);
+      } catch (storageError) {
+        console.log('Storage failed for trial users, trying file-based approach:', storageError);
+        
+        // File-based fallback
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        
+        const usersFile = path.join(process.cwd(), 'trial-users.json');
+        
+        try {
+          const data = await fs.readFile(usersFile, 'utf-8');
+          const users = JSON.parse(data);
+          console.log('Trial users loaded from file');
+          res.json(users || []);
+        } catch (fileError) {
+          console.log('No trial users file found, returning empty array');
+          res.json([]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching trial users:', error);
       res.status(500).json({ message: 'Failed to fetch trial users' });
