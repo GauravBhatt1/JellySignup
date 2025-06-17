@@ -207,7 +207,7 @@ import { MongoStorage } from './mongo-storage';
 // If DATABASE_URL exists and starts with mongodb, use MongoDB
 // FORCE_MONGODB flag can override detection for VPS deployment
 const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
-// Force MongoDB for VPS production deployment
+// Only use MongoDB if DATABASE_URL is MongoDB format or explicitly forced
 const forceMongoForVPS = process.env.FORCE_MONGODB === 'true' || process.env.NODE_ENV === 'production';
 const useMongoStorage = isDatabaseUrlMongoDB || forceMongoForVPS;
 
