@@ -2,20 +2,17 @@ FROM node:18
 
 WORKDIR /app
 
-# Copy all files
+# Copy everything
 COPY . .
 
 # Install dependencies
 RUN npm install
 
-# Build application
+# Build app
 RUN npm run build
 
 # Expose port
 EXPOSE 5000
 
-# Set environment
-ENV NODE_ENV=production
-
-# Start application
+# Start app
 CMD ["npm", "start"]
