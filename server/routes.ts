@@ -158,6 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         console.log(`Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
+        console.log('File-based trial settings check:', JSON.stringify(trialSettings));
         
         if (trialSettings && trialSettings.isTrialModeEnabled === true) {
           console.log(`CREATING TRIAL USER: ${validatedData.username}`);
@@ -660,7 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all trial users from storage (bypass auth for debugging)
-  app.get('/api/admin/trial-users', async (req: Request, res: Response) => {
+  app.get('/api/debug/trial-users', async (req: Request, res: Response) => {
     try {
       const trialUsers = await storage.getAllTrialUsers();
       console.log('Trial users from storage:', trialUsers?.length || 0);

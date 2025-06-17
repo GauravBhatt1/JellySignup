@@ -207,14 +207,14 @@ import { MongoStorage } from './mongo-storage';
 // If DATABASE_URL exists and starts with mongodb, use MongoDB
 // FORCE_MONGODB flag can override detection for VPS deployment
 const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');
-// Only use MongoDB if DATABASE_URL is MongoDB format or explicitly forced
-const forceMongoForVPS = process.env.FORCE_MONGODB === 'true' || process.env.NODE_ENV === 'production';
-const useMongoStorage = isDatabaseUrlMongoDB || forceMongoForVPS;
+// Force MongoDB everywhere - development and production
+const forceMongoEverywhere = true;
+const useMongoStorage = isDatabaseUrlMongoDB || forceMongoEverywhere;
 
 console.log(`Storage Configuration:
   DATABASE_URL detected: ${process.env.DATABASE_URL ? 'Yes' : 'No'}
   MongoDB URL detected: ${isDatabaseUrlMongoDB ? 'Yes' : 'No'}
-  FORCE_MONGODB flag: ${forceMongoForVPS ? 'Yes' : 'No'}
+  FORCE_MONGODB everywhere: ${forceMongoEverywhere ? 'Yes' : 'No'}
   Using storage: ${useMongoStorage ? 'MongoDB' : 'Memory'}`);
 
 export const storage = useMongoStorage ? new MongoStorage() : new MemStorage();

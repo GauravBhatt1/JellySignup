@@ -2,15 +2,11 @@
 
 ## Current Configuration
 
-### Development Environment
-- Uses PostgreSQL for main database
-- Uses memory storage for trial users (temporary)
-- File fallback for trial settings
-
-### VPS Production Environment
-- **Trial users**: Always saved in MongoDB (production mode)
-- **Trial settings**: File fallback with MongoDB primary
-- MongoDB automatically forced when NODE_ENV=production
+### All Environments (Development & Production)
+- **Database**: MongoDB for everything (forced everywhere)
+- **Trial users**: Always saved in MongoDB 
+- **Trial settings**: MongoDB primary with file fallback
+- **Unified approach**: Same storage system everywhere
 
 ### VPS Commands
 
