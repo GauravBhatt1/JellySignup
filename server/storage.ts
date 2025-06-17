@@ -208,8 +208,10 @@ import { MongoStorage } from './mongo-storage';
 // FORCE_MONGODB flag can override detection for VPS deployment
 // Force MongoDB everywhere - development and production  
 const forceMongoEverywhere = true;
-// For development testing, use provided MongoDB URL
+// For VPS production, MongoDB URL should be set in environment
+// Development fallback for testing only
 if (forceMongoEverywhere && !process.env.DATABASE_URL?.startsWith('mongodb')) {
+  console.log('🔧 Development mode: Using test MongoDB URL');
   process.env.DATABASE_URL = "mongodb+srv://gauravbhatt8160:9PgTpvopw3OJD9Ny@cluster0.yalif93.mongodb.net/jellyfin_signup?retryWrites=true&w=majority&appName=Cluster0";
 }
 const isDatabaseUrlMongoDB = process.env.DATABASE_URL?.startsWith('mongodb');

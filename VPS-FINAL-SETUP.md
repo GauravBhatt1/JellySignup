@@ -2,11 +2,12 @@
 
 ## Current Configuration
 
-### All Environments (Development & Production)
-- **Database**: MongoDB for everything (forced everywhere)
-- **Trial users**: Always saved in MongoDB 
-- **Trial settings**: MongoDB primary with file fallback
-- **Unified approach**: Same storage system everywhere
+### VPS Production Environment
+- **Database**: MongoDB Atlas (automatic detection)
+- **Trial users**: Saved in MongoDB with 7-day expiry
+- **Trial settings**: File fallback system active
+- **User creation**: Automatic Jellyfin + MongoDB trial tracking
+- **Verified working**: User signup, trial creation, MongoDB storage
 
 ### VPS Commands
 
