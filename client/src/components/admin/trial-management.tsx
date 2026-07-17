@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, Clock, Users, Settings } from "lucide-react";
+import { AlertCircle, Clock, Users, Settings, FileDown, UserCheck, Ban, Trash2, CalendarPlus } from "lucide-react";
 
 interface TrialSettings {
   isTrialModeEnabled: boolean;
@@ -160,6 +160,53 @@ export function TrialManagement() {
     }
   };
 
+  const runTrialUserAction = async (username: string, action: string, days?: number) => {
+    setProcessing(true);
+    try {
+      const response = await fetch(`/api/admin/trial-users/${encodeURIComponent(username)}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, days })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Trial action failed');
+      toast({ title: "Success", description: data.message });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Trial action failed",
+        variant: "destructive"
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const exportTrialUsersCsv = () => {
+    const headers = ["username", "signupDate", "expiryDate", "status", "trialDurationDays"];
+    const rows = trialUsers.map(user => ({
+      username: user.username,
+      signupDate: user.signupDate,
+      expiryDate: user.expiryDate,
+      status: user.isExpired ? "Expired" : "Active",
+      trialDurationDays: user.trialDurationDays
+    }));
+    const csv = [
+      headers.join(","),
+      ...rows.map(row => headers.map(header => `"${String((row as any)[header]).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jellysignup-trial-users-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const getDaysRemaining = (expiryDate: string) => {
     const expiry = new Date(expiryDate);
     const now = new Date();
@@ -167,6 +214,9 @@ export function TrialManagement() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+  const expiredCount = trialUsers.filter(user => user.isExpired || getDaysRemaining(user.expiryDate) <= 0).length;
+  const expiringSoonCount = trialUsers.filter(user => !user.isExpired && getDaysRemaining(user.expiryDate) > 0 && getDaysRemaining(user.expiryDate) <= 3).length;
 
   const getStatusBadge = (user: TrialUser) => {
     if (user.isExpired) {
@@ -187,6 +237,12 @@ export function TrialManagement() {
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Trial Users</div><div className="mt-1 text-2xl font-bold">{trialUsers.length}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Expired</div><div className="mt-1 text-2xl font-bold text-red-500">{expiredCount}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Expiring Soon</div><div className="mt-1 text-2xl font-bold text-amber-500">{expiringSoonCount}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Default Days</div><div className="mt-1 text-2xl font-bold">{settings.trialDurationDays}</div></CardContent></Card>
+      </div>
       {/* Trial Settings Card */}
       <Card>
         <CardHeader>
@@ -284,6 +340,9 @@ export function TrialManagement() {
           <CardDescription>
             Manage users with trial accounts
           </CardDescription>
+          <Button variant="outline" size="sm" onClick={exportTrialUsersCsv} className="w-fit">
+            <FileDown className="mr-2 h-4 w-4" /> Export Trial CSV
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {trialUsers.length === 0 ? (
@@ -309,8 +368,20 @@ export function TrialManagement() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     {getStatusBadge(user)}
+                    <Button size="sm" variant="outline" disabled={processing} onClick={() => runTrialUserAction(user.username, 'extend', 7)}>
+                      <CalendarPlus className="mr-1 h-3.5 w-3.5" /> +7d
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={processing} onClick={() => runTrialUserAction(user.username, 'convert-regular')}>
+                      <UserCheck className="mr-1 h-3.5 w-3.5" /> Regular
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={processing} onClick={() => runTrialUserAction(user.username, 'disable-now')}>
+                      <Ban className="mr-1 h-3.5 w-3.5" /> Disable
+                    </Button>
+                    <Button size="sm" variant="destructive" disabled={processing} onClick={() => runTrialUserAction(user.username, 'delete-now')}>
+                      <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                    </Button>
                   </div>
                 </div>
               ))}

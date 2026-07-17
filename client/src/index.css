@@ -7,8 +7,17 @@ html, body {
   background-color: #0f1129;
   overflow-x: hidden;
   scroll-behavior: smooth;
-  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: auto;
+}
+
+/* Force scroll enabled everywhere (mobile too) */
+html, body, #root {
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-y: scroll !important;
+  touch-action: pan-y !important;
+  position: relative !important;
 }
 
 /* Add animation for slow pulse effect */
@@ -97,7 +106,9 @@ html {
 }
 
 body {
-  @apply bg-gradient-to-b from-[#1a1b4b] to-[#0f1129] text-white min-h-screen;
+  @apply bg-[#0a0b1f] text-white min-h-screen;
+  font-feature-settings: "kern" "liga" "tnum";
+  background-image: radial-gradient(circle at 50% 20%, rgba(0, 164, 220, 0.06) 0%, transparent 60%);
 }
 
 /* Modern glass card style */
@@ -117,5 +128,9 @@ body {
 
 /* Modern input focus style */
 .jellyfin-input:focus {
-  @apply border-indigo-500 outline-none ring-1 ring-purple-500;
+  @apply border-[#00a4dc] outline-none ring-2 ring-[#00a4dc]/40 transition-all;
+}
+
+button:focus-visible {
+  @apply ring-2 ring-[#00a4dc]/50 outline-none;
 }

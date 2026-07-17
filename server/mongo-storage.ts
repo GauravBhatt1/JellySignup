@@ -62,10 +62,36 @@ const TrialSettingsSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+const ApprovalSettingsSchema = new mongoose.Schema({
+  key: { type: String, default: 'singleton', unique: true },
+  requireAdminApproval: { type: Boolean, default: false },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const ApprovalRequestSchema = new mongoose.Schema({
+  requestId: { type: String, required: true, unique: true },
+  username: { type: String, required: true },
+  normalizedUsername: { type: String, required: true, index: true },
+  passwordHash: { type: String, required: true },
+  encryptedPassword: { type: mongoose.Schema.Types.Mixed, required: true },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
+  requestedAt: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+  approvedAt: { type: Date },
+  rejectedAt: { type: Date },
+  jellyfinUserId: { type: String },
+  adminNote: { type: String },
+  ip: { type: mongoose.Schema.Types.Mixed },
+  userAgent: { type: String }
+}, { strict: false });
+
 // MongoDB Models
 const UserModel = mongoose.model('User', UserSchema);
 const TrialUserModel = mongoose.model('TrialUser', TrialUserSchema);
 const TrialSettingsModel = mongoose.model('TrialSettings', TrialSettingsSchema);
+const ApprovalSettingsModel = mongoose.model('ApprovalSettings', ApprovalSettingsSchema);
+const ApprovalRequestModel = mongoose.model('ApprovalRequest', ApprovalRequestSchema);
 
 // MongoDB Storage Implementation
 export class MongoStorage implements IStorage {
@@ -173,9 +199,6 @@ export class MongoStorage implements IStorage {
       // Ensure MongoDB connection is established
       await connectMongoDB();
       
-      // Log incoming data for debugging
-      console.log('MongoDB updateTrialSettings called with:', newSettings);
-      
       // Use findOneAndUpdate with upsert for better reliability
       const settings = await TrialSettingsModel.findOneAndUpdate(
         {}, // Empty filter to find any document
@@ -194,8 +217,6 @@ export class MongoStorage implements IStorage {
           runValidators: true // Run schema validation
         }
       );
-
-      console.log('MongoDB trial settings updated successfully:', settings);
 
       return {
         id: parseInt(settings._id.toString()),
@@ -217,5 +238,65 @@ export class MongoStorage implements IStorage {
       }
       throw error;
     }
+  }
+
+  async getApprovalSettings(): Promise<any | undefined> {
+    const settings = await ApprovalSettingsModel.findOne({ key: 'singleton' });
+    return settings ? {
+      requireAdminApproval: settings.requireAdminApproval,
+      updatedAt: settings.updatedAt,
+    } : undefined;
+  }
+
+  async updateApprovalSettings(newSettings: any): Promise<any> {
+    const settings = await ApprovalSettingsModel.findOneAndUpdate(
+      { key: 'singleton' },
+      {
+        $set: {
+          requireAdminApproval: Boolean(newSettings.requireAdminApproval),
+          updatedAt: new Date()
+        },
+        $setOnInsert: {
+          key: 'singleton'
+        }
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+
+    return {
+      requireAdminApproval: settings.requireAdminApproval,
+      updatedAt: settings.updatedAt,
+    };
+  }
+
+  async getApprovalRequests(): Promise<any[]> {
+    const requests = await ApprovalRequestModel.find({}).sort({ updatedAt: -1 });
+    return requests.map((request: any) => {
+      const item = request.toObject();
+      const { _id, __v, requestId, ...rest } = item;
+      return {
+        ...rest,
+        id: requestId,
+      };
+    });
+  }
+
+  async replaceApprovalRequests(items: any[]): Promise<void> {
+    await ApprovalRequestModel.deleteMany({});
+    if (items.length === 0) return;
+
+    await ApprovalRequestModel.insertMany(items.map((item) => {
+      const { id, ...rest } = item;
+      return {
+        ...rest,
+        requestId: id,
+        normalizedUsername: item.normalizedUsername || String(item.username || '').toLowerCase(),
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        requestedAt: item.requestedAt ? new Date(item.requestedAt) : undefined,
+        approvedAt: item.approvedAt ? new Date(item.approvedAt) : undefined,
+        rejectedAt: item.rejectedAt ? new Date(item.rejectedAt) : undefined,
+      };
+    }), { ordered: false });
   }
 }

@@ -5,12 +5,16 @@ import { JellyfinUser } from "@shared/schema";
 
 export function useJellyfin() {
   const [success, setSuccess] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rateLimitInfo, setRateLimitInfo] = useState<{remaining: number; reset: string} | null>(null);
 
   const mutation = useMutation({
     mutationFn: async (userData: JellyfinUser) => {
       setError(null);
+      setMessage(null);
+      setPendingApproval(false);
       const res = await apiRequest("POST", "/api/jellyfin/users", userData);
       
       // Extract rate limit information from headers
@@ -33,16 +37,27 @@ export function useJellyfin() {
       return res.json();
     },
     onSuccess: (data) => {
-      setSuccess(true);
       setError(null);
+      setMessage(data.message || null);
+
+      if (data.status === "pending") {
+        setPendingApproval(true);
+        setSuccess(false);
+        return;
+      }
+
+      setSuccess(true);
       
       // Redirect to Jellyfin after a short delay
       setTimeout(() => {
-        window.location.href = data.redirectUrl;
+        if (data.redirectUrl) {
+          window.location.href = data.redirectUrl;
+        }
       }, 3000);
     },
     onError: (err: Error) => {
       setSuccess(false);
+      setPendingApproval(false);
       
       // Check if error is rate limit related
       if (err.message.includes("Too many signup attempts")) {
@@ -58,6 +73,8 @@ export function useJellyfin() {
     isCreating: mutation.isPending,
     error,
     success,
+    pendingApproval,
+    message,
     rateLimitInfo
   };
 }

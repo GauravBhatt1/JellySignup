@@ -10,6 +10,7 @@ services:
       - "5000:5000"
     volumes:
       - .:/app
+      - /data/compose/1/nginx/data/logs:/npm-logs:ro
     env_file:
       - .env
     environment:

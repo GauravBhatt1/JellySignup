@@ -1,14 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Eye, EyeOff, CheckCircle, AlertCircle, User, Info, Clock, Loader2 } from "lucide-react";
 import { useJellyfin } from "@/hooks/use-jellyfin";
 import { JellyfinUser, jellyfinUserSchema } from "@shared/schema";
-import { JELLYFIN_API_BASE_URL } from "@/lib/jellyfin";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -21,20 +19,37 @@ import { Input } from "@/components/ui/input";
 import { PasswordStrength } from "./password-strength";
 import { useQuery } from "@tanstack/react-query";
 
+interface TrialInfo {
+  isTrialModeEnabled: boolean;
+  trialDurationDays?: number;
+}
+
+interface ApprovalInfo {
+  requireAdminApproval: boolean;
+}
+
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const { toast } = useToast();
-  const { createUser, isCreating, error, success, rateLimitInfo } = useJellyfin();
+  const [statusUsername, setStatusUsername] = useState("");
+  const [statusPassword, setStatusPassword] = useState("");
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusKind, setStatusKind] = useState<"pending" | "approved" | "rejected" | "error" | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const { createUser, isCreating, error, success, pendingApproval, message, rateLimitInfo } = useJellyfin();
 
   // Fetch trial settings to show trial notice
-  const { data: trialInfo } = useQuery({
+  const { data: trialInfo } = useQuery<TrialInfo>({
     queryKey: ['/api/trial-info'],
     refetchInterval: 60000, // Refresh every minute
   });
 
-  // Type guard for trial info
-  const isTrialMode = trialInfo && typeof trialInfo === 'object' && 'isTrialModeEnabled' in trialInfo;
-  const trialDays = isTrialMode && 'trialDurationDays' in trialInfo ? trialInfo.trialDurationDays : 7;
+  const { data: approvalInfo } = useQuery<ApprovalInfo>({
+    queryKey: ['/api/approval-info'],
+    refetchInterval: 60000,
+  });
+
+  const isTrialMode = Boolean(trialInfo?.isTrialModeEnabled);
+  const trialDays = trialInfo?.trialDurationDays ?? 7;
 
   const form = useForm<JellyfinUser>({
     resolver: zodResolver(jellyfinUserSchema),
@@ -52,7 +67,36 @@ export function SignupForm() {
     await createUser(data);
   };
 
+  const checkAccountStatus = async () => {
+    setIsCheckingStatus(true);
+    setStatusMessage(null);
+    setStatusKind(null);
+    try {
+      const res = await fetch("/api/account-status", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: statusUsername, password: statusPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to check account status");
+      setStatusKind(data.status || "error");
+      setStatusMessage(data.message);
+      if (data.status === "approved" && data.redirectUrl) {
+        setTimeout(() => {
+          window.location.href = data.redirectUrl;
+        }, 2500);
+      }
+    } catch (err) {
+      setStatusKind("error");
+      setStatusMessage(err instanceof Error ? err.message : "Failed to check account status");
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
+
   const password = form.watch("password");
+  const isApprovalRequired = Boolean(approvalInfo?.requireAdminApproval);
 
   return (
     <Card className="w-full max-w-md rounded-lg glass-card p-6 shadow-xl">
@@ -63,7 +107,7 @@ export function SignupForm() {
       </div>
 
       {/* Trial Mode Notice */}
-      {isTrialMode && trialInfo.isTrialModeEnabled && (
+      {isTrialMode && (
         <Alert className="mb-6 bg-blue-500/10 border border-blue-800/30 rounded-lg">
           <Clock className="h-5 w-5 text-blue-400" />
           <AlertDescription className="text-sm font-medium text-blue-300">
@@ -74,6 +118,15 @@ export function SignupForm() {
                 Your account will be automatically managed after the trial period.
               </div>
             </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {isApprovalRequired && (
+        <Alert className="mb-6 bg-amber-500/10 border border-amber-800/30 rounded-lg">
+          <Clock className="h-5 w-5 text-amber-300" />
+          <AlertDescription className="text-sm font-medium text-amber-200">
+            New account requests require admin approval before Jellyfin access is created.
           </AlertDescription>
         </Alert>
       )}
@@ -92,7 +145,16 @@ export function SignupForm() {
         <Alert className="mb-6 bg-green-500/10 border border-green-800 rounded-lg">
           <CheckCircle className="h-5 w-5 text-green-400" />
           <AlertDescription className="text-sm font-medium text-green-400">
-            Account created successfully! Redirecting you to Jellyfin...
+            {message || "Account created successfully! Redirecting you to Jellyfin..."}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {pendingApproval && (
+        <Alert className="mb-6 bg-amber-500/10 border border-amber-800/40 rounded-lg">
+          <Clock className="h-5 w-5 text-amber-300" />
+          <AlertDescription className="whitespace-pre-line text-sm font-medium text-amber-200">
+            {message || "Your account request has been sent.\n\nPlease wait up to 2 days for admin approval.\n\nYou can use the same username and password to log in later and check your account status."}
           </AlertDescription>
         </Alert>
       )}
@@ -182,30 +244,11 @@ export function SignupForm() {
           >
             {isCreating ? (
               <>
-                <span className="animate-spin mr-2">
-                  <svg 
-                    className="h-5 w-5" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    fill="none" 
-                    viewBox="0 0 24 24"
-                  >
-                    <circle 
-                      className="opacity-25" 
-                      cx="12" cy="12" r="10" 
-                      stroke="currentColor" 
-                      strokeWidth="4"
-                    ></circle>
-                    <path 
-                      className="opacity-75" 
-                      fill="currentColor" 
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                </span>
-                Creating account...
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                {isApprovalRequired ? "Sending request..." : "Creating account..."}
               </>
             ) : (
-              "Create Account"
+              isApprovalRequired ? "Request Account" : "Create Account"
             )}
           </Button>
           
@@ -222,6 +265,56 @@ export function SignupForm() {
           </div>
         </form>
       </Form>
+
+      {isApprovalRequired && (
+        <div className="mt-6 border-t border-gray-800 pt-5">
+          <div className="mb-3">
+            <h3 className="text-sm font-semibold text-gray-200">Check Account Status</h3>
+            <p className="mt-1 text-xs text-gray-500">Use the same username and password you requested with.</p>
+          </div>
+          <div className="space-y-3">
+            <Input
+              value={statusUsername}
+              onChange={(event) => setStatusUsername(event.target.value)}
+              placeholder="Username"
+              className="bg-[#12122c]/80 border-indigo-900/30 text-white placeholder-gray-400 rounded-lg h-11 jellyfin-input"
+            />
+            <Input
+              value={statusPassword}
+              onChange={(event) => setStatusPassword(event.target.value)}
+              type="password"
+              placeholder="Password"
+              className="bg-[#12122c]/80 border-indigo-900/30 text-white placeholder-gray-400 rounded-lg h-11 jellyfin-input"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full bg-[#12122c]/60 backdrop-blur-sm border border-indigo-900/40 hover:bg-[#12122c]/80 text-gray-300"
+              disabled={isCheckingStatus || statusUsername.trim().length < 3 || statusPassword.length < 8}
+              onClick={checkAccountStatus}
+            >
+              {isCheckingStatus ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Info className="mr-2 h-4 w-4" />}
+              Check Status
+            </Button>
+            {statusMessage && (
+              <Alert className={`rounded-lg ${
+                statusKind === "approved" ? "border-green-800 bg-green-500/10" :
+                statusKind === "rejected" || statusKind === "error" ? "border-red-800 bg-red-500/10" :
+                "border-amber-800/40 bg-amber-500/10"
+              }`}>
+                {statusKind === "approved" ? <CheckCircle className="h-5 w-5 text-green-400" /> : <AlertCircle className="h-5 w-5 text-amber-300" />}
+                <AlertDescription className={`whitespace-pre-line text-sm font-medium ${
+                  statusKind === "approved" ? "text-green-400" :
+                  statusKind === "rejected" || statusKind === "error" ? "text-red-300" :
+                  "text-amber-200"
+                }`}>
+                  {statusMessage}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </div>
+      )}
     </Card>
   );
 }

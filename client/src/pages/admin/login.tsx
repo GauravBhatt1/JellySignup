@@ -82,7 +82,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-y-auto">
       {/* Dynamic background with movie posters */}
       <DynamicBackground />
       

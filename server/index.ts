@@ -9,15 +9,12 @@ const MemoryStore = createMemoryStore(session);
 
 const app = express();
 
-// Enable trust proxy for running behind reverse proxies in Portainer/Docker
-app.set('trust proxy', true);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Configure session middleware with settings for reverse proxy
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'jellyfin-admin-secret',
+  secret: process.env.SESSION_SECRET || require('crypto').randomBytes(32).toString('hex'),
   resave: true,
   saveUninitialized: true,
   proxy: true, // Trust the reverse proxy
@@ -74,35 +71,22 @@ app.use((req, res, next) => {
 
   console.log('Location tracking features disabled as requested');
 
-  // Database configuration logging for VPS debugging
-  const forceMongoForVPS = process.env.NODE_ENV === 'production' || process.env.FORCE_MONGODB === 'true';
-  
-  if (process.env.DATABASE_URL) {
-    const dbType = process.env.DATABASE_URL.includes('mongodb') ? 'MongoDB' : 'PostgreSQL';
-    console.log(`Database Configuration: ${dbType} detected from URL`);
-    
-    if (forceMongoForVPS) {
-      console.log('🔧 FORCE_MONGODB enabled - using MongoDB storage');
+  // Database configuration - prefer MongoDB for VPS deployments
+  if (process.env.DATABASE_URL?.startsWith('mongodb')) {
+    console.log('Database: MongoDB detected');
+    console.log('Testing MongoDB connection...');
+    try {
+      const { MongoStorage } = await import('./mongo-storage');
+      const mongoStorage = new MongoStorage();
+      await mongoStorage.getTrialSettings();
+      console.log('✅ MongoDB connection test successful');
+    } catch (error) {
+      console.error('❌ MongoDB connection test failed:', error instanceof Error ? error.message : error);
     }
-    
-    if (dbType === 'MongoDB' || forceMongoForVPS) {
-      console.log('Testing MongoDB connection...');
-      try {
-        const { MongoStorage } = await import('./mongo-storage');
-        const mongoStorage = new MongoStorage();
-        await mongoStorage.getTrialSettings();
-        console.log('✅ MongoDB connection test successful');
-      } catch (error) {
-        console.error('❌ MongoDB connection test failed:', error instanceof Error ? error.message : error);
-      }
-    }
+  } else if (process.env.DATABASE_URL) {
+    console.log('Database: PostgreSQL detected (Drizzle)');
   } else {
-    console.log('⚠️ No DATABASE_URL configured');
-    if (forceMongoForVPS) {
-      console.log('🔧 FORCE_MONGODB enabled but no DATABASE_URL - check VPS configuration');
-    } else {
-      console.log('Using in-memory storage for development');
-    }
+    console.log('⚠️ No DATABASE_URL configured - using in-memory storage');
   }
   
   const server = await registerRoutes(app);

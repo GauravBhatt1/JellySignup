@@ -1,10 +1,11 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import session from "express-session";
 import rateLimit from "express-rate-limit";
+import crypto from "crypto";
 import { storage } from "./storage";
+import { hashPassword, comparePassword } from "./password-utils";
 import { z } from "zod";
-import { jellyfinUserSchema, trialSettingsSchema } from "@shared/schema";
+import { jellyfinUserSchema } from "@shared/schema";
 import { adminLoginSchema, userActionSchema } from "@shared/admin-schema";
 import { 
   createJellyfinUser, 
@@ -18,8 +19,6 @@ import {
   isJellyfinAdmin,
   bulkSetUserStatus
 } from "./jellyfin";
-import { setupUserAccessTracking, setupJellyfinProxy, getAccessStats } from "./access-tracker";
-import { trackActiveSessions, getActivityStats } from "./jellyfin-activity-tracker";
 
 // Declare session with adminAuthenticated property
 declare module "express-session" {
@@ -96,6 +95,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Admin health endpoint with live dependency checks
+  app.get('/api/admin/server-health', adminAuth, async (req: Request, res: Response) => {
+    const started = Date.now();
+    const health: any = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      database: {
+        configured: Boolean(process.env.DATABASE_URL),
+        type: process.env.DATABASE_URL?.includes('mongodb') ? 'MongoDB' : 'PostgreSQL',
+        ok: false
+      },
+      jellyfin: {
+        configured: Boolean(process.env.JELLYFIN_SERVER_URL),
+        ok: false
+      },
+      latencyMs: 0
+    };
+
+    try {
+      await storage.getTrialSettings();
+      health.database.ok = true;
+    } catch (error) {
+      health.status = 'degraded';
+      health.database.error = error instanceof Error ? error.message : 'Database check failed';
+    }
+
+    try {
+      await getAllUsers();
+      health.jellyfin.ok = true;
+    } catch (error) {
+      health.status = 'degraded';
+      health.jellyfin.error = error instanceof Error ? error.message : 'Jellyfin check failed';
+    }
+
+    health.latencyMs = Date.now() - started;
+    res.json(health);
+  });
+
   // Apply rate limiting to signup endpoint - configured for proxy environments (like Portainer)
   const signupLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -109,16 +148,309 @@ export async function registerRoutes(app: Express): Promise<Server> {
     skip: (req) => process.env.NODE_ENV === 'development'
   });
   
+  const getRecycleReservedUsernames = async (): Promise<Set<string>> => {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const file = path.join(process.cwd(), 'deleted-users-recycle-bin.json');
+      const data = await fs.readFile(file, 'utf-8');
+      const items = JSON.parse(data);
+      return new Set((Array.isArray(items) ? items : []).map((item: any) => String(item.name || '').toLowerCase()).filter(Boolean));
+    } catch {
+      return new Set();
+    }
+  };
+
+  const approvalSettingsPath = async () => {
+    const path = await import('path');
+    return path.join(process.cwd(), 'approval-settings.json');
+  };
+
+  const approvalRequestsPath = async () => {
+    const path = await import('path');
+    return path.join(process.cwd(), 'approval-requests.json');
+  };
+
+  const readApprovalSettings = async () => {
+    try {
+      const approvalStorage = storage as any;
+      if (typeof approvalStorage.getApprovalSettings === 'function') {
+        const settings = await approvalStorage.getApprovalSettings();
+        if (settings) return { requireAdminApproval: false, ...settings };
+      }
+    } catch (error) {
+      console.error('Approval settings storage read failed, falling back to file:', error);
+    }
+
+    try {
+      const fs = await import('fs/promises');
+      const data = await fs.readFile(await approvalSettingsPath(), 'utf-8');
+      const settings = { requireAdminApproval: false, ...JSON.parse(data) };
+      try {
+        const approvalStorage = storage as any;
+        if (typeof approvalStorage.updateApprovalSettings === 'function') {
+          await approvalStorage.updateApprovalSettings(settings);
+        }
+      } catch (migrationError) {
+        console.error('Approval settings file-to-storage migration failed:', migrationError);
+      }
+      return settings;
+    } catch {
+      return { requireAdminApproval: false, updatedAt: new Date().toISOString() };
+    }
+  };
+
+  const writeApprovalSettings = async (settings: any) => {
+    const next = {
+      requireAdminApproval: Boolean(settings.requireAdminApproval),
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      const approvalStorage = storage as any;
+      if (typeof approvalStorage.updateApprovalSettings === 'function') {
+        return await approvalStorage.updateApprovalSettings(next);
+      }
+    } catch (error) {
+      console.error('Approval settings storage write failed, falling back to file:', error);
+    }
+
+    const fs = await import('fs/promises');
+    await fs.writeFile(await approvalSettingsPath(), JSON.stringify(next, null, 2));
+    return next;
+  };
+
+  const readApprovalRequests = async (): Promise<any[]> => {
+    try {
+      const approvalStorage = storage as any;
+      if (typeof approvalStorage.getApprovalRequests === 'function') {
+        const storedRequests = await approvalStorage.getApprovalRequests();
+        if (Array.isArray(storedRequests) && storedRequests.length > 0) {
+          return storedRequests;
+        }
+      }
+    } catch (error) {
+      console.error('Approval requests storage read failed, falling back to file:', error);
+    }
+
+    try {
+      const fs = await import('fs/promises');
+      const data = await fs.readFile(await approvalRequestsPath(), 'utf-8');
+      const requests = JSON.parse(data);
+      try {
+        const approvalStorage = storage as any;
+        if (typeof approvalStorage.replaceApprovalRequests === 'function') {
+          await approvalStorage.replaceApprovalRequests(Array.isArray(requests) ? requests : []);
+        }
+      } catch (migrationError) {
+        console.error('Approval requests file-to-storage migration failed:', migrationError);
+      }
+      return requests;
+    } catch {
+      return [];
+    }
+  };
+
+  const writeApprovalRequests = async (items: any[]) => {
+    try {
+      const approvalStorage = storage as any;
+      if (typeof approvalStorage.replaceApprovalRequests === 'function') {
+        await approvalStorage.replaceApprovalRequests(items);
+        return;
+      }
+    } catch (error) {
+      console.error('Approval requests storage write failed, falling back to file:', error);
+    }
+
+    const fs = await import('fs/promises');
+    await fs.writeFile(await approvalRequestsPath(), JSON.stringify(items, null, 2));
+  };
+
+  const getApprovalEncryptionKey = () => {
+    const secret = process.env.APPROVAL_ENCRYPTION_KEY || process.env.SESSION_SECRET || process.env.JELLYFIN_API_KEY || 'jellysignup-local-approval-key';
+    return crypto.createHash('sha256').update(secret).digest();
+  };
+
+  const encryptApprovalPassword = (password: string) => {
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', getApprovalEncryptionKey(), iv);
+    const encrypted = Buffer.concat([cipher.update(password, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return {
+      algorithm: 'aes-256-gcm',
+      iv: iv.toString('base64'),
+      tag: tag.toString('base64'),
+      value: encrypted.toString('base64')
+    };
+  };
+
+  const decryptApprovalPassword = (encryptedPassword: any) => {
+    const decipher = crypto.createDecipheriv(
+      'aes-256-gcm',
+      getApprovalEncryptionKey(),
+      Buffer.from(encryptedPassword.iv, 'base64')
+    );
+    decipher.setAuthTag(Buffer.from(encryptedPassword.tag, 'base64'));
+    return Buffer.concat([
+      decipher.update(Buffer.from(encryptedPassword.value, 'base64')),
+      decipher.final()
+    ]).toString('utf8');
+  };
+
+  const createTrialTrackingForUser = async (username: string) => {
+    try {
+      let trialSettings;
+      try {
+        trialSettings = await storage.getTrialSettings();
+      } catch {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        try {
+          const data = await fs.readFile(path.join(process.cwd(), 'trial-settings.json'), 'utf-8');
+          trialSettings = JSON.parse(data);
+        } catch {
+          trialSettings = {
+            isTrialModeEnabled: true,
+            trialDurationDays: 7,
+            expiryAction: 'disable'
+          };
+        }
+      }
+
+      if (trialSettings?.isTrialModeEnabled === true) {
+        const signupDate = new Date();
+        const expiryDate = new Date();
+        expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
+        await storage.createTrialUser({
+          username,
+          signupDate,
+          expiryDate,
+          isExpired: false,
+          trialDurationDays: trialSettings.trialDurationDays
+        });
+      }
+    } catch (error) {
+      console.error(`Error creating trial tracking for ${username}:`, error);
+    }
+  };
+
+  app.get('/api/approval-info', async (_req: Request, res: Response) => {
+    const settings = await readApprovalSettings();
+    res.json({ requireAdminApproval: Boolean(settings.requireAdminApproval) });
+  });
+
+  app.post('/api/account-status', async (req: Request, res: Response) => {
+    try {
+      const validatedData = jellyfinUserSchema.parse(req.body);
+      const requests = await readApprovalRequests();
+      const request = requests.find(item => String(item.username || '').toLowerCase() === validatedData.username.toLowerCase());
+      if (!request) {
+        return res.status(404).json({ status: 'not_found', message: 'No account request found for this username.' });
+      }
+
+      const passwordMatches = await comparePassword(validatedData.password, request.passwordHash || '');
+      if (!passwordMatches) {
+        return res.status(401).json({ status: 'invalid', message: 'Invalid username or password.' });
+      }
+
+      if (request.status === 'pending') {
+        return res.json({
+          status: 'pending',
+          message: 'Your account is waiting for admin approval.\n\nPlease try again later.'
+        });
+      }
+
+      if (request.status === 'approved') {
+        return res.json({
+          status: 'approved',
+          message: 'Your account has been approved.\n\nYou can now log in.',
+          redirectUrl: process.env.JELLYFIN_SERVER_URL || 'http://localhost:8096'
+        });
+      }
+
+      if (request.status === 'rejected') {
+        return res.json({
+          status: 'rejected',
+          message: 'Your account request has been rejected by the admin.\n\nYou cannot log in with this account.'
+        });
+      }
+
+      return res.json({ status: request.status || 'unknown', message: 'Account request status is unavailable.' });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      }
+      console.error('Error checking account status:', error);
+      return res.status(500).json({ message: error instanceof Error ? error.message : 'Internal server error' });
+    }
+  });
+
   // Jellyfin user creation endpoint with rate limiting
   app.post("/api/jellyfin/users", signupLimiter, async (req, res) => {
     try {
       // Validate request body
       const validatedData = jellyfinUserSchema.parse(req.body);
-      
+
+      // Hash password for local storage (Bug #3 fix)
+      const hashedPassword = await hashPassword(validatedData.password);
+
+      // Block usernames currently held in the recycle bin to prevent spam/reclaim abuse
+      const reservedUsernames = await getRecycleReservedUsernames();
+      if (reservedUsernames.has(validatedData.username.toLowerCase())) {
+        return res.status(409).json({
+          message: "This username is reserved in the recycle bin. Contact admin to restore or permanently remove it first."
+        });
+      }
+
       // Check if username already exists in Jellyfin
       const exists = await checkUserExists(validatedData.username);
       if (exists) {
         return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const approvalSettings = await readApprovalSettings();
+      if (approvalSettings.requireAdminApproval) {
+        const requests = await readApprovalRequests();
+        const existingRequest = requests.find(item => String(item.username || '').toLowerCase() === validatedData.username.toLowerCase());
+        if (existingRequest) {
+          if (existingRequest.status === 'pending') {
+            return res.status(409).json({ message: "Your account request is already waiting for admin approval." });
+          }
+          if (existingRequest.status === 'approved') {
+            return res.status(409).json({ message: "Your account has already been approved. You can log in to Jellyfin." });
+          }
+          if (existingRequest.status === 'rejected') {
+            return res.status(403).json({ message: "Your account request has been rejected by the admin. You cannot log in with this account." });
+          }
+        }
+
+        const now = new Date().toISOString();
+        requests.unshift({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          username: validatedData.username,
+          normalizedUsername: validatedData.username.toLowerCase(),
+          passwordHash: hashedPassword,
+          encryptedPassword: encryptApprovalPassword(validatedData.password),
+          status: 'pending',
+          createdAt: now,
+          updatedAt: now,
+          requestedAt: now,
+          ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress || null,
+          userAgent: req.headers['user-agent'] || null
+        });
+        await writeApprovalRequests(requests.slice(0, 1000));
+
+        try {
+          const { logUserAccess } = await import('./access-tracker');
+          logUserAccess(req, validatedData.username, '/api/jellyfin/users/pending-approval');
+        } catch (trackingError) {
+          console.error("Location tracking error (non-critical):", trackingError);
+        }
+
+        return res.status(202).json({
+          status: 'pending',
+          message: 'Your account request has been sent.\n\nPlease wait up to 2 days for admin approval.\n\nYou can use the same username and password to log in later and check your account status.'
+        });
       }
 
       // Create user in Jellyfin
@@ -134,80 +466,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Policy update failed but continuing with user creation");
         // We don't throw the error here to allow user creation to succeed
       }
-      
-      // TRIAL USER TRACKING - Check if trial mode is enabled with file fallback
-      console.log(`Checking trial settings for user: ${validatedData.username}`);
-      try {
-        let trialSettings;
-        
-        // Try storage first, then file fallback
-        try {
-          trialSettings = await storage.getTrialSettings();
-          console.log('Storage trial settings:', trialSettings);
-        } catch (storageError) {
-          console.log('Storage failed for trial settings, checking file...');
-          const fs = await import('fs/promises');
-          const path = await import('path');
-          const settingsFile = path.join(process.cwd(), 'trial-settings.json');
-          
-          try {
-            const data = await fs.readFile(settingsFile, 'utf-8');
-            trialSettings = JSON.parse(data);
-            console.log('File trial settings loaded:', trialSettings);
-          } catch (fileError) {
-            console.log('No trial settings file found:', fileError.message);
-          }
-        }
-        
-        // Final fallback - use default trial settings if nothing found
-        if (!trialSettings) {
-          trialSettings = {
-            isTrialModeEnabled: true,
-            trialDurationDays: 7,
-            expiryAction: 'disable'
-          };
-          console.log('Using default trial settings');
-        }
-        
-        console.log(`Trial settings: enabled=${trialSettings?.isTrialModeEnabled}, days=${trialSettings?.trialDurationDays}`);
-        
-        if (trialSettings && trialSettings.isTrialModeEnabled === true) {
-          console.log(`CREATING TRIAL USER: ${validatedData.username}`);
-          const signupDate = new Date();
-          const expiryDate = new Date();
-          expiryDate.setDate(signupDate.getDate() + trialSettings.trialDurationDays);
-          
-          const trialUserData = {
-            username: validatedData.username,
-            signupDate: signupDate,
-            expiryDate: expiryDate,
-            isExpired: false,
-            trialDurationDays: trialSettings.trialDurationDays
-          };
-          
-          await storage.createTrialUser(trialUserData);
-          console.log(`TRIAL USER CREATED in storage: ${validatedData.username}`);
-          
-          // Debug: Check if user was actually saved
-          const savedUser = await storage.getTrialUser(validatedData.username);
-          console.log('Verification - Trial user saved:', savedUser ? 'YES' : 'NO');
-          
-          // Debug: Get all trial users count
-          const allUsers = await storage.getAllTrialUsers();
-          console.log('Total trial users in storage:', allUsers.length);
-        } else {
-          console.log(`Trial mode disabled or no settings found`);
-        }
-      } catch (trialCheckError) {
-        console.error(`Error checking trial settings: ${trialCheckError}`);
-      }
+
+      await createTrialTrackingForUser(validatedData.username);
       
       // Track user location at signup
-      const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
       // Using our new access tracking system for real location data
       const { logUserAccess } = await import('./access-tracker');
       logUserAccess(req, validatedData.username, '/api/jellyfin/users/signup');
-      console.log(`User signup location tracked for ${validatedData.username} from IP: ${ip}`);
       
       // Return success response with redirect URL
       return res.status(201).json({ 
@@ -269,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Add IP tracking without async/await
         try {
-          const { logUserAccess } = require('./access-tracker');
+          const { logUserAccess } = await import('./access-tracker');
           logUserAccess(req, validatedData.username, '/api/admin/login');
         } catch (trackingError) {
           console.error("Location tracking error (non-critical):", trackingError);
@@ -348,6 +613,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/admin/approval-settings', adminAuth, async (_req: Request, res: Response) => {
+    const settings = await readApprovalSettings();
+    res.json(settings);
+  });
+
+  app.put('/api/admin/approval-settings', adminAuth, async (req: Request, res: Response) => {
+    if (typeof req.body?.requireAdminApproval !== 'boolean') {
+      return res.status(400).json({ message: 'requireAdminApproval must be boolean' });
+    }
+
+    const settings = await writeApprovalSettings({
+      requireAdminApproval: req.body.requireAdminApproval
+    });
+    res.json(settings);
+  });
+
+  app.get('/api/admin/approval-requests', adminAuth, async (_req: Request, res: Response) => {
+    const requests = await readApprovalRequests();
+    const sanitized = requests.map(({ encryptedPassword, passwordHash, ...item }) => item);
+    sanitized.sort((a, b) => {
+      const rank: Record<string, number> = { pending: 0, approved: 1, rejected: 2 };
+      const rankDiff = (rank[a.status] ?? 9) - (rank[b.status] ?? 9);
+      if (rankDiff !== 0) return rankDiff;
+      return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+    });
+    res.json(sanitized);
+  });
+
+  app.post('/api/admin/approval-requests/:id/action', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const action = String(req.body?.action || '');
+      if (!['approve', 'reject'].includes(action)) {
+        return res.status(400).json({ message: 'Invalid approval action' });
+      }
+
+      const requests = await readApprovalRequests();
+      const request = requests.find(item => item.id === req.params.id);
+      if (!request) {
+        return res.status(404).json({ message: 'Approval request not found' });
+      }
+
+      if (request.status !== 'pending') {
+        return res.status(409).json({ message: `Request is already ${request.status}` });
+      }
+
+      const now = new Date().toISOString();
+      if (action === 'reject') {
+        request.status = 'rejected';
+        request.rejectedAt = now;
+        request.updatedAt = now;
+        request.adminNote = String(req.body?.adminNote || '').trim();
+        await writeApprovalRequests(requests);
+        return res.json({ message: `${request.username} rejected` });
+      }
+
+      const exists = await checkUserExists(request.username);
+      let user: any = null;
+      if (!exists) {
+        const password = decryptApprovalPassword(request.encryptedPassword);
+        user = await createJellyfinUser({ username: request.username, password });
+        try {
+          await updateUserPolicy(user.Id, false);
+        } catch (policyError) {
+          console.log('Policy update failed but continuing with approval');
+        }
+        await createTrialTrackingForUser(request.username);
+      }
+
+      request.status = 'approved';
+      request.approvedAt = now;
+      request.updatedAt = now;
+      request.jellyfinUserId = user?.Id || request.jellyfinUserId || null;
+      request.adminNote = String(req.body?.adminNote || '').trim();
+      await writeApprovalRequests(requests);
+      res.json({ message: `${request.username} approved and Jellyfin account created` });
+    } catch (error) {
+      console.error('Error processing approval request:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : 'Failed to process approval request' });
+    }
+  });
+
   // Location statistics endpoint removed
   app.get("/api/admin/location-stats", adminAuth, async (req, res) => {
     try {
@@ -373,6 +719,339 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.status(200).json({ message: "Location tracking disabled" });
   });
   
+  const recycleBinPath = async () => {
+    const path = await import('path');
+    return path.join(process.cwd(), 'deleted-users-recycle-bin.json');
+  };
+
+  const readRecycleBin = async (): Promise<any[]> => {
+    try {
+      const fs = await import('fs/promises');
+      const file = await recycleBinPath();
+      const data = await fs.readFile(file, 'utf-8');
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  };
+
+  const writeRecycleBin = async (items: any[]) => {
+    const fs = await import('fs/promises');
+    const file = await recycleBinPath();
+    await fs.writeFile(file, JSON.stringify(items, null, 2));
+  };
+
+  const moveUserToRecycleBin = async (id: string, source: string = 'admin-delete') => {
+    try {
+      const user = await getUserById(id);
+      const items = await readRecycleBin();
+      items.unshift({
+        recycleId: `${Date.now()}-${id}`,
+        deletedAt: new Date().toISOString(),
+        source,
+        originalId: id,
+        name: user?.Name || id,
+        policy: user?.Policy || null,
+        lastLoginDate: user?.LastLoginDate || null,
+        lastActivityDate: user?.LastActivityDate || null,
+        rawUser: user || null
+      });
+      await writeRecycleBin(items.slice(0, 200));
+    } catch (error) {
+      console.error(`Failed to snapshot user ${id} before delete:`, error);
+    }
+  };
+
+  app.get('/api/admin/recycle-bin/users', adminAuth, async (req: Request, res: Response) => {
+    const items = await readRecycleBin();
+    res.json(items);
+  });
+
+  app.delete('/api/admin/recycle-bin/users/:recycleId', adminAuth, async (req: Request, res: Response) => {
+    const items = await readRecycleBin();
+    const next = items.filter(item => item.recycleId !== req.params.recycleId);
+    await writeRecycleBin(next);
+    res.json({ message: 'Recycle bin item permanently removed' });
+  });
+
+  app.post('/api/admin/recycle-bin/users/:recycleId/restore', adminAuth, async (req: Request, res: Response) => {
+    const items = await readRecycleBin();
+    const item = items.find(entry => entry.recycleId === req.params.recycleId);
+    if (!item) return res.status(404).json({ message: 'Recycle bin item not found' });
+
+    const password = req.body?.password || `Restore${Math.floor(1000 + Math.random() * 9000)}!`;
+    try {
+      const exists = await checkUserExists(item.name);
+      if (exists) return res.status(409).json({ message: 'A Jellyfin user with this name already exists' });
+      const restored = await createJellyfinUser({ username: item.name, password });
+      if (item.policy?.EnableContentDownloading !== undefined) {
+        await updateUserPolicy(restored.Id, Boolean(item.policy.EnableContentDownloading));
+      }
+      if (item.policy?.IsDisabled) {
+        await setUserStatus(restored.Id, true);
+      }
+      const next = items.filter(entry => entry.recycleId !== req.params.recycleId);
+      await writeRecycleBin(next);
+      res.json({ message: `Restored ${item.name}. Temporary password: ${password}`, temporaryPassword: password });
+    } catch (error) {
+      console.error('Failed to restore user from recycle bin:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : 'Failed to restore user' });
+    }
+  });
+
+  const demandPath = async () => {
+    const path = await import('path');
+    return path.join(process.cwd(), 'demand-analytics.json');
+  };
+
+  const normalizeDemandQuery = (query: string) => query.trim().toLowerCase().replace(/\s+/g, ' ');
+
+  const readDemandEntries = async (): Promise<any[]> => {
+    try {
+      const fs = await import('fs/promises');
+      const file = await demandPath();
+      const data = await fs.readFile(file, 'utf-8');
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  };
+
+  const writeDemandEntries = async (items: any[]) => {
+    const fs = await import('fs/promises');
+    const file = await demandPath();
+    await fs.writeFile(file, JSON.stringify(items, null, 2));
+  };
+
+  const upsertDemandEntry = async ({
+    query,
+    username,
+    mediaType = 'unknown',
+    resultCount = 0,
+    source = 'manual'
+  }: {
+    query: string;
+    username: string;
+    mediaType?: string;
+    resultCount?: number;
+    source?: string;
+  }) => {
+    const now = new Date().toISOString();
+    const normalizedQuery = normalizeDemandQuery(query);
+    const items = await readDemandEntries();
+    const existing = items.find(item => item.normalizedQuery === normalizedQuery);
+
+    if (existing) {
+      existing.query = existing.query || query;
+      existing.mediaType = existing.mediaType === 'unknown' ? mediaType : existing.mediaType;
+      existing.resultCount = resultCount;
+      existing.searchCount = (existing.searchCount || 0) + 1;
+      existing.lastSearchedAt = now;
+      existing.status = existing.status || 'pending';
+      existing.users = Array.from(new Set([...(existing.users || []), username]));
+      existing.events = [
+        { username, searchedAt: now, resultCount, source },
+        ...(existing.events || [])
+      ].slice(0, 50);
+    } else {
+      items.unshift({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        query,
+        normalizedQuery,
+        mediaType,
+        resultCount,
+        status: 'pending',
+        searchCount: 1,
+        users: [username],
+        firstSearchedAt: now,
+        lastSearchedAt: now,
+        createdAt: now,
+        events: [{ username, searchedAt: now, resultCount, source }]
+      });
+    }
+
+    await writeDemandEntries(items.slice(0, 1000));
+  };
+
+  const demandLogStatePath = async () => {
+    const path = await import('path');
+    return path.join(process.cwd(), 'demand-log-state.json');
+  };
+
+  const getProxySearchLogPath = () => {
+    return process.env.NPM_ACCESS_LOG_PATH || '/npm-logs/proxy-host-1_access.log';
+  };
+
+  const getSearchResultCount = async (query: string): Promise<number> => {
+    try {
+      const baseUrl = (process.env.JELLYFIN_SERVER_URL || 'http://localhost:8096').replace(/\/$/, '');
+      const apiKey = process.env.JELLYFIN_API_KEY || '';
+      if (!apiKey) return 0;
+      const url = new URL(`${baseUrl}/Items`);
+      url.searchParams.set('Recursive', 'true');
+      url.searchParams.set('SearchTerm', query);
+      url.searchParams.set('IncludeItemTypes', 'Movie,Series');
+      url.searchParams.set('Limit', '1');
+      url.searchParams.set('EnableTotalRecordCount', 'true');
+      const response = await fetch(url, {
+        headers: { 'X-Emby-Token': apiKey }
+      });
+      if (!response.ok) return 0;
+      const data: any = await response.json();
+      return Number(data?.TotalRecordCount ?? data?.Items?.length ?? 0);
+    } catch (error) {
+      console.error('Demand search result count failed:', error);
+      return 0;
+    }
+  };
+
+  const importDemandFromProxyLogs = async () => {
+    try {
+      const fs = await import('fs/promises');
+      const logPath = getProxySearchLogPath();
+      const stat = await fs.stat(logPath);
+      const stateFile = await demandLogStatePath();
+      let offset = 0;
+
+      try {
+        const state = JSON.parse(await fs.readFile(stateFile, 'utf-8'));
+        offset = state?.parserVersion === 2 ? Number(state?.offset || 0) : Math.max(0, stat.size - 1024 * 1024);
+      } catch {
+        offset = Math.max(0, stat.size - 1024 * 1024);
+      }
+
+      if (offset > stat.size) offset = 0;
+      const handle = await fs.open(logPath, 'r');
+      const length = stat.size - offset;
+      if (length <= 0) {
+        await handle.close();
+        return { imported: 0 };
+      }
+
+      const buffer = Buffer.alloc(length);
+      await handle.read(buffer, 0, length, offset);
+      await handle.close();
+      await fs.writeFile(stateFile, JSON.stringify({ offset: stat.size, importedAt: new Date().toISOString(), logPath, parserVersion: 2 }, null, 2));
+
+      const userMap = new Map<string, string>();
+      try {
+        const users = await getAllUsers();
+        users.forEach((user: any) => userMap.set(String(user.Id || '').replace(/-/g, '').toLowerCase(), user.Name));
+      } catch (error) {
+        console.error('Demand user map load failed:', error);
+      }
+
+      const rawEntries = buffer
+        .toString('utf-8')
+        .split('\n')
+        .map(line => {
+          if (!line.includes('searchTerm=')) return null;
+          const requestMatch = line.match(/"(\/[^"]+)"/);
+          if (!requestMatch) return null;
+          try {
+            const url = new URL(requestMatch[1], 'http://jellyfin.local');
+            const query = url.searchParams.get('searchTerm')?.trim();
+            const userId = url.searchParams.get('userId')?.replace(/-/g, '').toLowerCase() || 'unknown';
+            if (!query || query.length < 4) return null;
+            return {
+              query,
+              userId,
+              username: userMap.get(userId) || `user:${userId.slice(0, 8)}`,
+              mediaType: url.searchParams.get('includeItemTypes') || url.searchParams.get('mediaTypes') || 'unknown',
+            };
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean) as Array<{ query: string; userId: string; username: string; mediaType: string }>;
+
+      const finalEntries = rawEntries.filter((entry, index, list) => {
+        const normalized = normalizeDemandQuery(entry.query);
+        return !list.some((other, otherIndex) => {
+          if (otherIndex === index || other.userId !== entry.userId) return false;
+          const otherNormalized = normalizeDemandQuery(other.query);
+          return otherNormalized.length > normalized.length && otherNormalized.startsWith(normalized);
+        });
+      });
+
+      let imported = 0;
+      for (const entry of finalEntries) {
+        const resultCount = await getSearchResultCount(entry.query);
+        if (resultCount === 0) {
+          await upsertDemandEntry({
+            query: entry.query,
+            username: entry.username,
+            mediaType: entry.mediaType,
+            resultCount,
+            source: 'nginx-proxy-log'
+          });
+          imported += 1;
+        }
+      }
+
+      return { imported };
+    } catch (error: any) {
+      if (error?.code !== 'ENOENT') {
+        console.error('Demand proxy log import failed:', error);
+      }
+      return { imported: 0, error: error?.message || 'Proxy log import failed' };
+    }
+  };
+
+  app.get('/api/admin/demand', adminAuth, async (_req: Request, res: Response) => {
+    await importDemandFromProxyLogs();
+    const items = await readDemandEntries();
+    const sorted = items.sort((a, b) => {
+      const statusRank: Record<string, number> = { pending: 0, added: 1, rejected: 2, ignored: 3 };
+      const rankDiff = (statusRank[a.status] ?? 9) - (statusRank[b.status] ?? 9);
+      if (rankDiff !== 0) return rankDiff;
+      return new Date(b.lastSearchedAt || b.createdAt).getTime() - new Date(a.lastSearchedAt || a.createdAt).getTime();
+    });
+    res.json(sorted);
+  });
+
+  app.post('/api/admin/demand', adminAuth, async (req: Request, res: Response) => {
+    const query = String(req.body?.query || '').trim();
+    if (query.length < 2) {
+      return res.status(400).json({ message: 'Search query must be at least 2 characters' });
+    }
+
+    const username = String(req.body?.username || 'manual-admin').trim() || 'manual-admin';
+    const mediaType = String(req.body?.mediaType || 'unknown');
+    const resultCount = Number.isFinite(Number(req.body?.resultCount)) ? Number(req.body.resultCount) : 0;
+    await upsertDemandEntry({ query, username, mediaType, resultCount, source: req.body?.source || 'manual' });
+    res.status(201).json({ message: 'Demand entry recorded' });
+  });
+
+  app.post('/api/admin/demand/import-proxy-logs', adminAuth, async (_req: Request, res: Response) => {
+    const result = await importDemandFromProxyLogs();
+    res.json({ message: `Imported ${result.imported || 0} missing searches`, ...result });
+  });
+
+  app.patch('/api/admin/demand/:id', adminAuth, async (req: Request, res: Response) => {
+    const allowedStatuses = new Set(['pending', 'added', 'rejected', 'ignored']);
+    const status = String(req.body?.status || '');
+    if (!allowedStatuses.has(status)) {
+      return res.status(400).json({ message: 'Invalid demand status' });
+    }
+
+    const items = await readDemandEntries();
+    const item = items.find(entry => entry.id === req.params.id);
+    if (!item) return res.status(404).json({ message: 'Demand entry not found' });
+
+    item.status = status;
+    item.updatedAt = new Date().toISOString();
+    await writeDemandEntries(items);
+    res.json({ message: `Demand marked ${status}` });
+  });
+
+  app.delete('/api/admin/demand/:id', adminAuth, async (req: Request, res: Response) => {
+    const items = await readDemandEntries();
+    const next = items.filter(entry => entry.id !== req.params.id);
+    await writeDemandEntries(next);
+    res.json({ message: 'Demand entry removed' });
+  });
+
   // Perform user action (delete, enable, disable, reset password, bulk actions)
   app.post("/api/admin/users/action", adminAuth, async (req, res) => {
     try {
@@ -388,6 +1067,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             for (const id of userIds) {
               try {
+                await moveUserToRecycleBin(id, 'bulk-delete');
                 await deleteUser(id);
                 success++;
               } catch (error) {
@@ -405,8 +1085,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (!userId) {
             return res.status(400).json({ message: "User ID is required for delete action" });
           }
+          await moveUserToRecycleBin(userId as string, 'single-delete');
           await deleteUser(userId as string);
-          return res.status(200).json({ message: "User deleted successfully" });
+          return res.status(200).json({ message: "User deleted successfully. Snapshot saved to recycle bin." });
           
         case "disable":
           if (!userId) {
@@ -671,11 +1352,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all trial users for admin panel (temporary bypass auth)
-  app.get('/api/admin/trial-users', async (req: Request, res: Response) => {
+  app.get('/api/admin/trial-users', adminAuth, async (req: Request, res: Response) => {
     try {
       const trialUsers = await storage.getAllTrialUsers();
-      console.log('Admin panel trial users count:', trialUsers?.length || 0);
       res.json(trialUsers || []);
     } catch (error) {
       console.error('Error fetching trial users:', error);
@@ -683,19 +1362,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Failed to fetch trial users',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
-    }
-  });
-
-  // Get all trial users from storage (bypass auth for debugging)
-  app.get('/api/debug/trial-users', async (req: Request, res: Response) => {
-    try {
-      const trialUsers = await storage.getAllTrialUsers();
-      console.log('Trial users from storage:', trialUsers?.length || 0);
-      console.log('Trial users data:', trialUsers);
-      res.json(trialUsers || []);
-    } catch (error) {
-      console.error('Error fetching trial users from storage:', error);
-      res.status(500).json({ message: 'Failed to fetch trial users from storage' });
     }
   });
 
@@ -744,6 +1410,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Per-user trial controls: extend, convert to regular, mark expired, disable/delete now
+  app.post('/api/admin/trial-users/:username/action', adminAuth, async (req: Request, res: Response) => {
+    try {
+      const username = decodeURIComponent(req.params.username);
+      const { action, days = 7 } = req.body || {};
+      const trialUser = await storage.getTrialUser(username);
+
+      if (!trialUser) {
+        return res.status(404).json({ message: 'Trial user not found' });
+      }
+
+      if (action === 'extend') {
+        const safeDays = Math.max(1, Math.min(365, Number(days) || 7));
+        const baseDate = new Date(trialUser.expiryDate) > new Date() ? new Date(trialUser.expiryDate) : new Date();
+        const expiryDate = new Date(baseDate);
+        expiryDate.setDate(baseDate.getDate() + safeDays);
+
+        await storage.deleteTrialUser(username);
+        await storage.createTrialUser({
+          username,
+          signupDate: new Date(trialUser.signupDate),
+          expiryDate,
+          isExpired: false,
+          trialDurationDays: (trialUser.trialDurationDays || 0) + safeDays
+        });
+
+        return res.json({ message: `Extended ${username}'s trial by ${safeDays} days`, expiryDate });
+      }
+
+      if (action === 'convert-regular') {
+        await storage.deleteTrialUser(username);
+        return res.json({ message: `${username} converted to regular user` });
+      }
+
+      if (action === 'mark-expired') {
+        await storage.markTrialUserExpired(username);
+        return res.json({ message: `${username} marked as expired` });
+      }
+
+      if (action === 'disable-now' || action === 'delete-now') {
+        const users = await getAllUsers();
+        const jellyfinUser = users.find((u: any) => u.Name === username);
+        if (!jellyfinUser) {
+          return res.status(404).json({ message: 'Matching Jellyfin user not found' });
+        }
+        if (action === 'delete-now') {
+          await moveUserToRecycleBin(jellyfinUser.Id, 'trial-delete');
+          await deleteUser(jellyfinUser.Id);
+          await storage.deleteTrialUser(username);
+          return res.json({ message: `${username} deleted from Jellyfin and trial tracking` });
+        }
+        await setUserStatus(jellyfinUser.Id, true);
+        await storage.markTrialUserExpired(username);
+        return res.json({ message: `${username} disabled and marked expired` });
+      }
+
+      return res.status(400).json({ message: 'Invalid trial action' });
+    } catch (error) {
+      console.error('Error performing trial user action:', error);
+      res.status(500).json({ message: error instanceof Error ? error.message : 'Failed to perform trial action' });
+    }
+  });
+
   // Process expired trial users
   app.post('/api/admin/process-expired-trials', adminAuth, async (req: Request, res: Response) => {
     try {
@@ -758,6 +1487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const users = await getAllUsers();
             const jellyfinUser = users.find((u: any) => u.Name === trialUser.username);
             if (jellyfinUser) {
+              await moveUserToRecycleBin(jellyfinUser.Id, 'expired-trial-delete');
               await deleteUser(jellyfinUser.Id);
             }
             await storage.deleteTrialUser(trialUser.username);

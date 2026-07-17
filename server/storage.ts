@@ -143,6 +143,8 @@ export class MemStorage implements IStorage {
     const trialUser: TrialUser = {
       ...insertTrialUser,
       id,
+      signupDate: insertTrialUser.signupDate || new Date(),
+      isExpired: insertTrialUser.isExpired ?? false,
       createdAt: new Date(),
     };
     this.trialUsers.set(id, trialUser);
@@ -193,11 +195,12 @@ export class MemStorage implements IStorage {
   async updateTrialSettings(settings: InsertTrialSettings): Promise<TrialSettings> {
     this.trialSettings = {
       id: 1,
-      ...settings,
-      createdAt: new Date(),
+      isTrialModeEnabled: settings.isTrialModeEnabled ?? false,
+      trialDurationDays: settings.trialDurationDays ?? 7,
+      expiryAction: settings.expiryAction ?? "disable",
       updatedAt: new Date(),
     };
-    return this.trialSettings;
+    return this.trialSettings!;
   }
 }
 

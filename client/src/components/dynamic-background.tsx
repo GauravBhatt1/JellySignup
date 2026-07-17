@@ -95,7 +95,7 @@ export function DynamicBackground() {
   ];
   
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden pointer-events-none">
       {/* Base background to prevent white flashes during scroll */}
       <div className="fixed inset-0 bg-[#0f1129] -z-30"></div>
       

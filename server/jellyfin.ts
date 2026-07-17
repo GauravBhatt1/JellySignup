@@ -96,7 +96,7 @@ export async function isJellyfinAdmin(username: string, password: string): Promi
               return false;
             }
           }
-        } catch (pathError) {
+        } catch (pathError: any) {
           console.log(`Path ${path} failed: ${pathError.message}`);
         }
       }
@@ -105,7 +105,7 @@ export async function isJellyfinAdmin(username: string, password: string): Promi
         console.error('Could not access users through any standard API paths');
         return false;
       }
-    } catch (apiError) {
+    } catch (apiError: any) {
       console.error('API connection test failed:', apiError.message);
     }
     
@@ -127,7 +127,7 @@ export async function isJellyfinAdmin(username: string, password: string): Promi
         console.log('User is confirmed as administrator (fallback)');
         return true;
       }
-    } catch (authError) {
+    } catch (authError: any) {
       console.error('Authentication failed:', authError.message);
     }
     

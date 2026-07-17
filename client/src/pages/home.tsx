@@ -4,7 +4,7 @@ import { DynamicBackground } from "@/components/dynamic-background";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-y-auto">
       {/* Dynamic background with movie posters */}
       <DynamicBackground />
       

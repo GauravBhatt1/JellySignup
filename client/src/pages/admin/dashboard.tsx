@@ -1,25 +1,20 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Users, 
   UserX, 
   UserCheck, 
-  UserCog, 
-  LogOut, 
   Loader2, 
   AlertCircle, 
   Search,
   Trash,
   Lock,
   UserX2,
-  Monitor,
   UserCheck2,
-  Settings,
-  Clock,
   CheckSquare,
   Square,
-  Download
+  Download,
+  FileDown,
 } from "lucide-react";
 // Theme selector import removed
 import { useToast } from "@/hooks/use-toast";
@@ -45,8 +40,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrialManagement } from "@/components/admin/trial-management";
+import { AdminLayout } from "@/components/admin/admin-layout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,7 +83,6 @@ export default function AdminDashboard() {
   const [newPassword, setNewPassword] = useState("");
   const [showNeverLoggedIn, setShowNeverLoggedIn] = useState(false);
   const { toast } = useToast();
-  const [_, navigate] = useLocation();
   const queryClient = useQueryClient();
 
   // Check if admin is logged in
@@ -200,31 +193,6 @@ export default function AdminDashboard() {
     }
   });
 
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/admin/logout");
-      if (!res.ok) {
-        throw new Error("Failed to logout");
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
-      });
-      window.location.href = "/admin/login";
-    },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Logout Failed",
-        description: "Failed to logout. Please try again.",
-      });
-    }
-  });
-
   // Function to check if a user has never logged in
   const hasNeverLoggedIn = (user: JellyfinApiUser): boolean => {
     return !user.LastLoginDate && !user.LastActivityDate;
@@ -240,6 +208,13 @@ export default function AdminDashboard() {
     return matchesSearch;
   }) : [];
 
+  const totalUsers = users?.length || 0;
+  const activeUsers = users?.filter((user: JellyfinApiUser) => !user.Policy?.IsDisabled && !user.Policy?.IsAdministrator).length || 0;
+  const disabledUsers = users?.filter((user: JellyfinApiUser) => user.Policy?.IsDisabled).length || 0;
+  const neverLoggedInUsers = users?.filter((user: JellyfinApiUser) => hasNeverLoggedIn(user) && !user.Policy?.IsAdministrator).length || 0;
+  const trialUsersCount = trialUsersList?.length || 0;
+  const downloadsEnabledUsers = users?.filter((user: JellyfinApiUser) => user.Policy?.EnableContentDownloading).length || 0;
+
   // Format date for display
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Never";
@@ -251,152 +226,92 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    logoutMutation.mutate();
+  const exportUsersCsv = () => {
+    const rows = filteredUsers.map((user: JellyfinApiUser) => ({
+      username: user.Name,
+      status: user.Policy?.IsAdministrator ? "Admin" : user.Policy?.IsDisabled ? "Disabled" : "Active",
+      accountMode: trialUsersList?.some((trialUser: any) => trialUser.username === user.Name) ? "Trial" : "Regular",
+      downloads: user.Policy?.EnableContentDownloading ? "Enabled" : "Disabled",
+      lastActivity: user.LastActivityDate || "Never",
+      lastLogin: user.LastLoginDate || "Never"
+    }));
+    const headers = ["username", "status", "accountMode", "downloads", "lastActivity", "lastLogin"];
+    const csv = [
+      headers.join(","),
+      ...rows.map((row: Record<string, string>) => headers.map(header => `"${String(row[header]).replace(/"/g, '""')}"`).join(","))
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jellysignup-users-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
+  const selectedUserNames = selectedUsers
+    .map(id => users?.find((user: JellyfinApiUser) => user.Id === id)?.Name)
+    .filter(Boolean) as string[];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0d14] to-[#121725] text-white">
-      {/* Header */}
-      <header className="bg-gray-900/60 border-b border-gray-800 px-4 sm:px-6 py-4">
-        <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Users className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Jellyfin Admin Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-4">
-{/* Analytics button removed */}
-            
-{/* Theme selector button removed */}
-            <Button 
-              variant="ghost" 
-              className="text-gray-400 hover:text-white flex items-center gap-2"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main className="container mx-auto p-4 sm:p-6">
-        {/* Stats Cards */}
-        {!isLoading && !error && users && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {/* Total Users Card */}
-            <div className="bg-gradient-to-br from-blue-900/50 to-blue-800/20 border border-blue-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center">
-                <div className="p-3 bg-blue-500/20 rounded-full mr-4">
-                  <Users className="h-6 w-6 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Total Users</p>
-                  <h3 className="text-2xl font-bold text-white">{users.length}</h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Active Users Card */}
-            <div className="bg-gradient-to-br from-green-900/50 to-green-800/20 border border-green-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center">
-                <div className="p-3 bg-green-500/20 rounded-full mr-4">
-                  <UserCheck className="h-6 w-6 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Active Users</p>
-                  <h3 className="text-2xl font-bold text-white">
-                    {users.filter((u: JellyfinApiUser) => !u.Policy?.IsDisabled).length}
-                  </h3>
-                </div>
-              </div>
-            </div>
-
-            {/* Inactive Users Card */}
-            <div className="bg-gradient-to-br from-amber-900/50 to-amber-800/20 border border-amber-800/30 rounded-lg p-4 shadow-lg backdrop-blur-sm">
-              <div className="flex items-center">
-                <div className="p-3 bg-amber-500/20 rounded-full mr-4">
-                  <UserX className="h-6 w-6 text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Never Logged In</p>
-                  <h3 className="text-2xl font-bold text-white">
-                    {users.filter((u: JellyfinApiUser) => hasNeverLoggedIn(u)).length}
-                  </h3>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 rounded-lg p-6 shadow-lg">
-          <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-800 border-gray-700">
-              <TabsTrigger value="users" className="flex items-center gap-2 data-[state=active]:bg-gray-700">
-                <Users className="h-4 w-4" />
-                User Management
-              </TabsTrigger>
-              <TabsTrigger value="trials" className="flex items-center gap-2 data-[state=active]:bg-gray-700">
-                <Clock className="h-4 w-4" />
-                Trial Management
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="users" className="mt-6">
-              <div className="space-y-6">
+    <AdminLayout
+      title="User Management"
+      description="Manage Jellyfin users, bulk actions, exports, and account safety."
+    >
+      <div className="bg-gray-900/40 backdrop-blur-sm border border-gray-800 rounded-2xl p-3 sm:p-4 lg:p-5 shadow-lg">
+        <div className="space-y-4">
                 {/* Moved all user management content here */}
-                {/* Mobile Notice - Desktop Required */}
-                <div className="block sm:hidden w-full bg-gray-900/90 backdrop-blur-sm border border-amber-500/30 rounded-xl p-4 mb-6 shadow-lg">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="bg-amber-600 rounded-full p-2 mr-3">
-                        <Settings className="h-5 w-5 text-white" />
+                {/* Mobile Notice removed - Bulk actions now work on mobile too */}
+                {/* Banner removed to enable mobile bulk actions */}
+                    
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                      <div className="rounded-2xl border border-gray-800 bg-gray-950/70 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-gray-500">Total</div>
+                        <div className="mt-2 text-2xl font-bold text-white">{totalUsers}</div>
                       </div>
-                      <span className="font-bold text-lg text-amber-400">Desktop Recommended</span>
-                    </div>
-                    
-                    <div className="text-sm text-gray-300 mb-4 leading-relaxed">
-                      For <span className="text-amber-400 font-semibold">complete admin functionality</span> and bulk user actions,<br />
-                      please use a <span className="text-white font-medium">desktop browser</span> or enable <span className="text-white font-medium">"Desktop site"</span> mode.
-                    </div>
-                    
-                    <div className="bg-gray-800/60 rounded-lg p-3 mb-4 border border-gray-700">
-                      <div className="text-xs font-medium mb-2 text-amber-300">⚡ Advanced Features:</div>
-                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                        <div className="flex items-center">
-                          <Lock className="h-3 w-3 mr-1 text-amber-400" /> 
-                          <span>Password Reset</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Download className="h-3 w-3 mr-1 text-blue-400" /> 
-                          <span>Enable Downloads</span>
-                        </div>
-                        <div className="flex items-center">
-                          <UserX className="h-3 w-3 mr-1 text-orange-400" /> 
-                          <span>Disable Users</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Trash className="h-3 w-3 mr-1 text-red-400" /> 
-                          <span>Delete Users</span>
-                        </div>
+                      <div className="rounded-2xl border border-green-500/20 bg-green-950/20 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-green-400/70">Active</div>
+                        <div className="mt-2 text-2xl font-bold text-green-300">{activeUsers}</div>
+                      </div>
+                      <div className="rounded-2xl border border-red-500/20 bg-red-950/20 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-red-400/70">Disabled</div>
+                        <div className="mt-2 text-2xl font-bold text-red-300">{disabledUsers}</div>
+                      </div>
+                      <div className="rounded-2xl border border-amber-500/20 bg-amber-950/20 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-amber-400/70">Never Login</div>
+                        <div className="mt-2 text-2xl font-bold text-amber-300">{neverLoggedInUsers}</div>
+                      </div>
+                      <div className="rounded-2xl border border-blue-500/20 bg-blue-950/20 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-blue-400/70">Trials</div>
+                        <div className="mt-2 text-2xl font-bold text-blue-300">{trialUsersCount}</div>
+                      </div>
+                      <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 p-4 shadow-lg">
+                        <div className="text-xs uppercase tracking-wide text-cyan-400/70">Downloads</div>
+                        <div className="mt-2 text-2xl font-bold text-cyan-300">{downloadsEnabledUsers}</div>
                       </div>
                     </div>
-                    
-                    <div className="text-xs text-gray-500 bg-gray-800/40 rounded-md px-3 py-2">
-                      💡 Mobile browsers: Menu → Request Desktop Site
-                    </div>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold flex items-center">
+                    <div className="rounded-2xl border border-gray-800 bg-gray-950/60 p-4 shadow-lg">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <div className="text-sm font-semibold text-white">Export & Bulk Preview</div>
+                            <p className="mt-1 text-xs text-gray-500">Download current filtered users or preview selected bulk changes.</p>
+                          </div>
+                          <Button onClick={exportUsersCsv} variant="outline" size="sm" className="border-gray-700 bg-gray-800 hover:bg-gray-700">
+                            <FileDown className="mr-2 h-4 w-4" /> Export CSV
+                          </Button>
+                        </div>
+                    </div>
+
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-4">
+                  <h2 className="text-xl font-semibold flex items-center w-full lg:w-auto">
                     <Users className="mr-2 h-5 w-5 text-primary" />
                     User Management
                   </h2>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     {/* Toggle to show only users who never logged in */}
                     <Button
                       variant={showNeverLoggedIn ? "default" : "outline"}
@@ -408,18 +323,43 @@ export default function AdminDashboard() {
                       {showNeverLoggedIn ? "Showing Inactive Users" : "Show Inactive Users"}
                     </Button>
 
-                    {/* Bulk Actions Panel for Selected Users */}
+                    {/* Bulk Actions Panel for Selected Users (Mobile Friendly) */}
                     {selectedUsers.length > 0 && (
-                      <div className="w-full bg-gray-800/90 backdrop-blur-sm border border-blue-500/30 rounded-xl p-4 mb-4">
-                        <div className="text-center text-blue-400 font-medium mb-3">
-                          🎯 {selectedUsers.length} Users Selected
+                      <div className="w-full lg:w-auto sticky top-0 z-50 bg-gray-900/95 backdrop-blur-xl border border-blue-500/40 rounded-xl p-4 shadow-xl md:static md:top-auto md:mb-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <div className="text-blue-400 font-semibold">{selectedUsers.length} Users Selected</div>
+                            <div className="mt-1 max-w-[360px] truncate text-xs text-gray-400">Preview: {selectedUserNames.slice(0, 4).join(', ')}{selectedUserNames.length > 4 ? ` +${selectedUserNames.length - 4} more` : ''}</div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedUsers([])}
+                              className="text-gray-400 hover:text-white h-8 px-2"
+                            >
+                              Clear
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Select all visible users logic
+                                const allIds = users?.map((u: any) => u.Id) || [];
+                                setSelectedUsers(allIds);
+                              }}
+                              className="text-blue-400 border-blue-500/50 h-8 px-3 text-xs"
+                            >
+                              Select All
+                            </Button>
+                          </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-4 gap-2 md:gap-3">
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center h-12 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white"
+                            className="flex flex-col items-center justify-center gap-1 h-16 sm:h-14 bg-amber-600 hover:bg-amber-700 border-amber-500 text-white rounded-xl active:scale-95 transition-transform text-[10px] sm:text-xs font-medium"
                             onClick={() => {
                               actionMutation.mutate({
                                 action: "reset-password",
@@ -428,13 +368,14 @@ export default function AdminDashboard() {
                             }}
                             disabled={actionMutation.isPending}
                           >
-                            <Lock className="h-6 w-6" />
+                            <Lock className="h-5 w-5" />
+                            <span>Reset</span>
                           </Button>
                           
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center h-12 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white"
+                            className="flex flex-col items-center justify-center gap-1 h-16 sm:h-14 bg-blue-600 hover:bg-blue-700 border-blue-500 text-white rounded-xl active:scale-95 transition-transform text-[10px] sm:text-xs font-medium"
                             onClick={() => {
                               actionMutation.mutate({
                                 action: "toggle-downloads",
@@ -443,13 +384,14 @@ export default function AdminDashboard() {
                             }}
                             disabled={actionMutation.isPending}
                           >
-                            <Download className="h-6 w-6" />
+                            <Download className="h-5 w-5" />
+                            <span>Download</span>
                           </Button>
                           
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex items-center justify-center h-12 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white"
+                            className="flex flex-col items-center justify-center gap-1 h-16 sm:h-14 bg-orange-600 hover:bg-orange-700 border-orange-500 text-white rounded-xl active:scale-95 transition-transform text-[10px] sm:text-xs font-medium"
                             onClick={() => {
                               actionMutation.mutate({
                                 action: "bulk-disable",
@@ -458,23 +400,42 @@ export default function AdminDashboard() {
                             }}
                             disabled={actionMutation.isPending}
                           >
-                            <UserX className="h-6 w-6" />
+                            <UserX className="h-5 w-5" />
+                            <span>Disable</span>
                           </Button>
                           
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="flex items-center justify-center h-12 bg-red-600 hover:bg-red-700 text-white"
-                            onClick={() => {
-                              actionMutation.mutate({
-                                action: "delete",
-                                userIds: selectedUsers
-                              });
-                            }}
-                            disabled={actionMutation.isPending}
-                          >
-                            <Trash className="h-6 w-6" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex flex-col items-center justify-center gap-1 h-16 sm:h-14 bg-red-600 hover:bg-red-700 text-white rounded-xl active:scale-95 transition-transform text-[10px] sm:text-xs font-medium"
+                                disabled={actionMutation.isPending}
+                              >
+                                <Trash className="h-5 w-5" />
+                                <span>Delete</span>
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-gray-900 border-gray-800 text-white max-w-lg mx-auto">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete {selectedUsers.length} selected users?</AlertDialogTitle>
+                                <AlertDialogDescription className="text-gray-400">
+                                  This will move these Jellyfin users to the recycle bin first: {selectedUserNames.slice(0, 8).join(', ')}{selectedUserNames.length > 8 ? ` +${selectedUserNames.length - 8} more` : ''}. You can restore them later unless another user takes the same username.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="bg-gray-800 text-white hover:bg-gray-700 border-gray-700">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-600 hover:bg-red-700"
+                                  onClick={() => {
+                                    actionMutation.mutate({ action: "delete", userIds: selectedUsers });
+                                  }}
+                                >
+                                  Move to Recycle Bin
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     )}
@@ -482,12 +443,12 @@ export default function AdminDashboard() {
                     {/* Inactive Users Info */}
                     {showNeverLoggedIn && (
                       <div className="text-center text-sm text-amber-400 mb-4">
-                        Found {filteredUsers.filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
+                        Found {filteredUsers.filter((user: JellyfinApiUser) => !user.LastLoginDate && !user.Policy?.IsAdministrator).length} inactive users
                       </div>
                     )}
 
                     {/* Search */}
-                    <div className="relative w-64">
+                    <div className="relative w-full sm:w-64">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input 
                         type="text"
@@ -579,10 +540,185 @@ export default function AdminDashboard() {
                 </div>
               )}
               
-              <div className="overflow-x-auto">
-                <Table>
+              {/* Mobile user cards */}
+              <div className="grid gap-3 md:hidden">
+                {filteredUsers.length === 0 ? (
+                  <div className="rounded-2xl border border-gray-800 bg-gray-950/60 p-6 text-center text-gray-500">
+                    No users found
+                  </div>
+                ) : (
+                  filteredUsers.map((user: JellyfinApiUser) => {
+                    const isSelected = selectedUsers.includes(user.Id);
+                    const isTrialUser = trialUsersList?.some((trialUser: any) => trialUser.username === user.Name);
+                    return (
+                      <div
+                        key={user.Id}
+                        className={`rounded-2xl border p-4 shadow-lg transition-colors ${isSelected ? 'border-blue-500/70 bg-blue-950/20' : 'border-gray-800 bg-gray-950/60'}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              {!user.Policy?.IsAdministrator && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      setSelectedUsers(prev => prev.filter(id => id !== user.Id));
+                                    } else {
+                                      setSelectedUsers(prev => [...prev, user.Id]);
+                                    }
+                                  }}
+                                  className="rounded-lg p-1 text-gray-500 active:scale-95"
+                                  aria-label={isSelected ? 'Deselect user' : 'Select user'}
+                                >
+                                  {isSelected ? <CheckSquare className="h-5 w-5 text-blue-400" /> : <Square className="h-5 w-5" />}
+                                </button>
+                              )}
+                              <h3 className="truncate text-base font-semibold text-white">{user.Name}</h3>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {user.Policy?.IsAdministrator ? (
+                                <span className="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/20 px-2.5 py-1 text-[11px] font-medium text-indigo-300">Admin</span>
+                              ) : user.Policy?.IsDisabled ? (
+                                <span className="inline-flex items-center rounded-full border border-red-500/30 bg-red-500/20 px-2.5 py-1 text-[11px] font-medium text-red-300">Disabled</span>
+                              ) : (
+                                <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/20 px-2.5 py-1 text-[11px] font-medium text-green-300">Active</span>
+                              )}
+                              <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${isTrialUser ? 'border-blue-500/30 bg-blue-500/20 text-blue-300' : 'border-gray-500/30 bg-gray-500/20 text-gray-300'}`}>
+                                {isTrialUser ? 'Trial' : 'Regular'}
+                              </span>
+                              <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${user.Policy?.EnableContentDownloading ? 'border-blue-500/30 bg-blue-500/20 text-blue-300' : 'border-gray-500/30 bg-gray-500/20 text-gray-300'}`}>
+                                Downloads {user.Policy?.EnableContentDownloading ? 'On' : 'Off'}
+                              </span>
+                              {hasNeverLoggedIn(user) && !user.Policy?.IsAdministrator && (
+                                <span className="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/20 px-2.5 py-1 text-[11px] font-medium text-amber-300">Never logged in</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-gray-900/50 p-3 text-xs text-gray-400">
+                          <div>
+                            <div className="text-gray-500">Last activity</div>
+                            <div className="mt-1 font-medium text-gray-200">{formatDate(user.LastActivityDate)}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Last login</div>
+                            <div className="mt-1 font-medium text-gray-200">{formatDate(user.LastLoginDate)}</div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-4 gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-gray-700 bg-gray-800 text-[10px] text-white hover:bg-gray-700"
+                                onClick={() => setSelectedUser(user)}
+                                disabled={actionMutation.isPending}
+                              >
+                                <Lock className="h-4 w-4 text-amber-400" />
+                                Reset
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-gray-900 border-gray-800 text-white max-w-md mx-auto">
+                              <DialogHeader>
+                                <DialogTitle>Reset Password</DialogTitle>
+                                <DialogDescription className="text-gray-400">
+                                  Set a new password for user {selectedUser?.Name}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="py-4">
+                                <Input
+                                  type="password"
+                                  placeholder="Enter new password"
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  className="bg-gray-800 border-gray-700 text-white"
+                                />
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  className="bg-amber-600 hover:bg-amber-700"
+                                  onClick={() => {
+                                    if (selectedUser && newPassword) {
+                                      actionMutation.mutate({
+                                        userId: selectedUser.Id,
+                                        action: "reset-password",
+                                        newPassword
+                                      });
+                                    }
+                                  }}
+                                  disabled={!newPassword || actionMutation.isPending}
+                                >
+                                  {actionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                  Reset Password
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+
+                          <Button
+                            variant="outline"
+                            className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-blue-700/60 bg-blue-900/30 text-[10px] text-white hover:bg-blue-800/50 disabled:opacity-40"
+                            onClick={() => actionMutation.mutate({ userId: user.Id, action: "toggle-downloads", enableDownloads: !user.Policy?.EnableContentDownloading })}
+                            disabled={user.Policy?.IsAdministrator || actionMutation.isPending}
+                          >
+                            <Download className="h-4 w-4 text-blue-300" />
+                            DL
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-orange-700/60 bg-orange-900/30 text-[10px] text-white hover:bg-orange-800/50 disabled:opacity-40"
+                            onClick={() => actionMutation.mutate({ userId: user.Id, action: user.Policy?.IsDisabled ? "enable" : "disable" })}
+                            disabled={user.Policy?.IsAdministrator || actionMutation.isPending}
+                          >
+                            {user.Policy?.IsDisabled ? <UserCheck2 className="h-4 w-4 text-green-300" /> : <UserX2 className="h-4 w-4 text-orange-300" />}
+                            {user.Policy?.IsDisabled ? 'Enable' : 'Disable'}
+                          </Button>
+
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl border-red-700/60 bg-red-900/30 text-[10px] text-white hover:bg-red-800/50 disabled:opacity-40"
+                                disabled={user.Policy?.IsAdministrator || actionMutation.isPending}
+                              >
+                                <Trash className="h-4 w-4 text-red-300" />
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-gray-900 border-gray-800 text-white max-w-md mx-auto">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                <AlertDialogDescription className="text-gray-400">
+                                  Are you sure you want to delete user {user.Name}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="bg-gray-800 text-white hover:bg-gray-700 border-gray-700">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-600 hover:bg-red-700"
+                                  onClick={() => actionMutation.mutate({ userId: user.Id, action: "delete" })}
+                                >
+                                  {actionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              <div className="hidden overflow-x-auto rounded-2xl border border-gray-800 bg-gray-950/40 shadow-xl md:block">
+                <Table className="min-w-[760px]">
                   <TableHeader>
-                    <TableRow className="border-gray-800 hover:bg-gray-900/50">
+                    <TableRow className="border-gray-800 bg-gray-900/80 hover:bg-gray-900/80">
                       <TableHead className="text-gray-400 w-8">
                         <CheckSquare 
                           className={`h-4 w-4 cursor-pointer ${
@@ -591,14 +727,14 @@ export default function AdminDashboard() {
                           onClick={() => {
                             if (selectedUsers.length > 0) {
                               setSelectedUsers([]);
-                            } else {
+                             } else {
                               // For all users tab - select all non-admin users
                               const allUserIds = showNeverLoggedIn 
                                 ? filteredUsers
-                                    .filter(user => !user.LastLoginDate && !user.Policy?.IsAdministrator)
+                                    .filter((user: JellyfinApiUser) => !user.LastLoginDate && !user.Policy?.IsAdministrator)
                                     .map((user: any) => user.Id)
                                 : filteredUsers
-                                    .filter(user => !user.Policy?.IsAdministrator)
+                                    .filter((user: JellyfinApiUser) => !user.Policy?.IsAdministrator)
                                     .map((user: any) => user.Id);
                               setSelectedUsers(allUserIds);
                             }
@@ -623,7 +759,7 @@ export default function AdminDashboard() {
                       </TableRow>
                     ) : (
                       filteredUsers.map((user: JellyfinApiUser) => (
-                        <TableRow key={user.Id} className="border-gray-800 hover:bg-gray-900/50">
+                        <TableRow key={user.Id} className="border-gray-800 transition-colors hover:bg-gray-900/70">
                           <TableCell className="w-8">
                             {!user.Policy?.IsAdministrator && (
                               <Square
@@ -861,15 +997,8 @@ export default function AdminDashboard() {
               </div>
             </>
           )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="trials" className="mt-6">
-              <TrialManagement />
-            </TabsContent>
-          </Tabs>
         </div>
-      </main>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }
