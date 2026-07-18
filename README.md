@@ -1,19 +1,58 @@
-# 🎬 Jellyfin Signup Portal
+# Jellyfin Signup Portal
 
 A comprehensive Jellyfin user registration and management platform with advanced trial system, admin controls, and VPS deployment optimization.
 
-## ✨ Features
+## Features
 
 - **🚀 Streamlined User Registration**: Username availability checking with instant Jellyfin integration
+- **🛡️ Admin Approval Workflow**: Optional approval gate for new signups before Jellyfin accounts are created
+- **🔎 Account Status Checker**: Pending users can check whether their request is pending, approved, or rejected
 - **⏰ Advanced Trial Management**: Configurable trial periods with automatic expiration processing
-- **👨‍💼 Powerful Admin Dashboard**: Complete user management with bulk operations and analytics
-- **🌍 Geographic Analytics**: Precise location tracking and user distribution insights
+- **👨‍💼 Powerful Admin Dashboard**: Complete user management with bulk operations, CSV export, and account controls
+- **🗑️ Recycle Bin Safety**: Deleted usernames can be restored or permanently removed by an admin
+- **🎞️ Demand Tracking**: Track requested movies/shows and mark them pending, added, rejected, or ignored
+- **❤️ Server Health Checks**: Admin-only health view for app, database, Jellyfin, and runtime checks
 - **🔒 Enterprise Security**: Rate limiting, input validation, and secure session management
 - **📱 Mobile-First Design**: Responsive interface with dark/light themes
 - **🐳 Production-Ready Deployment**: Optimized Docker configuration for VPS deployment
 - **🗄️ Flexible Database Support**: Auto-detection between PostgreSQL (dev) and MongoDB (prod)
 
-## 🏗️ Tech Stack
+## Screenshots
+
+Screenshots below use demo data so the README can show the interface without exposing real users.
+
+### Signup with Admin Approval
+
+![Signup screen with admin approval notice and account status checker](docs/screenshots/signup-approval-required.png)
+
+### Admin Approval Queue
+
+![Admin approval queue with pending, approved, and rejected requests](docs/screenshots/admin-approvals.png)
+
+### User Management Dashboard
+
+![Admin user management dashboard with totals, CSV export, filters, and user actions](docs/screenshots/admin-user-management.png)
+
+### Mobile Admin Approval View
+
+![Mobile admin approval queue with responsive request cards](docs/screenshots/mobile-admin-approvals.png)
+
+## Latest Admin Approval Flow
+
+When **Require Admin Approval** is ON, the signup portal no longer creates the Jellyfin account immediately. Instead, it stores a pending request with the username, password hash, encrypted password payload, timestamp, and request status.
+
+Admins can open **Admin Console → Approvals** to:
+
+- Turn approval mode ON or OFF
+- See pending, approved, and rejected request counts
+- Approve a request, which creates the Jellyfin user using the original requested password
+- Reject a request, which blocks that username/password status check from becoming a Jellyfin login
+
+Users see a clear approval notice on the signup form. After requesting an account, they can use **Check Account Status** with the same username and password to see whether the account is still pending, has been approved, or was rejected.
+
+Approval settings and requests are stored through the production storage layer, with MongoDB support and a JSON fallback/migration path for older deployments.
+
+## Tech Stack
 
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
 - **Backend**: Express.js + TypeScript + MongoDB/PostgreSQL
@@ -21,7 +60,7 @@ A comprehensive Jellyfin user registration and management platform with advanced
 - **Deployment**: Docker + Docker Compose + Portainer ready
 - **Security**: Rate limiting + Session management + Input validation
 
-## 🚀 VPS Deployment Guide
+## VPS Deployment Guide
 
 ### Prerequisites
 - VPS with Docker and Docker Compose installed
@@ -91,7 +130,7 @@ A comprehensive Jellyfin user registration and management platform with advanced
 - **Admin Dashboard**: `http://your-vps-ip:5000/admin`
 - **Health Check**: `http://your-vps-ip:5000/health`
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 | Variable | Description | Example |
@@ -110,7 +149,13 @@ A comprehensive Jellyfin user registration and management platform with advanced
 - **Auto-Processing**: Bulk process expired trials with one click
 - **Analytics**: Track trial conversion and geographic distribution
 
-## 📱 Admin Features
+### Admin Approval Configuration
+- **Approval Mode**: Toggle whether new signups require manual admin review
+- **Pending Queue**: Review every account request before account creation
+- **Approve/Reject Actions**: Create Jellyfin users on approval or block rejected requests
+- **Status Lookup**: Let users check request state with their original credentials
+
+## Admin Features
 
 ### User Management
 - ✅ View all Jellyfin users
@@ -118,7 +163,9 @@ A comprehensive Jellyfin user registration and management platform with advanced
 - ✅ Delete users
 - ✅ Bulk operations
 - ✅ Download permissions toggle
-- ✅ Geographic analytics
+- ✅ Reset user passwords
+- ✅ Export filtered users to CSV
+- ✅ Filter inactive or never-logged-in accounts
 
 ### Trial Management
 - ✅ Configure trial settings
@@ -127,7 +174,19 @@ A comprehensive Jellyfin user registration and management platform with advanced
 - ✅ View trial statistics
 - ✅ Export user data
 
-## 🐳 Docker Features
+### Approval Management
+- ✅ Require admin approval for new signups
+- ✅ Review pending account requests
+- ✅ Approve requests and create Jellyfin accounts
+- ✅ Reject requests with visible user status
+- ✅ Mobile-friendly approval cards
+
+### Safety and Operations
+- ✅ Recycle bin for deleted users
+- ✅ Server health status page
+- ✅ Demand/request tracking for content requests
+
+## Docker Features
 
 ### Optimized for VPS Deployment
 - **Multi-stage build** for smaller image size
@@ -151,15 +210,17 @@ docker stats
 docker-compose restart jellyfin-signup
 ```
 
-## 🔐 Security Features
+## Security Features
 
 - **Rate Limiting**: Prevents signup abuse (5 attempts per IP per 15 minutes)
 - **Input Validation**: Zod schemas for all user inputs
 - **Session Security**: Secure cookies with HTTPS support
 - **Environment Isolation**: Production/development configurations
 - **API Key Protection**: Environment-based secret management
+- **Admin-Only Controls**: Approval queue, user actions, health, trials, recycle bin, and demand pages require admin session auth
+- **Encrypted Pending Passwords**: Approval requests keep the original password encrypted until admin approval creates the Jellyfin account
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### MongoDB Connection Issues
 ```bash
@@ -190,21 +251,33 @@ docker-compose up -d
 docker-compose logs --tail=100 jellyfin-signup
 ```
 
-## 📊 API Endpoints
+## API Endpoints
 
 ### Public Endpoints
 - `GET /health` - Health check for monitoring
 - `POST /api/jellyfin/users` - Create new user
 - `GET /api/trending-movies` - Get background content
 - `GET /api/trial-info` - Get trial configuration
+- `GET /api/approval-info` - Get public approval-mode status
+- `POST /api/account-status` - Check pending/approved/rejected account request state
 
 ### Admin Endpoints
+- `GET /api/admin/users` - List Jellyfin users
+- `POST /api/admin/users/action` - Enable, disable, delete, reset password, bulk-disable, or toggle downloads
 - `GET /api/admin/trial-settings` - Get trial settings
 - `PUT /api/admin/trial-settings` - Update trial settings
 - `GET /api/admin/trial-users` - List trial users
 - `POST /api/admin/process-expired-trials` - Process expired trials
+- `GET /api/admin/approval-settings` - Get approval settings
+- `PUT /api/admin/approval-settings` - Update approval settings
+- `GET /api/admin/approval-requests` - List signup approval requests
+- `POST /api/admin/approval-requests/:id/action` - Approve or reject a signup request
+- `GET /api/admin/server-health` - Get live dependency health checks
+- `GET /api/admin/demand` - List demand/request records
+- `POST /api/admin/demand` - Add a demand/request record
+- `DELETE /api/admin/demand/:id` - Delete a demand/request record
 
-## 🛠️ Development
+## Development
 
 ### Local Development
 ```bash
@@ -223,11 +296,11 @@ npm start
 npm run db:push
 ```
 
-## 📝 License
+## License
 
 MIT License - see LICENSE file for details
 
-## 🆘 Support
+## Support
 
 Having issues? Check these first:
 1. ✅ All environment variables are set correctly
